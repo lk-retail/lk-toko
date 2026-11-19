@@ -102,7 +102,7 @@ table.r{width:100%;border-collapse:collapse;font-size:14px}table.r td{padding:8p
 <div class="app" id="app"></div>
 <script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261119140432';
+var APP_VER = '20261119140705';
 function chkVer() { fetch('version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
@@ -535,7 +535,7 @@ var CATS = ['Device (open system)', 'Device (closed system)', 'Cartridge', 'Liqu
 var WHY = [['Stok habis · Out of stock', '断货'], ['Varian / nikotin tidak ada · Flavour or strength not available', '口味或尼古丁浓度没有'], ['Tidak dijual · We don\'t sell it', '店里不卖'], ['Harga kemahalan · Too expensive', '价格太贵'], ['Lainnya · Other', '其他']];
 var FACT = [['Sepi pengunjung · Few visitors', '人少'], ['EDC / QRIS / POS error, tidak bisa bayar', 'EDC / QRIS / POS 故障，付不了款'], ['Listrik padam · Power out', '停电'], ['Jalan / parkir / akses ditutup', '路、停车或入口被封'], ['Hujan deras / banjir', '大雨 / 水淹'], ['Acara / aturan mall', '商场活动或规定'], ['AC / lampu / toko tidak nyaman', '空调、灯或店里环境不好'], ['Buka telat / tutup cepat', '晚开 / 早关'], ['Kurang staf · Short staff', '人手不够'], ['Lainnya · Other', '其他']];
 var QT = [['Bocor · Leaking', '漏油'], ['Device rusak · Broken', 'device 坏了'], ['Rasa aneh / gosong · Bad taste', '味道怪 / 有糊味'], ['Retur · Return', '退货'], ['Tukar · Exchange', '换货'], ['Lainnya · Other', '其他']];
-function lbl2(x) { return L === 'id' ? (x[0] || '—') : x[1]; }
+function lbl2(x) { return L === 'id' ? (String(x[0]).split(' · ')[0] || '—') : x[1]; }
 function svNew() { return { a: { lost: [], quality: [], factors: [] }, bad: {} }; }
 function svSet(path, v) { var o = S.sv.a, k = path.split('.'); for (var i = 0; i < k.length - 1; i++) o = o[k[i]]; o[k[k.length - 1]] = v; }
 function svYN(q, yesLbl, noLbl) {
