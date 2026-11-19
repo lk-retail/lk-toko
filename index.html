@@ -464,7 +464,7 @@ function vRec() {
     var dt = C.ym + '-' + ('0' + d).slice(-2), D = C.days[dt], st = calStat(dt, D, C);
     if (D && D.absen) { sum[0]++; if (D.absen.diff > 0) sum[2]++; if (D.card && D.card.early > 10) sum[3]++; if (D.card && D.absen.diff <= 0 && D.card.early <= 10) sum[1]++; if (!D.card && dt < C.today) sum[4]++; }
     var dark = st === 'green' || st === 'red';
-    cells += '<div onclick="S.calSel=\'' + dt + '\';render()" style="aspect-ratio:1;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;cursor:pointer;background:' + CAL_BG[st] + ';color:' + (dark ? '#fff' : st === 'none' && dt > C.today ? '#b0b0b0' : '#000') +
+    cells += '<div onclick="S.calSel=\'' + dt + '\';render()" style="aspect-ratio:1;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;cursor:pointer;background:' + CAL_BG[st] + ';color:' + (dark ? '#fff' : '#000') +
       ';border:' + (dt === C.today ? '2.5px solid #000' : st === 'plan' ? '1.5px dashed #9aa0a6' : st === 'none' ? '1px solid #eee' : '0') + '">' + d + '</div>';
   }
   var tail = (7 - (lead + nd) % 7) % 7;
