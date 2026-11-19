@@ -16,7 +16,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .app{max-width:440px;margin:0 auto;min-height:100vh;background:var(--l);position:relative;padding-bottom:90px}
 button{font-family:inherit}
 .top{background:var(--y);padding:calc(14px + env(safe-area-inset-top)) 18px 18px}
-body::before{content:'';position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top);background:#000;z-index:100;pointer-events:none}
+body::before{content:'';position:fixed;top:0;left:0;right:0;height:max(4px,env(safe-area-inset-top));background:#000;z-index:100;pointer-events:none}
 .top .row{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
 .top .hi{font-size:13px;font-weight:600}
 .top .store{cursor:pointer}
@@ -117,7 +117,7 @@ table.r{width:100%;border-collapse:collapse;font-size:14px}table.r td{padding:8p
 <div class="app" id="app"></div>
 <script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261119151926';
+var APP_VER = '20261119153447';
 function chkVer() { fetch('version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
@@ -155,7 +155,7 @@ var TX = {
     ada: 'Ada', tidak: 'Tidak', stockOut: 'Stok menipis / habis', requestNew: 'Produk yang belum pernah ada di toko (diminta pelanggan)', lostSales: 'Pelanggan tidak jadi beli karena stok habis',
     opsIssue: 'Kendala operasional', competitor: 'Info kompetitor', defect: 'Barang rusak / cacat', idea: 'Ide / masukan', writeHere: 'Tulis di sini…',
     soDone: 'Stock opname harian sudah dilakukan', soBrands: 'Brand yang di-stock opname', soDiff: 'Selisih (tulis 0 kalau tidak ada)', lock: 'Foto toko yang sudah terkunci', nextStep: 'Lanjut', prev: 'Kembali', submit: 'Kirim laporan',
-    needLock: 'Foto toko terkunci wajib', records: 'Kehadiran saya', calSum: ['Masuk', 'Tepat waktu', 'Terlambat', 'Pulang awal', 'Tanpa absen pulang'], calLeg: { green: 'Tepat waktu', yellow: 'Terlambat / pulang awal', red: 'Tidak absen pulang', live: 'Sedang kerja', grey: 'Tidak ada catatan', plan: 'Jadwal shift' }, wk: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'], calIn: 'Absen masuk', calBuka: 'Cek buka toko', calOut: 'Absen pulang', calNote: 'Laporan Akhir Shift saya', calNone: 'Belum ada', calLate: function (m) { return 'terlambat ' + m + ' mnt'; }, calEarly: function (m) { return m + ' mnt lebih awal'; }, calOnTime: 'tepat waktu', calOutEarly: function (m) { return 'pulang ' + m + ' mnt lebih awal'; }, calPlan: 'Jadwal', calSales: 'Penjualan toko', calNoRec: 'Tidak ada catatan absen hari ini.', calClose: 'Tutup', calHint: 'Ketuk tanggal untuk lihat detail.', recT: { ABSEN: 'Absen', BUKA: 'Cek Buka Toko', FULL: 'Laporan Akhir Shift', KONDISI: 'Kondisi Toko' },
+    needLock: 'Foto toko terkunci wajib', records: 'Kehadiran saya', calSum: ['Masuk', 'Tepat waktu', 'Terlambat', 'Pulang awal', 'Tanpa absen pulang'], calLeg: { green: 'Tepat waktu', yellow: 'Terlambat / pulang awal', red: 'Tidak absen pulang', live: 'Sedang kerja', grey: 'Tidak ada catatan', plan: 'Jadwal shift' }, wk: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'], calIn: 'Absen masuk', calBuka: 'Cek buka toko', calOut: 'Absen pulang', calNote: 'Laporan Akhir Shift saya', calNone: 'Belum ada', calLate: function (m) { return 'terlambat ' + m + ' mnt'; }, calEarly: function (m) { return m + ' mnt lebih awal'; }, calOnTime: 'tepat waktu', calOutEarly: function (m) { return 'pulang ' + m + ' mnt lebih awal'; }, calPlan: 'Jadwal', calSales: 'Omzet yang saya isi saat pulang', calNoRec: 'Tidak ada catatan absen hari ini.', calClose: 'Tutup', calHint: 'Ketuk tanggal untuk lihat detail.', recT: { ABSEN: 'Absen', BUKA: 'Cek Buka Toko', FULL: 'Laporan Akhir Shift', KONDISI: 'Kondisi Toko' },
     board: 'Peringkat Top 10', boardWait: function (d) { return 'Peringkat mulai tampil ' + d + '.'; }, history: 'Rincian poin saya', pTabs: ['Rincian poin saya', 'Top 10', 'Aturan poin'], noData: 'Belum ada data.',
     svT: 'Laporan Akhir Shift', svS: 'Isi dulu (±3 menit), setelah itu absen pulang.', svB: 'Isi laporan', earlyL: 'Mau pulang lebih awal? Isi laporan sekarang ›',
     sdT: 'Data toko hari ini', sdS: 'Kamu shift tutup toko. Isi penjualan dan pelanggan hari ini sesuai laporan harian POS.', sdB: 'Isi data toko', sdBy: function (n, x) { return 'Data toko sudah diisi ' + n + ' ' + x + '.'; },
@@ -210,7 +210,7 @@ var TX = {
     ada: '有', tidak: '没有', stockOut: '库存不足 / 断货', requestNew: '顾客问到、店里从来没卖过的产品', lostSales: '因为断货没买成的顾客',
     opsIssue: '运营问题', competitor: '竞争对手情况', defect: '坏货 / 次品', idea: '想法 / 建议', writeHere: '写在这里…',
     soDone: '今天的盘点做了', soBrands: '盘点了哪些品牌', soDiff: '差异（没有就写 0）', lock: '锁门照', nextStep: '下一步', prev: '上一步', submit: '提交',
-    needLock: '锁门照必须拍', records: '我的考勤', calSum: ['上班', '准时', '迟到', '早退', '缺下班卡'], calLeg: { green: '准时', yellow: '迟到 / 早退', red: '没打下班卡', live: '上班中', grey: '没有记录', plan: '排班' }, wk: ['一', '二', '三', '四', '五', '六', '日'], calIn: '上班打卡', calBuka: '开店检查', calOut: '下班打卡', calNote: '我的下班问卷', calNone: '没有', calLate: function (m) { return '迟到 ' + m + ' 分钟'; }, calEarly: function (m) { return '提前 ' + m + ' 分钟'; }, calOnTime: '准时', calOutEarly: function (m) { return '提前 ' + m + ' 分钟下班'; }, calPlan: '排班', calSales: '门店销售', calNoRec: '这一天没有打卡记录。', calClose: '关闭', calHint: '点日期看当天明细。', recT: { ABSEN: '打卡', BUKA: '开店检查', FULL: '下班卡', KONDISI: '门店情况' },
+    needLock: '锁门照必须拍', records: '我的考勤', calSum: ['上班', '准时', '迟到', '早退', '缺下班卡'], calLeg: { green: '准时', yellow: '迟到 / 早退', red: '没打下班卡', live: '上班中', grey: '没有记录', plan: '排班' }, wk: ['一', '二', '三', '四', '五', '六', '日'], calIn: '上班打卡', calBuka: '开店检查', calOut: '下班打卡', calNote: '我的下班问卷', calNone: '没有', calLate: function (m) { return '迟到 ' + m + ' 分钟'; }, calEarly: function (m) { return '提前 ' + m + ' 分钟'; }, calOnTime: '准时', calOutEarly: function (m) { return '提前 ' + m + ' 分钟下班'; }, calPlan: '排班', calSales: '我下班时填的营业额', calNoRec: '这一天没有打卡记录。', calClose: '关闭', calHint: '点日期看当天明细。', recT: { ABSEN: '打卡', BUKA: '开店检查', FULL: '下班卡', KONDISI: '门店情况' },
     board: '前 10 排行榜', boardWait: function (d) { return '排行榜 ' + d + ' 开始显示。'; }, history: '我的积分明细', pTabs: ['我的积分明细', '前 10 排行榜', '积分规则'], noData: '还没有记录。',
     svT: '下班问卷', svS: '先填问卷（大约 3 分钟），填完再下班打卡。', svB: '开始填写', earlyL: '要提前下班？现在填问卷 ›',
     sdT: '今天门店数据', sdS: '你是关店班，照 POS 日报填今天的销售和顾客数据。', sdB: '开始填写', sdBy: function (n, x) { return n + ' ' + x + ' 已填今天的门店数据。'; },
@@ -306,7 +306,35 @@ function vLogin() {
     '<label class="f">' + t('eid') + '</label><input class="in" id="eid" autocapitalize="characters" autocomplete="username" placeholder="ID-2026-…">' +
     '<label class="f">' + t('pw') + '</label><input class="in" id="pw" type="password" autocomplete="current-password">' +
     '<button class="btn" onclick="doLogin()">' + t('login') + '</button>' +
-    '<div style="text-align:center;margin-top:18px"><button class="chip" onclick="swLang()">' + (L === 'id' ? '中文' : 'Bahasa Indonesia') + '</button></div></div>';
+    '<div style="text-align:center;margin-top:18px"><button class="chip" onclick="swLang()">' + (L === 'id' ? '中文' : 'Bahasa Indonesia') + '</button></div>' + a2hsTip() + '</div>';
+}
+// ---------- 登录页：怎么加到手机桌面（和 LK Hub 同一套文字）----------
+function standalone() { return (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true; }
+function a2hsEnv() { var ua = navigator.userAgent; if (/FBAN|FBAV|Instagram|WhatsApp|Line\/|; wv\)/i.test(ua)) return 'inapp'; var ios = /iPhone|iPad|iPod/i.test(ua) || (/Macintosh/.test(ua) && 'ontouchend' in document);
+  if (ios) return /CriOS|EdgiOS|FxiOS|OPiOS/i.test(ua) ? 'ios_other' : 'ios_safari'; if (/SamsungBrowser/i.test(ua)) return 'samsung'; if (/Android/i.test(ua)) return 'android'; return 'pc'; }
+var A2HS_EVT = null; window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); A2HS_EVT = e; try { render(); } catch (x) { } });
+function a2hsInstall() { if (!A2HS_EVT) return; A2HS_EVT.prompt(); A2HS_EVT.userChoice.then(function () { A2HS_EVT = null; render(); }); }
+var A2HS = {
+  inapp: { zh: ['现在是在 WhatsApp 等 App 里面打开的，拍照、定位和安装都可能用不了。', '点右上角「⋯」或「⋮」', '选「在浏览器中打开」（苹果用 Safari，安卓用 Chrome）', '在浏览器里重新打开后，再按这里的步骤添加到主屏幕'],
+    id: ['Halaman ini dibuka di dalam aplikasi (misalnya WhatsApp); foto, lokasi, dan instal mungkin tidak berfungsi.', 'Ketuk "⋯" atau "⋮" di kanan atas', 'Pilih "Buka di browser" (iPhone: Safari, Android: Chrome)', 'Setelah terbuka di browser, ikuti langkah tambah ke layar utama di sini'] },
+  ios_safari: { zh: ['苹果手机 · Safari', '点屏幕底部的「分享」按钮（方框加向上箭头）；底部没有的话，先点「⋯」再点「分享」', '往下滑，点「添加到主屏幕」', '名字保持「LK Toko」，点右上角「添加」', '回到手机桌面，以后都点黄色的 LK Toko 图标打开（第一次要重新登录）'],
+    id: ['iPhone · Safari', 'Ketuk tombol "Bagikan" (kotak dengan panah ke atas) di bawah layar; kalau tidak ada, ketuk "⋯" dulu lalu "Bagikan"', 'Gulir ke bawah, ketuk "Tambahkan ke Layar Utama"', 'Biarkan nama "LK Toko", ketuk "Tambah" di kanan atas', 'Kembali ke layar utama HP, selanjutnya selalu buka dari ikon kuning LK Toko (pertama kali perlu masuk lagi)'] },
+  ios_other: { zh: ['苹果手机 · Chrome 等浏览器', '点地址栏右边的「分享」按钮（方框加向上箭头）', '往下滑，点「添加到主屏幕」', '名字保持「LK Toko」，点「添加」', '回到手机桌面，以后都点黄色的 LK Toko 图标打开（第一次要重新登录）'],
+    id: ['iPhone · Chrome / browser lain', 'Ketuk tombol "Bagikan" (kotak dengan panah ke atas) di sebelah kanan alamat', 'Gulir ke bawah, ketuk "Tambahkan ke Layar Utama"', 'Biarkan nama "LK Toko", ketuk "Tambah"', 'Kembali ke layar utama HP, selanjutnya selalu buka dari ikon kuning LK Toko (pertama kali perlu masuk lagi)'] },
+  android: { zh: ['安卓手机 · Chrome', '点右上角「⋮」', '点「安装应用」或「添加到主屏幕」', '在弹出的窗口点「安装」（如果让你选「安装」还是「创建快捷方式」，选「安装」）', '回到手机桌面，以后都点黄色的 LK Toko 图标打开'],
+    id: ['Android · Chrome', 'Ketuk "⋮" di kanan atas', 'Ketuk "Instal aplikasi" atau "Tambahkan ke layar utama"', 'Di jendela yang muncul, ketuk "Instal" (kalau ada pilihan "Instal" atau "Buat pintasan", pilih "Instal")', 'Kembali ke layar utama HP, selanjutnya selalu buka dari ikon kuning LK Toko'] },
+  samsung: { zh: ['安卓手机 · 三星浏览器', '点屏幕底部的「≡」菜单', '点「添加页面到」', '选「主屏幕」，再点「添加」', '回到手机桌面，以后都点黄色的 LK Toko 图标打开'],
+    id: ['Android · Samsung Internet', 'Ketuk menu "≡" di bawah layar', 'Ketuk "Tambahkan halaman ke"', 'Pilih "Layar utama", lalu ketuk "Tambah"', 'Kembali ke layar utama HP, selanjutnya selalu buka dari ikon kuning LK Toko'] }
+};
+function a2hsSteps(k) { var x = A2HS[k][L === 'zh' ? 'zh' : 'id']; return '<div style="font-size:13px"><b>' + esc(x[0]) + '</b></div><ol style="font-size:13px;margin:6px 0 0 18px;padding:0">' + x.slice(1).map(function (s) { return '<li style="margin:3px 0">' + esc(s) + '</li>'; }).join('') + '</ol>'; }
+function a2hsTip() {
+  if (standalone()) return ''; var env = a2hsEnv(); if (env === 'pc') return '';
+  var zh = L === 'zh', h = '<div style="margin-top:22px;background:#fff;border:1px solid var(--line);border-left:5px solid #FDCD17;border-radius:12px;padding:14px;text-align:left"><div style="font-size:16px;font-weight:700;margin-bottom:4px">📲 ' + (zh ? '先把 LK Toko 加到手机桌面（只需做一次）' : 'Tambahkan LK Toko ke layar utama HP (cukup sekali)') + '</div><div style="font-size:13px;color:#6b6b6b">' + (zh ? '加好后像 App 一样全屏打开，拍照、定位也更稳定。' : 'Setelah itu terbuka penuh seperti aplikasi, foto dan lokasi lebih stabil.') + '</div>';
+  if (env === 'android' && A2HS_EVT) h += '<button class="btn" onclick="a2hsInstall()">' + (zh ? '一键安装 LK Toko' : 'Instal LK Toko sekarang') + '</button><div style="font-size:13px;color:#6b6b6b;margin-top:6px">' + (zh ? '点了没反应的话，按下面的步骤手动添加：' : 'Kalau tidak muncul, tambahkan manual dengan langkah di bawah:') + '</div>';
+  h += '<div style="margin-top:8px">' + a2hsSteps(env) + '</div>';
+  if (env !== 'inapp') h += '<div style="font-size:13px;color:#6b6b6b;margin-top:8px">' + (zh ? '已经加过还看到这段？说明这次不是从桌面图标打开的，请点桌面图标打开。点图标打开还看到，就删掉图标，按上面的步骤重新添加' + (env === 'android' ? '（选「安装」）' : '') + '。' : 'Sudah ditambahkan tapi masih muncul? Berarti halaman ini tidak dibuka dari ikon; buka dari ikon LK Toko. Kalau dari ikon tetap muncul, hapus ikonnya lalu tambahkan lagi dengan langkah di atas' + (env === 'android' ? ' (pilih "Instal")' : '') + '.') + '</div>';
+  if (env !== 'inapp') { var others = ['ios_safari', 'ios_other', 'android', 'samsung'].filter(function (k) { return k !== env; }); h += '<details style="margin-top:8px"><summary style="font-size:13px;cursor:pointer;color:#1565c0">' + (zh ? '不是这个手机 / 浏览器？点这里看其他步骤' : 'Bukan HP / browser ini? Lihat langkah lain') + '</summary>' + others.map(function (k) { return '<div style="margin-top:8px">' + a2hsSteps(k) + '</div>'; }).join('') + '</details>'; }
+  return h + '</div>';
 }
 function doLogin() {
   var id = document.getElementById('eid').value.trim(), pw = document.getElementById('pw').value;
