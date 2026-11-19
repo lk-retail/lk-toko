@@ -104,7 +104,7 @@ table.r{width:100%;border-collapse:collapse;font-size:14px}table.r td{padding:8p
 <div class="app" id="app"></div>
 <script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261119145301';
+var APP_VER = '20261119145601';
 function chkVer() { fetch('version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
@@ -165,7 +165,7 @@ var TX = {
     p12: 'Poin 12 bulan terakhir', pTap: 'Ketuk bulan untuk lihat rinciannya.', pLive: 'berjalan', pSettling: 'belum final (final tgl 8)', rankN: function (r) { return 'Peringkat ' + r; }, attLine: function (a) { return 'masuk ' + a.days + ' hari · tepat waktu ' + a.onTime + ' · terlambat ' + a.late + ' · pulang awal ' + a.early + ' · tanpa absen pulang ' + a.noCard; },
     ssT: 'Penjualan toko bulan ini', ssT2: 'Penjualan toko', ssAsOf: function (d) { return 'Data s/d ' + d; }, ssTarget: 'target', ssPct: function (p, tp) { return 'Tercapai ' + p + '%' + (tp != null ? ' · waktu berjalan ' + tp + '%' : ''); },
     ssNeed: function (a, d, x) { return 'Kurang Rp ' + a + ' · sisa ' + d + ' hari, rata-rata Rp ' + x + ' per hari'; }, ssShort: function (a) { return 'Kurang Rp ' + a + ' dari target'; }, ssDone: function (a) { return 'Target tercapai, lebih Rp ' + a; },
-    ssVsPrev: 'Dibanding periode sama bulan lalu', ssYday: function (d) { return d; }, ssCur: 'Bulan ini', ssPrev: 'Bulan lalu', ssDaily: 'Penjualan per hari', ssStoreOnly: 'Toko', ssSales: 'Penjualan', ssAvg: function (x) { return 'rata-rata harian target Rp ' + x; }, ssTap: 'Ketuk batang untuk lihat angka per hari.',
+    ssVsPrev: 'Dibanding periode sama bulan lalu', ssYday: function (d) { return 'Penjualan ' + d; }, ssGrabM: 'GrabMart bulan ini', ssCur: 'Bulan ini', ssPrev: 'Bulan lalu', ssDaily: 'Penjualan per hari', ssStoreOnly: 'Toko', ssSales: 'Penjualan', ssAvg: function (x) { return 'Target rata-rata harian Rp ' + x; }, ssTap: 'Ketuk batang untuk lihat angka per hari.',
     ssGrabShare: function (p) { return p + '% dari penjualan toko'; }, ssGrabDays: function (n, m) { return 'Ada pesanan ' + n + ' dari ' + m + ' hari'; },
     msT: 'Penjualan saya', msSoon: 'Segera hadir', msDesc: 'Di sini nanti tampil produk tertentu yang kamu jual (misalnya device RELX) dan perkiraan komisinya.',
     lastMonth: 'Peringkat final bulan lalu'
@@ -220,7 +220,7 @@ var TX = {
     p12: '近 12 个月积分', pTap: '点月份看那个月的明细。', pLive: '进行中', pSettling: '结算中（8 号定）', rankN: function (r) { return '第 ' + r + ' 名'; }, attLine: function (a) { return '上班 ' + a.days + ' 天 · 准时 ' + a.onTime + ' · 迟到 ' + a.late + ' · 早退 ' + a.early + ' · 缺下班卡 ' + a.noCard; },
     ssT: '本月门店销售', ssT2: '门店销售', ssAsOf: function (d) { return '数据到 ' + d; }, ssTarget: '目标', ssPct: function (p, tp) { return '完成 ' + p + '%' + (tp != null ? ' · 时间过了 ' + tp + '%' : ''); },
     ssNeed: function (a, d, x) { return '还差 Rp ' + a + '，剩 ' + d + ' 天，每天要卖 Rp ' + x; }, ssShort: function (a) { return '离目标差 Rp ' + a; }, ssDone: function (a) { return '目标完成了，超出 Rp ' + a; },
-    ssVsPrev: '比上月同期', ssYday: function (d) { return d; }, ssCur: '本月', ssPrev: '上月', ssDaily: '每天销售', ssStoreOnly: '门店', ssSales: '销售', ssAvg: function (x) { return '完成目标平均每天 Rp ' + x; }, ssTap: '点柱子看当天金额。',
+    ssVsPrev: '比上月同期', ssYday: function (d) { return d + ' 卖了'; }, ssGrabM: '本月 GrabMart', ssCur: '本月', ssPrev: '上月', ssDaily: '每天销售', ssStoreOnly: '门店', ssSales: '销售', ssAvg: function (x) { return '目标日均 Rp ' + x; }, ssTap: '点柱子看当天金额。',
     ssGrabShare: function (p) { return '占门店销售 ' + p + '%'; }, ssGrabDays: function (n, m) { return m + ' 天里有 ' + n + ' 天有单'; },
     msT: '我的销售', msSoon: '即将上线', msDesc: '这里以后会显示你卖出的指定产品（例如 RELX device）和预估提成。',
     lastMonth: '上个月最终排名'
@@ -535,7 +535,7 @@ function salesCard(H) {
   return '<div class="card" style="cursor:pointer" onclick="go(\'sales\')"><div style="display:flex;justify-content:space-between;align-items:baseline"><h3 style="margin:0">' + t('ssT') + '</h3><span style="font-size:12px;color:var(--g)">' + t('ssAsOf')(mdShort(R.asOf)) + '</span></div>' +
     '<div style="display:flex;align-items:baseline;gap:8px;margin-top:8px"><b style="font-size:28px">Rp ' + jt(M.total) + '</b>' + (M.target ? '<span style="font-size:14px;color:var(--g)">/ ' + t('ssTarget') + ' ' + jt(M.target) + '</span>' : '') + '</div>' +
     ssLines(M, true) +
-    '<div style="display:flex;justify-content:space-between;font-size:13px;color:var(--g);margin-top:8px;border-top:1px dashed var(--line);padding-top:8px"><span>' + t('ssYday')(mdShort(R.asOf)) + ' <b style="color:#000">Rp ' + jt(y[0]) + '</b>' + (M.grab ? ' · GrabMart <b style="color:#000">' + jt(M.grab) + '</b>' : '') + '</span><span>›</span></div></div>';
+    '<div style="display:flex;justify-content:space-between;font-size:13px;color:var(--g);margin-top:8px;border-top:1px dashed var(--line);padding-top:8px"><span>' + t('ssYday')(mdShort(R.asOf)) + ' <b style="color:#000">Rp ' + jt(y[0]) + '</b>' + (M.grab ? ' · ' + t('ssGrabM') + ' <b style="color:#000">' + jt(M.grab) + '</b>' : '') + '</span><span>›</span></div></div>';
 }
 function vSales() {
   var H = S.home, R = H && H.store && S.ss && S.ss[H.store.id], h = '<div class="page"><button class="back" onclick="go(\'home\')">' + t('back') + '</button><h2>' + t('ssT2') + '</h2><div style="font-size:13px;color:var(--g);margin:-8px 0 12px">' + esc(H && H.store ? H.store.name : '') + (R ? ' · ' + t('ssAsOf')(mdShort(R.asOf)) : '') + '</div>';
