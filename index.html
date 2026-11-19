@@ -124,7 +124,7 @@ table.r{width:100%;border-collapse:collapse;font-size:14px}table.r td{padding:8p
 <div class="app" id="app"></div>
 <script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261119155501';
+var APP_VER = '20261119161252';
 function chkVer() { fetch('version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
@@ -248,6 +248,7 @@ var TX = {
 };
 function t(k) { return TX[L][k]; }
 function totP(p) { p = Number(p) || 0; return p < 0 ? '−' + Math.abs(p) : String(p); }
+function pendT() { return L === 'zh' ? '待定' : 'Menunggu'; }
 function fmtP(p) { p = Number(p); return (p > 0 ? '+' : p < 0 ? '−' : '') + String(Math.abs(p)); }
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
 var IC = {
@@ -412,8 +413,6 @@ function vHome() {
   if (u.test) top += '<div class="info">' + t('test') + '</div>';
   if (!H) return top + '<div class="next"><div class="lbl">' + t('next') + '</div><div class="t" style="opacity:.35">· · ·</div><div class="s">&nbsp;</div><button class="btn" disabled>&nbsp;</button></div><div class="card"><h3>' + t('today') + '</h3><div class="steps">' + t('steps').map(function (n, k) { return '<div class="st"><div class="dot">' + (k + 1) + '</div>' + n + '</div>'; }).join('') + '</div></div><div class="card"><h3>' + t('pts') + '</h3><div class="pts"><div class="big" style="opacity:.3">–</div></div></div>';
   if (!H.store) return top + '<div class="alert">' + t('noStore') + '</div>';
-  if (!H.store.shifts.length && !multi) return top + '<div class="alert">' + t('noShift') + '</div>';
-  if (!H.store.shifts.length) top += '<div class="alert">' + esc(H.store.name) + ': ' + t('noShift') + '</div>';
   var O = H.out, nxc = function (ti, sub, onc, b) { return '<div class="next"><div class="lbl">' + t('next') + '</div><div class="t">' + ti + '</div><div class="s">' + sub + '</div><button class="btn" onclick="' + onc + '">' + b + '</button></div>'; };
   var other = H.inToday && H.store && H.inToday !== H.store.id;
   var stage = !H.absen ? 0 : !H.buka ? 1 : !O || !O.survey || O.needStore ? 2 : !O.done ? 3 : 4, nx = '';
@@ -487,9 +486,8 @@ function vAbsen() {
   if (M && !S.ckStore) return back + pickH + '</div>';
   if (M && !C) return back + pickH + '<div class="card" style="margin:10px 0">…</div></div>';
   var stName = C.store.name;
-  if (!sh.length) return back + pickH + '<div class="alert" style="margin:10px 0">' + t('noShift') + '</div></div>';
   return back + pickH +
-    '<label class="f">' + t('shift') + '</label><div class="seg">' + (C.opts || sh).map(function (s) { var dis = s.ok === false; return '<button ' + (dis ? 'disabled style="opacity:.4" ' : '') + 'class="' + (S.shift === s.code ? 'on' : '') + '" onclick="S.shift=\'' + s.code + '\';render()">' + shiftLbl(s) + '' + '</button>'; }).join('') + '</div>' +
+    (!sh.length ? '' : '<label class="f">' + t('shift') + '</label><div class="seg">' + (C.opts || sh).map(function (s) { var dis = s.ok === false; return '<button ' + (dis ? 'disabled style="opacity:.4" ' : '') + 'class="' + (S.shift === s.code ? 'on' : '') + '" onclick="S.shift=\'' + s.code + '\';render()">' + shiftLbl(s) + '' + '</button>'; }).join('') + '</div>') +
     '<label class="photo" for="cam">' + (S.photo ? '<img src="' + S.photo + '">' : t('selfie')) + '</label>' +
     '<input id="cam" type="file" accept="image/*" capture="user" style="display:none" onchange="pick(this)">' +
     '<button class="btn" onclick="sendAbsen()"' + (S.photo ? '' : ' disabled') + '>' + (M ? t('sendAt')(esc(stName)) : t('send')) + '</button>' +
@@ -531,6 +529,9 @@ function sendBuka() {
     .catch(function () { busy(); toast(t('err')); });
 }
 function rsn(r) {
+  if (r === 'PENDING_IN') return L === 'zh' ? '上班打卡（班次待定，补上后自动算分）' : 'Absen masuk (jam shift belum ada, poin dihitung nanti)';
+  if (r === 'PENDING_OUT') return L === 'zh' ? '下班打卡（班次待定，补上后自动算分）' : 'Absen pulang (jam shift belum ada, poin dihitung nanti)';
+  if (L === 'zh') r = String(r || '').replace(/^Koreksi: /, '补正：').replace(/^Tidak masuk tanpa izin/, '旷工（未请假）');
   r = String(r || '').replace(/^((?:Absen|Laporan Akhir Shift|Kondisi Toko) )\d{1,2}:\d{2} /, '$1'); if (L !== 'zh') return r;
   return r.replace(/pulang (\d+) mnt lebih awal/g, '提前 $1 分钟下班').replace(/terlambat (\d+) mnt/g, '迟到 $1 分钟').replace(/lebih awal (\d+) mnt/g, '提前 $1 分钟').replace(/tepat waktu/g, '准时')
     .replace(/, \+(\d+) mnt\)/g, '，迟到 $1 分钟)').replace(/, -(\d+) mnt\)/g, '，提前 $1 分钟)').replace(/^Absen Pulang/, '下班打卡').replace(/shift selesai (\d{1,2}:\d{2})/, '班次 $1 结束').replace(/absen pulang (\d+) mnt sesudah shift selesai/, '下班后 $1 分钟才打卡').replace(/^Absen /, '上班打卡 ').replace(/^Laporan Akhir Shift /, '下班卡 ').replace(/^Kondisi Toko /, '门店情况 ').replace(/shift /, '班次 ').replace(/, /g, '，').replace(/ ?\(/g, '（').replace(/\)/g, '）');
@@ -552,9 +553,9 @@ function vPoin() {
         S.pOpen = S.pOpen || {};
         body += '<div class="card" style="padding:0;overflow:hidden">' + order.map(function (d, k) {
           var wd = L === 'zh' ? '周' + '日一二三四五六'.charAt(new Date(d + 'T00:00:00Z').getUTCDay()) : ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'][new Date(d + 'T00:00:00Z').getUTCDay()];
-          var tot = Math.round(g[d].reduce(function (a, m) { return a + Number(m.points || 0); }, 0) * 10) / 10, on = !!S.pOpen[d];
-          return '<div style="' + (k ? 'border-top:1px solid var(--line)' : '') + '"><div onclick="S.pOpen[\'' + d + '\']=!S.pOpen[\'' + d + '\'];render()" style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;cursor:pointer"><span style="font-size:15px">' + d + ' · ' + wd + '</span><span style="display:flex;align-items:center;gap:10px"><b style="font-size:16px;color:' + (tot < 0 ? 'var(--r)' : tot > 0 ? 'var(--ok)' : '#000') + '">' + fmtP(tot) + '</b><span style="color:#6b6b6b;font-size:12px">' + (on ? '▲' : '▼') + '</span></span></div>' +
-            (on ? '<div style="padding:0 16px 10px">' + g[d].map(function (m) { return '<div style="display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-top:1px dashed var(--line);font-size:14px"><span style="color:#3c4043">' + esc(rsn(m.reason)) + '</span><b style="white-space:nowrap">' + fmtP(m.points) + '</b></div>'; }).join('') + '</div>' : '') + '</div>';
+          var tot = Math.round(g[d].reduce(function (a, m) { return a + Number(m.points || 0); }, 0) * 10) / 10, on = !!S.pOpen[d]; var allP = g[d].every(function (m) { return m.points == null; });
+          return '<div style="' + (k ? 'border-top:1px solid var(--line)' : '') + '"><div onclick="S.pOpen[\'' + d + '\']=!S.pOpen[\'' + d + '\'];render()" style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;cursor:pointer"><span style="font-size:15px">' + d + ' · ' + wd + '</span><span style="display:flex;align-items:center;gap:10px"><b style="font-size:16px;color:' + (allP ? '#9aa0a6' : tot < 0 ? 'var(--r)' : tot > 0 ? 'var(--ok)' : '#000') + '">' + (allP ? pendT() : fmtP(tot)) + '</b><span style="color:#6b6b6b;font-size:12px">' + (on ? '▲' : '▼') + '</span></span></div>' +
+            (on ? '<div style="padding:0 16px 10px">' + g[d].map(function (m) { return '<div style="display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-top:1px dashed var(--line);font-size:14px"><span style="color:#3c4043">' + esc(rsn(m.reason)) + '</span><b style="white-space:nowrap' + (m.points == null ? ';color:#9aa0a6' : '') + '">' + (m.points == null ? pendT() : fmtP(m.points)) + '</b></div>'; }).join('') + '</div>' : '') + '</div>';
         }).join('') + '</div>'; }
     }
   } else if (tab === 1) {
