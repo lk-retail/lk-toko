@@ -69,6 +69,19 @@ input.in{width:100%;font-size:17px;padding:13px;border:1px solid var(--line);bor
 .toggle input{width:24px;height:24px;accent-color:#000;flex:none}
 .back{background:none;border:0;font-size:15px;color:var(--g);padding:4px 0 12px}
 .small{font-size:13px}.muted{color:#777;font-size:13px}
+.sl-hd{display:flex;align-items:center;justify-content:space-between;gap:10px}.sl-hd h2{margin:0!important;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:18px}
+.sl-mon{flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:999px;background:#111;color:#FDCD17;font-weight:700;font-size:14px;cursor:pointer;white-space:nowrap}
+.sl-sub{font-size:12px;color:#888;margin:6px 2px 0;line-height:1.4}
+.sl-big{font-size:34px;font-weight:800;line-height:1.1;letter-spacing:-.5px}
+.sl-track{position:relative;height:8px;background:#efefec;border-radius:4px;margin:12px 0 6px}.sl-track i{position:absolute;left:0;top:0;bottom:0;border-radius:4px}.sl-track b{position:absolute;top:-3px;bottom:-3px;width:2px;margin-left:-1px;background:#111;border-radius:1px}
+.sl-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}
+.sl-kpi{background:#f6f6f3;border-radius:10px;padding:8px 10px}.sl-kpi .l{font-size:11px;color:#888;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sl-kpi .v{font-size:17px;font-weight:800;margin-top:2px;white-space:nowrap}
+.sl-leg{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:#555;margin-top:7px}.sl-leg span::before{content:'';display:inline-block;width:8px;height:8px;border-radius:2px;background:var(--c);margin-right:5px}.sl-leg .dash::before{background:none;border-top:2px dashed #111;height:0;width:12px;vertical-align:middle}
+.sl-gap{display:inline-block;font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;white-space:nowrap}.sl-need{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.sl-need>div{background:#f6f6f3;border-radius:10px;padding:8px 10px}.sl-need .l{font-size:11px;color:#888}.sl-need .v{font-size:18px;font-weight:800;margin-top:2px}
+.sl-day{font-size:13px;color:#333;margin-top:8px}.sl-day i{font-style:normal;color:#8a6d00}.sl-day span{color:#999}
+.sl-mask{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:40;display:flex;align-items:flex-end;justify-content:center}
+.sl-sheet{background:#fff;width:100%;max-width:440px;border-radius:16px 16px 0 0;padding:16px 12px calc(26px + env(safe-area-inset-bottom))}
+.sl-sheet .it{padding:13px 12px;border-radius:10px;font-size:16px;display:flex;justify-content:space-between;cursor:pointer}.sl-sheet .it.on{background:#fff8d6;font-weight:700}
 .pcmore{margin:0 14px 14px;padding:11px;border:1px solid var(--line);border-radius:12px;background:#fff;font-size:14px;font-weight:600;text-align:center;cursor:pointer}
 .guide{background:#fff8d6;border:1px solid #f0dc8a;border-radius:12px;padding:10px 12px;font-size:14px;line-height:1.5;margin-bottom:12px}
 .q{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
@@ -104,7 +117,7 @@ table.r{width:100%;border-collapse:collapse;font-size:14px}table.r td{padding:8p
 <div class="app" id="app"></div>
 <script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261119150431';
+var APP_VER = '20261119150909';
 function chkVer() { fetch('version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
@@ -388,7 +401,7 @@ function go(v) {
   if (v === 'survey') { if (!S.sv) S.sv = svNew(); if (S.home.out && S.home.out.open) S.svEarly = 0; }
   if (v === 'storedata' && !S.cd) S.cd = { sales: {}, shots: [], cust: {}, so: { done: false } };
   if (v === 'pulang') S.po = { selfie: null, lock: null };
-  if (v === 'sales') { S.ssM = 'cur'; S.ssDay = null; }
+  if (v === 'sales') { S.ssYm = null; S.ssPick = 0; S.ssDay = null; }
   S.stOpen = false;
   if (v === 'rec') { S.calSel = null; S.calYm = null; calLoad(null); }
   if (v === 'saya' && S.sess) { var pk = 'tk_pc_' + (S.sess.user.nick || '').toLowerCase(); try { S.pc = S.pc || JSON.parse(localStorage.getItem(pk) || 'null'); } catch (e) {} api('myPetty', [S.sess.token]).then(function (r) { S.pc = r; try { localStorage.setItem(pk, JSON.stringify(r)); } catch (e) {} if (S.view === 'saya') render(); }).catch(function () {}); }
@@ -506,72 +519,89 @@ function vPoin() {
 // ---------- 门店销售（和 LK Hub 同口径；只看顶部选中的那家店）----------
 // 金额格式（R231）：≥10jt 不带小数，1–10jt 一位小数，<1jt 两位小数
 function jt(n) { n = Number(n) || 0; var a = Math.abs(n) / 1e6, s = a >= 10 ? Math.round(a).toLocaleString('en-US') : a >= 1 ? (Math.round(a * 10) / 10).toFixed(1) : (Math.round(a * 100) / 100).toFixed(2); return (n < 0 ? '-' : '') + s + 'jt'; }
-function ssKey(id) { return 'tk_ss_' + id; }
-function loadSales(id) {
-  S.ss = S.ss || {};
-  if (!S.ss[id]) { try { S.ss[id] = JSON.parse(localStorage.getItem(ssKey(id)) || 'null'); } catch (e) {} }
-  api('storeSales', [S.sess.token, id], 1).then(function (r) { if (!r || !r.ok) return; S.ss[id] = r; try { localStorage.setItem(ssKey(id), JSON.stringify(r)); } catch (e) {} if (S.view === 'home' || S.view === 'sales') render(); }).catch(function () {});
+function ssKey(id, ym) { return 'tk_ss_' + id + '_' + (ym || 'cur'); }
+// 读某店某月销售（ym 空 = 本月）；结果按「店_月」缓存在手机上，打开先显示上次的
+function loadSales(id, ym) {
+  S.ss = S.ss || {}; var k = id + '_' + (ym || 'cur');
+  if (!S.ss[k]) { try { S.ss[k] = JSON.parse(localStorage.getItem(ssKey(id, ym)) || 'null'); } catch (e) {} }
+  api('storeSales', [S.sess.token, id, ym || ''], 1).then(function (r) { if (!r || !r.ok) return; S.ss[k] = r; if (!ym) S.ss[id + '_' + r.sel] = r; try { localStorage.setItem(ssKey(id, ym), JSON.stringify(r)); } catch (e) {} if (S.view === 'home' || S.view === 'sales') render(); }).catch(function () {});
 }
 function mdShort(d) { var m = /\d{4}-(\d{2})-(\d{2})/.exec(d || ''), mn = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des']; return !m ? '' : L === 'zh' ? +m[1] + '/' + +m[2] : +m[2] + ' ' + mn[+m[1] - 1]; }
-// 进度条：黑色细线 = 时间过了多少
-function ssBar(M) {
-  var pct = M.target ? M.total / M.target : 0, tp = M.e / M.dim, ok = pct >= tp;
-  return '<div style="position:relative;height:12px;background:#eeece6;border-radius:6px;margin:10px 0 6px;overflow:visible"><div style="height:100%;width:' + Math.min(100, pct * 100) + '%;background:' + (pct >= 1 ? 'var(--ok)' : ok ? '#FDCD17' : '#f29900') + ';border-radius:6px"></div>' +
-    (M.e < M.dim ? '<div style="position:absolute;top:-4px;bottom:-4px;left:' + (tp * 100) + '%;width:2px;background:#000"></div>' : '') + '</div>';
-}
-function ssLines(M, isCur) {
-  var o = '';
-  if (M.target) {
-    var pct = M.total / M.target, tp = M.e / M.dim, left = M.target - M.total, rd = M.dim - M.e;
-    o += ssBar(M) + '<div style="font-size:13px;color:' + (pct >= tp ? 'var(--ok)' : '#b06000') + ';font-weight:600">' + t('ssPct')(Math.round(pct * 100), isCur ? Math.round(tp * 100) : null) + '</div>';
-    if (left > 0 && isCur && rd > 0) o += '<div style="font-size:14px;margin-top:4px">' + t('ssNeed')(jt(left), rd, jt(left / rd)) + '</div>';
-    else if (left > 0) o += '<div style="font-size:14px;margin-top:4px">' + t('ssShort')(jt(left)) + '</div>';
-    else o += '<div style="font-size:14px;margin-top:4px;color:var(--ok);font-weight:700">' + t('ssDone')(jt(-left)) + '</div>';
-  } else if (isCur && M.prevSame) {
-    var ch = Math.round((M.total / M.prevSame - 1) * 100);
-    o += '<div style="font-size:14px;margin-top:8px">' + t('ssVsPrev') + ' <b style="color:' + (ch >= 0 ? 'var(--ok)' : 'var(--r)') + '">' + (ch >= 0 ? '+' : '') + ch + '%</b></div>';
-  }
+// ---- 和 LK Hub 单店销售页同一套算法和排法（精简：去掉大区对比、提醒标签）----
+function pc1(x) { return x == null || !isFinite(x) ? '—' : Math.round(x * 100) + '%'; }
+function gr(a, b) { return b > 0 ? a / b - 1 : (a > 0 ? Infinity : null); }
+function sgn(x) { if (x === Infinity) return L === 'zh' ? '新增' : 'Baru'; if (x == null || !isFinite(x)) return '—'; if (x > 1) return '>100%'; var v = Math.round(x * 100); return (v > 0 ? '+' : '') + v + '%'; }
+function achCol(x) { return x == null ? '#888' : x < 0.85 ? '#b3261e' : x < 1 ? '#b26a00' : '#1d7a3a'; }
+function grCol(x) { return x == null ? '#777' : x < 0 ? '#b3261e' : '#1d7a3a'; }
+function ymLbl(ym) { var y = ym.slice(0, 4), m = Number(ym.slice(5, 7)), mn = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des']; return L === 'zh' ? y + '年' + m + '月' : mn[m - 1] + ' ' + y; }
+function ymPrev(y) { var t = Number(y.slice(0, 4)) * 12 + Number(y.slice(5, 7)) - 2; return Math.floor(t / 12) + '-' + ('0' + (t % 12 + 1)).slice(-2); }
+function slCalc(R) {
+  var x = R.o, cur = R.m === 'cur', o = { a: x.a, g: x.g, gd: x.gd, t: x.t };
+  o.ach = x.t > 0 ? x.a / x.t : null; o.share = x.a > 0 ? x.g / x.a : null; o.mom = gr(x.a, x.pa);
+  if (cur) { o.proj = x.t > 0 && R.e > 0 ? x.a / R.e * R.dim / x.t : null; o.need = x.t > x.a && R.dim > R.e ? (x.t - x.a) / (R.dim - R.e) : 0; o.l7 = x.l7 || 0; o.days = R.e; }
+  else { o.proj = o.ach; o.days = R.dim; }
   return o;
 }
+function slBar(fill, col, mark) { return '<div class="sl-track"><i style="width:' + Math.max(0, Math.min(100, (fill || 0) * 100)) + '%;background:' + col + '"></i>' + (mark != null ? '<b style="left:' + Math.min(100, mark * 100) + '%"></b>' : '') + '</div>'; }
+function slGap(a, t, R, money) {
+  var zh = L === 'zh'; if (!(t > 0) || R.m !== 'cur') return '';
+  var tp = R.e / R.dim, d = Math.round((a / t - tp) * 100), m = a - t * tp, c = d >= 0 ? '#1d7a3a' : achCol(a / t / tp);
+  var tx = d === 0 ? (zh ? '和时间进度持平' : 'sejalan dengan waktu') : (d > 0 ? (zh ? '领先 ' : 'unggul ') + d + (zh ? ' 个点' : ' poin') : (zh ? '落后 ' : 'tertinggal ') + (-d) + (zh ? ' 个点' : ' poin')) + (money && d !== 0 ? (zh ? '（' : ' (') + (d > 0 ? '+' : (zh ? '差 ' : 'kurang ')) + jt(Math.abs(m)) + (zh ? '）' : ')') : '');
+  return '<span class="sl-gap" style="color:' + c + ';background:' + c + '14">' + tx + '</span>';
+}
+function slKpi(l, v, c) { return '<div class="sl-kpi"><div class="l">' + l + '</div><div class="v"' + (c ? ' style="color:' + c + '"' : '') + '>' + v + '</div></div>'; }
+function slHero(o, R) {
+  var zh = L === 'zh', cur = R.m === 'cur', A = o.a, T = o.t, c = achCol(o.proj);
+  var h = '<div class="small muted">' + (cur ? (zh ? '已完成目标' : 'Pencapaian target') : (zh ? '月达成' : 'Pencapaian bulan ini')) + '</div><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><div class="sl-big" style="color:' + c + '">' + pc1(o.ach) + '</div>' + slGap(A, T, R, 1) + '</div>';
+  h += slBar(o.ach, c, cur ? R.e / R.dim : null) + '<div class="small muted">' + jt(A) + ' / ' + jt(T) + (cur ? ' · ' + (zh ? '时间进度 ' : 'waktu berjalan ') + pc1(R.e / R.dim) + (zh ? '（竖线）' : ' (garis)') : '') + '</div>';
+  if (cur) { var a7 = o.l7 / 7, c7 = o.need > 0 && a7 < o.need ? '#b3261e' : '#1d7a3a';
+    h += '<div class="sl-need"><div><div class="l">' + (zh ? '剩余每天要卖' : 'Sisa target / hari') + '</div><div class="v">' + (o.need > 0 ? jt(o.need) : '✓') + '</div></div><div><div class="l">' + (zh ? '最近 7 天日均' : 'Rata-rata 7 hari') + '</div><div class="v" style="color:' + c7 + '">' + jt(a7) + '</div></div></div>' +
+      '<div class="small muted" style="margin-top:6px">' + (zh ? '照现在的速度，月底约 ' : 'Dengan laju sekarang, akhir bulan ±') + '<b style="color:' + c + '">' + pc1(o.proj) + '</b></div>'; }
+  return h;
+}
+// 首页卡片：本月达成 + 领先/落后 + 剩余每天要卖；点进去看完整页面
 function salesCard(H) {
   if (!H || !H.store) return '';
-  var R = S.ss && S.ss[H.store.id];
+  var R = S.ss && S.ss[H.store.id + '_cur'], zh = L === 'zh';
   if (!R) return '<div class="card"><h3>' + t('ssT') + '</h3><div style="opacity:.35;font-size:24px;font-weight:800">–</div></div>';
-  var M = R.cur, y = M.days.length ? M.days[M.days.length - 1] : [0, 0];
-  return '<div class="card" style="cursor:pointer" onclick="go(\'sales\')"><div style="display:flex;justify-content:space-between;align-items:baseline"><h3 style="margin:0">' + t('ssT') + '</h3><span style="font-size:12px;color:var(--g)">' + t('ssAsOf')(mdShort(R.asOf)) + '</span></div>' +
-    '<div style="display:flex;align-items:baseline;gap:8px;margin-top:8px"><b style="font-size:28px">Rp ' + jt(M.total) + '</b>' + (M.target ? '<span style="font-size:14px;color:var(--g)">/ ' + t('ssTarget') + ' ' + jt(M.target) + '</span>' : '') + '</div>' +
-    ssLines(M, true) +
-    '<div style="display:flex;justify-content:space-between;font-size:13px;color:var(--g);margin-top:8px;border-top:1px dashed var(--line);padding-top:8px"><span>' + t('ssYday')(mdShort(R.asOf)) + ' <b style="color:#000">Rp ' + jt(y[0]) + '</b>' + (M.grab ? ' · ' + t('ssGrabM') + ' <b style="color:#000">' + jt(M.grab) + '</b>' : '') + '</span><span>›</span></div></div>';
+  var o = slCalc(R), c = achCol(o.proj), y = R.days.length ? R.days[R.days.length - 1] : null;
+  var body = o.t > 0 ? '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:6px"><b style="font-size:28px;color:' + c + '">' + pc1(o.ach) + '</b>' + slGap(o.a, o.t, R, 0) + '</div>' + slBar(o.ach, c, R.e / R.dim) +
+      '<div class="small muted">' + jt(o.a) + ' / ' + jt(o.t) + (o.need > 0 ? ' · ' + (zh ? '剩余每天要卖 ' : 'sisa target/hari ') + '<b style="color:#000">' + jt(o.need) + '</b>' : '') + '</div>'
+    : '<div style="display:flex;align-items:baseline;gap:8px;margin-top:6px"><b style="font-size:28px">' + jt(o.a) + '</b><span class="small muted">' + (zh ? '同期 ' : 'vs bln lalu ') + '<b style="color:' + grCol(o.mom) + '">' + sgn(o.mom) + '</b></span></div>';
+  return '<div class="card" style="cursor:pointer" onclick="go(\'sales\')"><div style="display:flex;justify-content:space-between;align-items:baseline"><h3 style="margin:0">' + t('ssT') + '</h3><span style="font-size:12px;color:var(--g)">' + t('ssAsOf')(mdShort(R.asOf)) + '</span></div>' + body +
+    '<div style="display:flex;justify-content:space-between;font-size:13px;color:var(--g);margin-top:8px;border-top:1px dashed var(--line);padding-top:8px"><span>' + mdShort(R.asOf) + ' <b style="color:#000">' + jt(y ? y[0] : 0) + '</b>' + (o.g ? ' · ' + t('ssGrabM') + ' <b style="color:#000">' + jt(o.g) + '</b>' : '') + '</span><span>›</span></div></div>';
 }
+function slChart(R) {
+  var zh = L === 'zh', cur = R.m === 'cur', n = R.dim, o = slCalc(R), line = cur ? (o.need > 0 ? o.need : null) : (o.t > 0 ? o.t / n : null), dd = R;
+  var mx = 1; dd.days.concat(dd.prevDays).forEach(function (v) { if (v && v[0] > mx) mx = v[0]; }); if (line && line * 1.1 > mx) mx = line * 1.1;
+  var last = 0; dd.days.forEach(function (v, i) { if (v) last = i; }); var sel = S.ssDay != null && S.ssDay < dd.days.length ? S.ssDay : last;
+  var md = function (i, ym) { return zh ? Number(ym.slice(5, 7)) + '/' + (i + 1) : (i + 1) + ' ' + ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'][Number(ym.slice(5, 7)) - 1]; };
+  var v = dd.days[sel], p = dd.prevDays[sel];
+  var info = '<div class="sl-day"><b>' + md(sel, R.sel) + '</b> · ' + (v ? jt(v[0]) : '—') + (v && v[1] > 0 ? ' <i>（GrabMart ' + jt(v[1]) + '）</i>' : '') + (p ? ' <span>· ' + md(sel, ymPrev(R.sel)) + ' ' + jt(p[0]) + '</span>' : '') + '</div>';
+  var hasG = dd.days.some(function (x) { return x && x[1] > 0; });
+  var h = '<div class="card"><b>' + (zh ? '每日销售' : 'Penjualan harian') + '</b><div class="sl-leg" style="margin:4px 0 0"><span style="--c:#FDCD17">' + ymLbl(R.sel) + '</span>' + (hasG ? '<span style="--c:#8a6d00">GrabMart</span>' : '') + '<span style="--c:#999">' + (zh ? '上月同一天' : 'hari sama bln lalu') + '</span>' + (line ? '<span class="dash">' + (cur ? (zh ? '每天要卖 ' : 'target/hari ') + jt(line) : (zh ? '日均目标 ' : 'target rata-rata ') + jt(line)) + '</span>' : '') + '</div>' + info +
+    '<div style="position:relative;display:flex;align-items:flex-end;gap:2px;height:140px;margin-top:6px;border-bottom:1px solid #ddd">' + (line ? '<div style="position:absolute;left:0;right:0;bottom:' + (line / mx * 100) + '%;border-top:2px dashed #111;opacity:.55;z-index:2;pointer-events:none"></div>' : '');
+  for (var i = 0; i < n; i++) { var x = dd.days[i], future = i >= dd.days.length, a2 = x ? x[0] : 0, g = x ? x[1] : 0, pp = dd.prevDays[i] ? dd.prevDays[i][0] : null, on = i === sel;
+    h += '<div onclick="S.ssDay=' + i + ';render()" style="flex:1;position:relative;height:100%;display:flex;flex-direction:column;justify-content:flex-end;cursor:pointer' + (future ? ';background:#f4f4f1;border-radius:2px' : '') + (on ? ';box-shadow:0 0 0 2px #111;border-radius:2px' : '') + '">' +
+      (pp != null && pp > 0 && !future ? '<div style="position:absolute;left:0;right:0;bottom:' + (pp / mx * 100) + '%;border-top:2px solid #999"></div>' : '') +
+      (future ? '' : '<div style="background:' + (on ? '#e8b900' : '#FDCD17') + ';border-radius:2px 2px 0 0;height:' + (Math.max(0, a2 - g) / mx * 100) + '%"></div><div style="background:#8a6d00;height:' + (g / mx * 100) + '%"></div>') + '</div>'; }
+  return h + '</div><div style="display:flex;justify-content:space-between" class="small muted"><span>1</span><span>' + (zh ? '点柱子看当天金额' : 'Ketuk batang untuk lihat angka') + '</span><span>' + n + '</span></div></div>';
+}
+function ssPick(y) { S.ssYm = y; S.ssPick = 0; S.ssDay = null; var id = S.home.store.id; if (!(S.ss && S.ss[id + '_' + y])) loadSales(id, y); render(); window.scrollTo(0, 0); }
 function vSales() {
-  var H = S.home, R = H && H.store && S.ss && S.ss[H.store.id], h = '<div class="page"><button class="back" onclick="go(\'home\')">' + t('back') + '</button><h2>' + t('ssT2') + '</h2><div style="font-size:13px;color:var(--g);margin:-8px 0 12px">' + esc(H && H.store ? H.store.name : '') + (R ? ' · ' + t('ssAsOf')(mdShort(R.asOf)) : '') + '</div>';
-  if (!R) return h + '<div class="card" style="margin:0">…</div></div>';
-  var isCur = S.ssM !== 'prev', M = isCur ? R.cur : R.prev, mon = monLbl(M.ym, 1);
-  h += '<div class="seg" style="margin-bottom:12px"><button class="' + (isCur ? 'on' : '') + '" onclick="S.ssM=\'cur\';S.ssDay=null;render()">' + t('ssCur') + '</button><button class="' + (!isCur ? 'on' : '') + '" onclick="S.ssM=\'prev\';S.ssDay=null;render()">' + t('ssPrev') + '</button></div></div>';
-  // 汇总
-  var c1 = '<div class="card"><h3>' + mon + '</h3><div style="display:flex;align-items:baseline;gap:8px"><b style="font-size:30px">Rp ' + jt(M.total) + '</b>' + (M.target ? '<span style="font-size:14px;color:var(--g)">/ ' + t('ssTarget') + ' ' + jt(M.target) + '</span>' : '') + '</div>' + ssLines(M, isCur) +
-    (isCur && M.target && M.prevSame ? '<div style="font-size:13px;color:var(--g);margin-top:6px">' + t('ssVsPrev') + ' ' + (function () { var ch = Math.round((M.total / M.prevSame - 1) * 100); return '<b style="color:' + (ch >= 0 ? 'var(--ok)' : 'var(--r)') + '">' + (ch >= 0 ? '+' : '') + ch + '%</b>'; })() + '</div>' : '') + '</div>';
-  // 每天柱子：黄色 = 店里卖的，黑色 = GrabMart；虚线 = 每天平均要卖多少才能完成目标
-  var D = M.days, n = M.dim, W = 320, Hh = 150, pl = 4, pr = 4, top = 10, bot = 22, bw = (W - pl - pr) / n, avg = M.target ? M.target / M.dim : 0;
-  var mx = Math.max(avg * 1.15, Math.max.apply(null, D.map(function (x) { return x[0]; }).concat([1])));
-  var Y = function (v) { return top + (1 - v / mx) * (Hh - top - bot); }, g = '';
-  for (var i = 0; i < n; i++) {
-    var x = pl + i * bw, v = D[i] || null, sel = S.ssDay === i;
-    if (sel) g += '<rect x="' + x + '" y="0" width="' + bw + '" height="' + Hh + '" fill="#fff8d6"/>';
-    if (v && v[0] > 0) { var off = v[0] - v[1]; g += '<rect x="' + (x + bw * 0.15) + '" y="' + Y(v[0]) + '" width="' + (bw * 0.7) + '" height="' + (Y(0) - Y(v[0])) + '" rx="1.5" fill="#FDCD17"/>'; if (v[1] > 0) g += '<rect x="' + (x + bw * 0.15) + '" y="' + Y(v[0]) + '" width="' + (bw * 0.7) + '" height="' + (Y(off) - Y(v[0])) + '" fill="#000"/>'; }
-    if ((i + 1) % 5 === 0 || i === 0) g += '<text x="' + (x + bw / 2) + '" y="' + (Hh - 6) + '" text-anchor="middle" font-size="9" fill="#6b6b6b">' + (i + 1) + '</text>';
-    if (i < D.length) g += '<rect x="' + x + '" y="0" width="' + bw + '" height="' + Hh + '" fill="transparent" onclick="S.ssDay=' + i + ';render()"/>';
-  }
-  g += '<line x1="' + pl + '" x2="' + (W - pr) + '" y1="' + Y(0) + '" y2="' + Y(0) + '" stroke="#ddd"/>';
-  if (avg) g += '<line x1="' + pl + '" x2="' + (W - pr) + '" y1="' + Y(avg) + '" y2="' + Y(avg) + '" stroke="#000" stroke-dasharray="4 3" stroke-width="1"/>';
-  var hasG = M.grab > 0, dsel = S.ssDay != null && D[S.ssDay] ? D[S.ssDay] : null, dd = M.ym + '-' + ('0' + ((S.ssDay || 0) + 1)).slice(-2);
-  var c2 = '<div class="card"><h3>' + t('ssDaily') + '</h3><svg viewBox="0 0 ' + W + ' ' + Hh + '" style="width:100%;display:block">' + g + '</svg>' +
-    '<div style="display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:#3c4043;margin-top:6px"><span><i style="display:inline-block;width:10px;height:10px;background:#FDCD17;border-radius:2px"></i> ' + (hasG ? t('ssStoreOnly') : t('ssSales')) + '</span>' + (hasG ? '<span><i style="display:inline-block;width:10px;height:10px;background:#000;border-radius:2px"></i> GrabMart</span>' : '') + (avg ? '<span>┄ ' + t('ssAvg')(jt(avg)) + '</span>' : '') + '</div>' +
-    '<div style="margin-top:10px;padding-top:8px;border-top:1px dashed var(--line);font-size:14px">' + (dsel ? '<b>' + mdShort(dd) + '</b> · Rp ' + jt(dsel[0]) + (dsel[1] ? ' <span style="color:var(--g)">(GrabMart ' + jt(dsel[1]) + ')</span>' : '') : '<span style="color:var(--g)">' + t('ssTap') + '</span>') + '</div></div>';
-  // GrabMart（这个月没有 GrabMart 的店不显示）
-  var gd = D.filter(function (x) { return x && x[1] > 0; }).length;
-  var c3 = hasG ? '<div class="card"><h3>GrabMart</h3><div style="display:flex;justify-content:space-between;align-items:baseline"><b style="font-size:22px">Rp ' + jt(M.grab) + '</b><span style="font-size:13px;color:var(--g)">' + t('ssGrabShare')(Math.round(M.grab / (M.total || 1) * 100)) + '</span></div><div style="font-size:13px;color:var(--g);margin-top:4px">' + t('ssGrabDays')(gd, D.length) + '</div></div>' : '';
-  return h + c1 + c2 + c3 + '<div class="card" style="cursor:pointer" onclick="go(\'mysales\')"><div style="display:flex;justify-content:space-between;align-items:center"><b>' + t('msT') + '</b><span style="color:var(--g)">›</span></div></div>';
+  var zh = L === 'zh', H = S.home, id = H && H.store ? H.store.id : '', base = S.ss && S.ss[id + '_cur'], ym = S.ssYm || (base && base.cur), R = S.ss && S.ss[id + '_' + ym];
+  var h = '<div class="page"><button class="back" onclick="go(\'home\')">' + t('back') + '</button>' +
+    '<div class="sl-hd"><h2>' + esc(H && H.store ? H.store.name : '') + '</h2>' + (base ? '<span class="sl-mon" onclick="S.ssPick=1;render()">' + ymLbl(ym) + ' <span style="font-size:10px">▼</span></span>' : '') + '</div>';
+  if (base) h += '<div class="sl-sub">' + (ym === base.cur ? (zh ? '数据到 ' + mdShort(base.asOf) + '（POS 每天更新到前一天）· 同期 = 上月 1–' + Math.min(base.e, 31) + ' 号' : 'Data s.d. ' + mdShort(base.asOf) + ' (POS diperbarui tiap hari) · dibanding tgl 1–' + base.e + ' bulan lalu') : (zh ? '整月 · 对比 ' + ymLbl(ymPrev(ym)) + ' 整月' : 'Satu bulan penuh · dibanding ' + ymLbl(ymPrev(ym)))) + '</div>';
+  if (base && S.ssPick) h += '<div class="sl-mask" onclick="if(event.target===this){S.ssPick=0;render()}"><div class="sl-sheet"><div style="font-weight:700;margin:2px 4px 8px">' + (zh ? '选择月份' : 'Pilih bulan') + '</div>' + base.months.map(function (y) { return '<div class="it' + (y === ym ? ' on' : '') + '" onclick="ssPick(\'' + y + '\')"><span>' + ymLbl(y) + '</span><span class="muted">' + (y === base.cur ? (zh ? '进行中' : 'berjalan') : '') + (y === ym ? ' ✓' : '') + '</span></div>'; }).join('') + '<div class="small muted" style="margin:8px 4px 0">' + (zh ? 'LK POS 从 2026年9月开始，更早的月份没有数据' : 'LK POS mulai Sep 2026, bulan sebelumnya belum ada data') + '</div></div></div>';
+  h += '</div>';
+  if (!R) return h + '<div class="card">…</div>';
+  var o = slCalc(R), cur = R.m === 'cur', hasG = R.o.g > 0 || R.o.pg > 0;
+  h += '<div class="card">' + (o.t > 0 ? slHero(o, R) : '<div class="small muted">' + (zh ? '累计销售' : 'Total penjualan') + '</div><div class="sl-big">' + jt(o.a) + '</div><div class="small muted" style="margin-top:4px">' + (zh ? '这家店这个月没有目标' : 'Toko ini belum ada target bulan ini') + '</div>') +
+    '<div class="sl-kpis">' + slKpi(zh ? '累计销售' : 'Total penjualan', jt(o.a)) + slKpi(cur ? (zh ? '同期增长' : 'Pertumbuhan') : (zh ? '比上月' : 'vs bulan lalu'), sgn(o.mom), grCol(o.mom)) +
+    (hasG ? slKpi('GrabMart', jt(o.g) + '<span style="font-size:12px;color:#999;font-weight:600"> · ' + pc1(o.share) + '</span>') : slKpi(zh ? '日均' : 'Rata-rata/hari', jt(o.a / (o.days || 1)))) + '</div></div>';
+  h += R.o.hasDays ? slChart(R) : '<div class="card muted">' + (zh ? '这个月没有每日明细（系统只保留最近约 2 个月的每日数据）' : 'Rincian harian bulan ini tidak tersedia (hanya ±2 bulan terakhir)') + '</div>';
+  return h + '<div class="card" style="cursor:pointer" onclick="go(\'mysales\')"><div style="display:flex;justify-content:space-between;align-items:center"><b>' + t('msT') + '</b><span style="color:var(--g)">›</span></div></div>';
 }
 // 我的销售：先放入口，等区分「谁卖的」的方式定了再接数据（提成也放在这里）
 function vMySales() {
