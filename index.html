@@ -15,8 +15,15 @@
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:#e9e7e2;color:var(--k);-webkit-font-smoothing:antialiased}
 .app{max-width:440px;margin:0 auto;min-height:100vh;background:var(--l);position:relative;padding-bottom:90px}
 button{font-family:inherit}
-.top{background:var(--y);padding:calc(14px + env(safe-area-inset-top)) 18px 18px}
-body::before{content:'';position:fixed;top:0;left:0;right:0;height:max(4px,env(safe-area-inset-top));background:#000;z-index:100;pointer-events:none}
+.top{background:var(--y);padding:14px 18px 18px}
+/* 顶部黑条（和 LK Hub 一样）：一直贴在最上面，iOS 会用它的黑色填状态栏，不再起雾 */
+.hb{position:sticky;top:0;z-index:30;background:#111;color:#fff;height:calc(50px + env(safe-area-inset-top));padding:env(safe-area-inset-top) 16px 0;display:flex;align-items:center;justify-content:space-between;font-size:18px}
+.hb b{color:var(--y);margin-right:6px}
+.hb .lang{border:1px solid var(--y);color:var(--y);background:none;border-radius:8px;padding:4px 10px;font-size:14px;font-family:inherit}
+.pf{position:relative;overflow:hidden;background:var(--y);color:#111;border-radius:16px;margin:12px 14px 0;padding:16px 16px 19px}
+.pf .av{flex:0 0 72px;width:72px;height:72px;border-radius:50%;background:#111 center/cover no-repeat;color:var(--y);font-weight:800;font-size:26px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 3px var(--y),0 0 0 5px #111;cursor:pointer}
+.pf .gear{position:absolute;top:8px;right:8px;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#5a4a00;cursor:pointer}
+.pf .bar{height:3px;background:#111;position:absolute;left:0;right:0;bottom:0}
 .top .row{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
 .top .hi{font-size:13px;font-weight:600}
 .top .store{cursor:pointer}
@@ -56,7 +63,7 @@ body::before{content:'';position:fixed;top:0;left:0;right:0;height:max(4px,env(s
 .nav a{flex:1;text-align:center;font-size:11px;color:var(--g);text-decoration:none}
 .nav a.on{color:#000;font-weight:700}.nav a.on svg{background:var(--y);border-radius:10px;width:44px;padding:0 11px}
 .page{padding:16px 14px}
-.app>.page:first-child{padding-top:calc(16px + env(safe-area-inset-top))}
+.app>.page:first-child{padding-top:16px}
 .page h2{font-size:20px;margin-bottom:12px}
 label.f{display:block;font-size:13px;color:var(--g);margin:12px 0 6px}
 input.in{width:100%;font-size:17px;padding:13px;border:1px solid var(--line);border-radius:10px;background:#fff}
@@ -104,12 +111,12 @@ textarea.in{min-height:72px;resize:vertical}
 .stmenu{position:absolute;top:100%;left:0;margin-top:6px;background:#fff;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.18);z-index:30;min-width:250px;overflow:hidden}
 .stmenu button{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid var(--line);background:#fff;padding:13px 14px;font-size:15px;color:#000}
 .stmenu button.on{font-weight:700}.stmenu small{color:var(--ok);font-weight:600;font-size:12px}
-.res{text-align:center;padding:calc(30px + env(safe-area-inset-top)) 14px 30px}
+.res{text-align:center;padding:30px 14px 30px}
 .res .big{font-size:56px;font-weight:800}
 .toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%);background:#000;color:#fff;padding:12px 16px;border-radius:12px;font-size:14px;max-width:86%;text-align:center;z-index:9}
 .busy{position:fixed;inset:0;background:rgba(255,255,255,.75);display:flex;align-items:center;justify-content:center;z-index:8;font-size:16px;font-weight:600}
 table.r{width:100%;border-collapse:collapse;font-size:14px}table.r td{padding:8px 4px;border-bottom:1px solid var(--line)}table.r td:last-child{text-align:right;font-weight:700}
-.login{padding:calc(40px + env(safe-area-inset-top)) 22px 40px}
+.login{padding:28px 22px 40px}
 .login .logo{width:84px;height:84px;border-radius:20px;display:block;margin:0 auto 16px}
 </style>
 </head>
@@ -117,7 +124,7 @@ table.r{width:100%;border-collapse:collapse;font-size:14px}table.r td{padding:8p
 <div class="app" id="app"></div>
 <script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261119153447';
+var APP_VER = '20261119153838';
 function chkVer() { fetch('version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
@@ -294,20 +301,21 @@ function upload(dataUrl, kind) {
 // ---------- 页面 ----------
 function render() {
   var a = document.getElementById('app');
-  if (!S.sess) { a.innerHTML = vLogin(); return; }
-  if (S.sess.mustChange) { a.innerHTML = vNewPw(); return; }
+  if (!S.sess) { a.innerHTML = vHb() + vLogin(); return; }
+  if (S.sess.mustChange) { a.innerHTML = vHb() + vNewPw(); return; }
   var v = S.view, h = '';
   if (v === 'home') h = vHome(); else if (v === 'absen') h = vAbsen(); else if (v === 'buka') h = vBuka(); else if (v === 'poin') h = vPoin(); else if (v === 'saya') h = vSaya(); else if (v === 'res') h = vRes(); else if (v === 'survey') h = vSurvey(); else if (v === 'storedata') h = vStoreData(); else if (v === 'pulang') h = vPulang(); else if (v === 'sales') h = vSales(); else if (v === 'mysales') h = vMySales(); else if (v === 'rec') h = vRec(); else if (v === 'tugas') h = vTugas(); else if (v === 'mystore') h = vMyStore(); else if (v === 'mypc') h = vMyPc();
   if (v === 'home' || v === 'poin' || v === 'saya' || v === 'tugas') h += vNav();
-  a.innerHTML = h;
+  a.innerHTML = vHb() + h;
 }
 function vLogin() {
   return '<div class="login"><img class="logo" src="img/icon-192.png?v=2" alt=""><h2 style="text-align:center;margin-bottom:6px">LK Toko</h2>' +
     '<label class="f">' + t('eid') + '</label><input class="in" id="eid" autocapitalize="characters" autocomplete="username" placeholder="ID-2026-…">' +
     '<label class="f">' + t('pw') + '</label><input class="in" id="pw" type="password" autocomplete="current-password">' +
     '<button class="btn" onclick="doLogin()">' + t('login') + '</button>' +
-    '<div style="text-align:center;margin-top:18px"><button class="chip" onclick="swLang()">' + (L === 'id' ? '中文' : 'Bahasa Indonesia') + '</button></div>' + a2hsTip() + '</div>';
+    a2hsTip() + '</div>';
 }
+function vHb() { return '<div class="hb"><div><b>LK</b>Toko</div><button class="lang" onclick="swLang()">ID | 中文</button></div>'; }
 // ---------- 登录页：怎么加到手机桌面（和 LK Hub 同一套文字）----------
 function standalone() { return (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true; }
 function a2hsEnv() { var ua = navigator.userAgent; if (/FBAN|FBAV|Instagram|WhatsApp|Line\/|; wv\)/i.test(ua)) return 'inapp'; var ios = /iPhone|iPad|iPod/i.test(ua) || (/Macintosh/.test(ua) && 'ontouchend' in document);
@@ -376,13 +384,31 @@ function dayLbl(d) {
 }
 function firstName(n) { return String(n || '').split(' ')[0]; }
 // 首页：最上面只放「下一步」；门店的事写清是谁做的；迟到时按钮变红；早班最后一步是「门店情况」
+// 首页人员卡：排版照 LK Hub（头像左、问候+日期、名字），颜色反过来：黄底黑字、黑色头像、底边黑线；右上角齿轮换头像
+function greetT() { var h = new Date().getHours(), zh = L === 'zh'; return h < 11 ? (zh ? '早上好' : 'Selamat pagi') : h < 15 ? (zh ? '中午好' : 'Selamat siang') : h < 18 ? (zh ? '下午好' : 'Selamat sore') : (zh ? '晚上好' : 'Selamat malam'); }
+function avKey() { return 'tk_av_' + String((S.sess && S.sess.user && S.sess.user.nick) || '').toLowerCase(); }
+function myAv() { var H = S.home; try { if (H && H.avatar !== undefined) { if (H.avatar) localStorage.setItem(avKey(), H.avatar); else localStorage.removeItem(avKey()); return H.avatar; } return localStorage.getItem(avKey()) || ''; } catch (e) { return (H && H.avatar) || ''; } }
+var GEAR = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg>';
+function pfCard(H, u) {
+  var nm = String(u.fullName || u.nick || ''), ini = nm.split(/\s+/).filter(Boolean).slice(0, 2).map(function (w) { return w.charAt(0).toUpperCase(); }).join(''), av = myAv();
+  return '<div class="pf"><div class="gear" onclick="avMenu()">' + GEAR + '</div><div style="display:flex;gap:16px;align-items:center">' +
+    '<div class="av" onclick="avMenu()" style="' + (av ? 'background-image:url(' + av + ')' : '') + '">' + (av ? '' : esc(ini || 'LK')) + '</div>' +
+    '<div style="min-width:0;flex:1;padding-right:22px"><div style="font-size:13px;color:#4a3d00">' + greetT() + (H ? ' · ' + dayLbl(H.local.date) : '') + '</div>' +
+    '<div style="font-size:22px;font-weight:800;line-height:1.25;margin-top:2px;overflow-wrap:anywhere">' + esc(nm) + '</div>' + (H ? stSel(H) : '') + '</div></div><div class="bar"></div></div>';
+}
+function avMenu() {
+  var zh = L === 'zh', has = !!myAv(), m = document.createElement('div'); m.id = 'avm'; m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:60;display:flex;align-items:flex-end'; m.onclick = function (e) { if (e.target === m) m.remove(); };
+  m.innerHTML = '<div style="background:#fff;width:100%;max-width:440px;margin:0 auto;border-radius:16px 16px 0 0;padding:16px 16px calc(24px + env(safe-area-inset-bottom))"><b style="font-size:16px">' + (zh ? '更换头像' : 'Ganti foto profil') + '</b><div style="font-size:13px;color:#6b6b6b;margin:4px 0 4px">' + (zh ? '自愿上传，只显示在你自己的 LK Toko 里。建议用清楚的正脸照。' : 'Opsional, hanya tampil di LK Toko kamu. Sebaiknya foto wajah yang jelas.') + '</div>' +
+    '<button class="btn" onclick="avPick(1)">' + (zh ? '拍一张' : 'Ambil foto') + '</button><button class="btn ghost" onclick="avPick(0)">' + (zh ? '从相册选' : 'Pilih dari galeri') + '</button>' + (has ? '<button class="btn ghost" onclick="avSave(\'\')">' + (zh ? '删除头像，改回首字母' : 'Hapus foto, pakai inisial') + '</button>' : '') + '<button class="btn ghost" onclick="document.getElementById(\'avm\').remove()">' + (zh ? '取消' : 'Batal') + '</button></div>';
+  document.body.appendChild(m);
+}
+function avPick(cam) { var i = document.createElement('input'); i.type = 'file'; i.accept = 'image/*'; if (cam) i.setAttribute('capture', 'user'); i.onchange = function () { var f = i.files && i.files[0]; if (!f) return; var img = new Image(), url = URL.createObjectURL(f); img.onload = function () { var n = Math.min(img.naturalWidth, img.naturalHeight), c = document.createElement('canvas'); c.width = c.height = 160; c.getContext('2d').drawImage(img, (img.naturalWidth - n) / 2, (img.naturalHeight - n) / 2, n, n, 0, 0, 160, 160); URL.revokeObjectURL(url); var q = .85, d = c.toDataURL('image/jpeg', q); while (d.length > 40000 && q > .4) { q -= .1; d = c.toDataURL('image/jpeg', q); } avSave(d); }; img.onerror = function () { toast(t('err')); }; img.src = url; }; i.click(); }
+function avSave(d) { var m = document.getElementById('avm'); if (m) m.remove(); busy(L === 'zh' ? '正在保存头像…' : 'Menyimpan foto…'); api('setAvatar', [S.sess.token, d]).then(function (r) { busy(); if (!r || !r.ok) return toast(t('err')); if (S.home) S.home.avatar = r.avatar || ''; render(); toast(L === 'zh' ? '头像已更新' : 'Foto profil diperbarui'); }).catch(function () { busy(); toast(t('err')); }); }
 function vHome() {
   var H = S.home, u = S.sess.user;
   var multi = H && H.stores && H.stores.length > 1;
   var ov = '';
-  var top = '<div class="top"><div class="row"><div><div class="hi">' + (H ? dayLbl(H.local.date) : '') + '</div><div class="name">' + esc(u.fullName) + '</div>' +
-    (H ? stSel(H) : '') + '</div></div>' +
-    '</div>' + ov + '</div>';
+  var top = pfCard(H, u) + ov;
   if (u.test) top += '<div class="info">' + t('test') + '</div>';
   if (!H) return top + '<div class="next"><div class="lbl">' + t('next') + '</div><div class="t" style="opacity:.35">· · ·</div><div class="s">&nbsp;</div><button class="btn" disabled>&nbsp;</button></div><div class="card"><h3>' + t('today') + '</h3><div class="steps">' + t('steps').map(function (n, k) { return '<div class="st"><div class="dot">' + (k + 1) + '</div>' + n + '</div>'; }).join('') + '</div></div><div class="card"><h3>' + t('pts') + '</h3><div class="pts"><div class="big" style="opacity:.3">–</div></div></div>';
   if (!H.store) return top + '<div class="alert">' + t('noStore') + '</div>';
@@ -513,7 +539,7 @@ function vPoin() {
   var P = S.home ? S.home.points : { total: 0 }, N = S.pn, tab = S.pTab || 0;
   var gap = (S.home && S.home.local && S.home.local.date < '2026-12-08') ? t('boardSoon') : P.inTop10 ? t('in10')(P.rank) : (P.gap == null ? t('gapNone') : t('gap')(P.gap));
   var head = '<div class="top"><div class="name">' + t('pts') + '</div><div style="font-size:40px;font-weight:800;margin-top:6px">' + totP(P.total) + ' <small style="font-size:14px">' + t('u') + '</small></div><div style="font-size:14px;margin-top:4px">' + gap.replace(/<b>|<\/b>/g, ' ') + '</div></div>';
-  var tabs = '<div style="position:sticky;top:env(safe-area-inset-top);z-index:5;background:#f3f3f1;padding:12px 14px 8px"><div style="display:flex;background:#e6e4df;border-radius:12px;padding:3px">' + t('pTabs').map(function (n, k) { return '<button onclick="S.pTab=' + k + ';S.rOpen=null;render();window.scrollTo(0,0)" style="flex:1;border:0;border-radius:10px;padding:9px 2px;font-size:13px;font-weight:' + (k === tab ? '700;background:#fff;color:#000;box-shadow:0 1px 3px rgba(0,0,0,.12)' : '500;background:transparent;color:#6b6b6b') + '">' + n + '</button>'; }).join('') + '</div></div>';
+  var tabs = '<div style="position:sticky;top:calc(50px + env(safe-area-inset-top));z-index:5;background:#f3f3f1;padding:12px 14px 8px"><div style="display:flex;background:#e6e4df;border-radius:12px;padding:3px">' + t('pTabs').map(function (n, k) { return '<button onclick="S.pTab=' + k + ';S.rOpen=null;render();window.scrollTo(0,0)" style="flex:1;border:0;border-radius:10px;padding:9px 2px;font-size:13px;font-weight:' + (k === tab ? '700;background:#fff;color:#000;box-shadow:0 1px 3px rgba(0,0,0,.12)' : '500;background:transparent;color:#6b6b6b') + '">' + n + '</button>'; }).join('') + '</div></div>';
   var body = '';
   if (tab === 0) {
     if (!N) body = '<div class="card">…</div>';
