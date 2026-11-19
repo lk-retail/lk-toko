@@ -124,7 +124,7 @@ table.r{width:100%;border-collapse:collapse;font-size:14px}table.r td{padding:8p
 <div class="app" id="app"></div>
 <script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261119165301';
+var APP_VER = '20261119165725';
 function chkVer() { fetch('version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
@@ -181,7 +181,7 @@ var TX = {
     svErr: 'Jawab semua pertanyaan 1–4. Yang merah belum lengkap.', svSend: 'Kirim laporan', svDone: 'Laporan terkirim', svNeed: 'Isi Laporan Akhir Shift dulu.',
     sdIntro: 'Isi sesuai laporan harian di POS, jangan kira-kira. Foto layar laporan POS wajib.', secSales: 'Penjualan hari ini', secCust: 'Pelanggan hari ini', secSO: 'Stock opname hari ini', zeroHint: 'Tidak ada? Tulis 0.',
     sdErr: 'Isi semua angka penjualan, pengunjung dan pembeli (tulis 0 kalau tidak ada), dan foto laporan POS.', buyersErr: 'Pembeli tidak boleh lebih banyak dari pengunjung.', soErr: 'Isi brand dan selisih stock opname.', sdSend: 'Kirim data toko', sdDone: 'Data toko terkirim', sdNeed: 'Isi data toko dulu.',
-    poIntro: function (x) { return 'Jam absen pulang = jam pulang kamu. Lakukan saat kamu benar-benar mau pulang (shift selesai ' + x + ').'; }, selfieOut: 'Selfie pulang', selfieHint: 'Ketuk untuk selfie · wajah kamu dan toko harus kelihatan', lockHint: 'Kunci pintu / rolling door dulu, lalu ketuk untuk foto gemboknya', poSend: 'Absen pulang sekarang', fotoTokoH: 'Ketuk untuk foto depan toko · konter dan display harus kelihatan',
+    poIntro: function (x) { return 'Jam absen pulang = jam pulang kamu. Lakukan saat kamu benar-benar mau pulang' + (x ? ' (shift selesai ' + x + ').' : '.'); }, selfieOut: 'Selfie pulang', selfieHint: 'Ketuk untuk selfie · wajah kamu dan toko harus kelihatan', lockHint: 'Kunci pintu / rolling door dulu, lalu ketuk untuk foto gemboknya', poSend: 'Absen pulang sekarang', fotoTokoH: 'Ketuk untuk foto depan toko · konter dan display harus kelihatan',
     p12: 'Poin 12 bulan terakhir', pTap: 'Ketuk bulan untuk lihat rinciannya.', pLive: 'berjalan', pSettling: 'belum final (final tgl 8)', rankN: function (r) { return 'Peringkat ' + r; }, attLine: function (a) { return 'masuk ' + a.days + ' hari · tepat waktu ' + a.onTime + ' · terlambat ' + a.late + ' · pulang awal ' + a.early + ' · tanpa absen pulang ' + a.noCard; },
     ssT: 'Penjualan toko bulan ini', ssT2: 'Penjualan toko', ssAsOf: function (d) { return 'Data s/d ' + d; }, ssTarget: 'target', ssPct: function (p, tp) { return 'Tercapai ' + p + '%' + (tp != null ? ' · waktu berjalan ' + tp + '%' : ''); },
     ssNeed: function (a, d, x) { return 'Kurang Rp ' + a + ' · sisa ' + d + ' hari, rata-rata Rp ' + x + ' per hari'; }, ssShort: function (a) { return 'Kurang Rp ' + a + ' dari target'; }, ssDone: function (a) { return 'Target tercapai, lebih Rp ' + a; },
@@ -236,7 +236,7 @@ var TX = {
     svErr: '1–4 题都要回答，红色的还没填完整。', svSend: '提交问卷', svDone: '问卷已提交', svNeed: '请先填下班问卷。',
     sdIntro: '照 POS 日报填，不要估。必须拍 POS 日报截图。', secSales: '今天销售', secCust: '今天顾客', secSO: '今天的盘点', zeroHint: '没有就写 0。',
     sdErr: '销售、进店人数、购买人数都要填（没有写 0），并拍 POS 日报截图。', buyersErr: '购买人数不能比进店人数多。', soErr: '请填盘点的品牌和差异。', sdSend: '提交门店数据', sdDone: '门店数据已提交', sdNeed: '请先填门店数据。',
-    poIntro: function (x) { return '下班打卡的时间就是你的下班时间，真正要走的时候再打（班次 ' + x + ' 结束）。'; }, selfieOut: '下班自拍', selfieHint: '点这里拍自拍 · 要拍到你的脸和门店', lockHint: '先锁好门或卷帘门，再点这里拍门锁', poSend: '现在下班打卡', fotoTokoH: '点这里拍门店正面 · 柜台和陈列都要拍进去',
+    poIntro: function (x) { return '下班打卡的时间就是你的下班时间，真正要走的时候再打' + (x ? '（班次 ' + x + ' 结束）。' : '。'); }, selfieOut: '下班自拍', selfieHint: '点这里拍自拍 · 要拍到你的脸和门店', lockHint: '先锁好门或卷帘门，再点这里拍门锁', poSend: '现在下班打卡', fotoTokoH: '点这里拍门店正面 · 柜台和陈列都要拍进去',
     p12: '近 12 个月积分', pTap: '点月份看那个月的明细。', pLive: '进行中', pSettling: '结算中（8 号定）', rankN: function (r) { return '第 ' + r + ' 名'; }, attLine: function (a) { return '上班 ' + a.days + ' 天 · 准时 ' + a.onTime + ' · 迟到 ' + a.late + ' · 早退 ' + a.early + ' · 缺下班卡 ' + a.noCard; },
     ssT: '本月门店销售', ssT2: '门店销售', ssAsOf: function (d) { return '数据到 ' + d; }, ssTarget: '目标', ssPct: function (p, tp) { return '完成 ' + p + '%' + (tp != null ? ' · 时间过了 ' + tp + '%' : ''); },
     ssNeed: function (a, d, x) { return '还差 Rp ' + a + '，剩 ' + d + ' 天，每天要卖 Rp ' + x; }, ssShort: function (a) { return '离目标差 Rp ' + a; }, ssDone: function (a) { return '目标完成了，超出 Rp ' + a; },
@@ -439,7 +439,7 @@ function vHome() {
   var other = H.inToday && H.store && H.inToday !== H.store.id;
   var stage = !H.absen ? 0 : !H.buka ? 1 : !O || !O.survey || O.needStore ? 2 : !O.done ? 3 : 4, nx = '';
   if (S.swLoading) nx = '<div class="next"><div class="lbl">' + t('next') + '</div><div class="t" style="opacity:.35">· · ·</div><div class="s">' + t('loading') + '</div></div>';
-  else if (other && H.doneToday) { var dSt = (H.stores.filter(function (x) { return x.id === H.inToday; })[0] || {}).name || ''; nx = '<div class="next" style="background:var(--okb);color:#000"><div class="lbl" style="color:var(--ok)">' + t('today') + '</div><div class="t">' + t('doneT') + '</div><div class="s" style="color:#3c4043">' + (L === 'zh' ? '你今天在 ' + esc(dSt) + ' ' + H.doneToday + ' 已下班打卡。这里只看这家店的情况。' : 'Hari ini kamu sudah absen pulang di ' + esc(dSt) + ' jam ' + H.doneToday + '. Di sini hanya info toko ini.') + '</div></div>'; }
+  else if (other && H.doneToday) nx = '<div class="next" style="background:var(--okb);color:#000"><div class="lbl" style="color:var(--ok)">' + t('today') + '</div><div class="t">' + t('doneT') + '</div><div class="s" style="color:#3c4043">' + t('doneS')(H.doneToday) + '</div></div>';
   else if (other) { var inSt = (H.stores.filter(function (x) { return x.id === H.inToday; })[0] || {}).name || ''; nx = nxc(esc(H.store.name), t('otherSt')(esc(inSt)), "pickSt('" + H.inToday + "')", t('backSt')(esc(inSt))); }
   else if (stage === 0) {
     if (!H.shift) nx = nxc(t('absenT'), multi ? t('pickSM') : t('pickS'), "go('absen')", t('absenB'));
@@ -648,7 +648,7 @@ function ssSay(o, R) {
 // 今天要卖 vs 最近一天卖了多少
 function ssToday(o, R) {
   var zh = L === 'zh', y = R.days.length ? R.days[R.days.length - 1] : null, yv = y ? y[0] : 0, ok = o.need > 0 ? yv >= o.need : true;
-  return '<div class="sl-need"><div><div class="l">' + (zh ? '今天要卖' : 'Target hari ini') + '</div><div class="v">' + (o.need > 0 ? jt(o.need) : '✓') + '</div></div><div><div class="l">' + mdShort(R.asOf) + (zh ? ' 卖了' : ' terjual') + '</div><div class="v" style="color:' + (ok ? '#1d7a3a' : '#b3261e') + '">' + jt(yv) + '</div>' + (o.need > 0 ? '<div style="font-size:12px;margin-top:2px;color:' + (ok ? '#1d7a3a' : '#b3261e') + '">' + (ok ? (zh ? '达到了每天要卖的数' : 'Sudah capai target harian') : (zh ? '比每天要卖的少 ' : 'Kurang ') + jt(o.need - yv) + (zh ? '' : ' dari target harian')) + '</div>' : '') + '</div></div>';
+  return '<div class="sl-need"><div><div class="l">' + (zh ? '今天要卖' : 'Target hari ini') + '</div><div class="v">' + (o.need > 0 ? jt(o.need) : '✓') + '</div></div><div><div class="l">' + mdShort(R.asOf) + (zh ? ' 卖了' : ' terjual') + '</div><div class="v" style="color:' + (ok ? '#1d7a3a' : '#b3261e') + '">' + jt(yv) + (o.need > 0 ? ' ' + (ok ? '▲' : '▼') : '') + '</div></div></div>';
 }
 function slKpi(l, v, c) { return '<div class="sl-kpi"><div class="l">' + l + '</div><div class="v"' + (c ? ' style="color:' + c + '"' : '') + '>' + v + '</div></div>'; }
 function slHero(o, R) {
