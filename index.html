@@ -124,7 +124,7 @@ table.r{width:100%;border-collapse:collapse;font-size:14px}table.r td{padding:8p
 <div class="app" id="app"></div>
 <script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261119180210';
+var APP_VER = '20261119181844';
 function chkVer() { fetch('version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
@@ -767,8 +767,8 @@ function poinChart(N, sel) {
   return '<div class="card"><h3>' + t('p12') + '</h3><svg viewBox="0 0 ' + W + ' ' + H + '" style="width:100%;display:block">' + g + '</svg>' + (M.length > 1 ? '<div style="font-size:12px;color:var(--g);margin-top:2px">' + t('pTap') + '</div>' : '') + sum + '</div>';
 }
 function vTugas() {
-  return '<div class="top"><div class="name">' + t('taskT') + '</div></div>' +
-    '<div style="padding:12px 14px 8px"><div style="display:flex;background:#e6e4df;border-radius:12px;padding:3px">' + t('taskTabs').map(function (n, k) { return '<button style="flex:1;border:0;border-radius:10px;padding:9px 2px;font-size:13px;font-weight:' + (k === 0 ? '700;background:#fff;color:#000;box-shadow:0 1px 3px rgba(0,0,0,.12)' : '500;background:transparent;color:#6b6b6b') + '">' + n + '</button>'; }).join('') + '</div></div>' +
+  // 2026-11-19：任务功能还没上线，先不放「待完成 / 记录」两个分页（点不动会让人以为坏了），上线时再加回来
+  return '<div class="top"><div class="name">' + t('taskT') + '</div></div><div style="padding:12px 0 0"></div>' +
     '<div class="card" style="text-align:center;padding:28px 18px"><div style="width:52px;height:52px;margin:0 auto 10px;color:#b0b0ab">' + IC.task + '</div><div style="font-size:17px;font-weight:700">' + t('taskSoonT') + '</div><div style="font-size:14px;color:var(--g);margin-top:8px;line-height:1.5">' + t('taskSoonS') + '</div></div>';
 }
 function entryRow(ic, title, sub, go_, last) {
