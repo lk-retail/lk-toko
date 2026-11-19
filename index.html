@@ -80,7 +80,7 @@ table.r{width:100%;border-collapse:collapse;font-size:14px}table.r td{padding:8p
 <div class="app" id="app"></div>
 <script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261119125129';
+var APP_VER = '20261119125655';
 function chkVer() { fetch('version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
@@ -104,7 +104,7 @@ var TX = {
     noShift: 'Jam shift toko ini belum diisi. Hubungi Operation Manager.', noStore: 'Kamu belum terdaftar di toko mana pun. Hubungi HR.',
     in10: function (r) { return '<b>Top 10</b>peringkat ' + r; }, gap: function (g) { return '<b>' + fmtP(g).replace('+', '') + ' poin lagi</b>masuk Top 10'; }, gapNone: '<b>Absen tepat waktu</b>untuk masuk Top 10', boardSoon: '<b>Peringkat Top 10</b>mulai 8 Des',
     todayP: function (p) { return 'Hari ini: ' + fmtP(p) + ' poin'; }, more: ['Barang', 'Perbaikan & Laporan', 'LK School'], soon: 'Segera',
-    nav: ['Hari Ini', 'Poin', 'Saya'], back: '‹ Kembali', shift: 'Shift', selfie: 'Ambil selfie', retake: 'Foto ulang', send: 'Kirim absen',
+    nav: ['Hari Ini', 'Tugas', 'Poin', 'Saya'], attSub: function (a) { return a.days ? 'Bulan ini: masuk ' + a.days + ' hari · tepat waktu ' + a.onTime + (a.late ? ' · terlambat ' + a.late : '') + (a.early ? ' · pulang awal ' + a.early : '') + (a.noCard ? ' · tanpa laporan ' + a.noCard : '') : 'Kalender kehadiran bulan ini'; }, taskT: 'Tugas Toko', taskTabs: ['Belum selesai', 'Selesai'], taskSoonT: 'Segera hadir', taskSoonS: 'Di sini nanti ada tugas dari Area Supervisor / tim operasional, misalnya pasang materi promo atau foto display. Tiap tugas ada batas waktu (bisa beberapa hari) dan tidak menghalangi absen pulang.', back: '‹ Kembali', shift: 'Shift', selfie: 'Ambil selfie', retake: 'Foto ulang', send: 'Kirim absen',
     sending: 'Mengirim…', upl: 'Mengunggah foto…', needPhoto: 'Ambil foto dulu', got: 'Absen tercatat', ptsGot: 'poin', doneBuka: 'Toko READY ✓',
     alat: 'HP, tablet/POS, EDC, lampu & AC menyala', bersih: 'Toko bersih: lantai, rak & etalase', display: 'Display rapi & siap', fotoToko: 'Foto depan toko',
     sendBuka: 'Kirim — Toko READY', shiftN: { F: 'Full', M: 'Pagi', E: 'Malam' },
@@ -135,7 +135,7 @@ var TX = {
     noShift: '这家店的班次时间还没填，请联系运营经理。', noStore: '你还没有分配门店，请联系 HR。',
     in10: function (r) { return '<b>前 10</b>第 ' + r + ' 名'; }, gap: function (g) { return '<b>还差 ' + fmtP(g).replace('+', '') + ' 分</b>进前 10'; }, gapNone: '<b>准时打卡</b>就能进前 10', boardSoon: '<b>前 10 排行榜</b>12/8 开始',
     todayP: function (p) { return '今天：' + fmtP(p) + ' 分'; }, more: ['货品', '报修与反馈', 'LK School'], soon: '即将上线',
-    nav: ['今天', '积分', '我的'], back: '‹ 返回', shift: '班次', selfie: '拍自拍', retake: '重拍', send: '提交打卡',
+    nav: ['今天', '任务', '积分', '我的'], attSub: function (a) { return a.days ? '本月上班 ' + a.days + ' 天 · 准时 ' + a.onTime + ' 天' + (a.late ? ' · 迟到 ' + a.late + ' 次' : '') + (a.early ? ' · 早退 ' + a.early + ' 次' : '') + (a.noCard ? ' · 缺下班卡 ' + a.noCard + ' 次' : '') : '查看本月考勤日历'; }, taskT: '门店任务', taskTabs: ['待完成', '已完成'], taskSoonT: '即将上线', taskSoonS: '这里以后会有区域主管和运营团队发的任务，比如摆放促销物料、拍陈列照片。每个任务有自己的期限（可以是几天），不影响每天的下班打卡。', back: '‹ 返回', shift: '班次', selfie: '拍自拍', retake: '重拍', send: '提交打卡',
     sending: '提交中…', upl: '正在上传照片…', needPhoto: '请先拍照', got: '打卡成功', ptsGot: '分', doneBuka: '门店已 READY ✓',
     alat: '手机、平板/POS、EDC、灯和空调都已打开', bersih: '店内干净：地面、货架、柜台', display: '陈列整齐，可以营业', fotoToko: '门店正面照',
     sendBuka: '提交 — 门店 READY', shiftN: { F: '全天', M: '早班', E: '晚班' },
@@ -163,6 +163,8 @@ var IC = {
   box: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7l9-4 9 4-9 4z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11v10"/></svg>',
   home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11l9-7 9 7v9h-6v-6H9v6H3z"/></svg>',
   star: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>',
+  task: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="17" rx="2"/><path d="M9 3h6v3H9z"/><path d="M8.5 13l2.5 2.5 4.5-5"/></svg>',
+  cal: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>',
   user: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4.5-6 8-6s7 2 8 6"/></svg>'
 };
 
@@ -206,8 +208,8 @@ function render() {
   if (!S.sess) { a.innerHTML = vLogin(); return; }
   if (S.sess.mustChange) { a.innerHTML = vNewPw(); return; }
   var v = S.view, h = '';
-  if (v === 'home') h = vHome(); else if (v === 'absen') h = vAbsen(); else if (v === 'buka') h = vBuka(); else if (v === 'poin') h = vPoin(); else if (v === 'saya') h = vSaya(); else if (v === 'res') h = vRes(); else if (v === 'card') h = vCard(); else if (v === 'rec') h = vRec();
-  if (v === 'home' || v === 'poin' || v === 'saya') h += vNav();
+  if (v === 'home') h = vHome(); else if (v === 'absen') h = vAbsen(); else if (v === 'buka') h = vBuka(); else if (v === 'poin') h = vPoin(); else if (v === 'saya') h = vSaya(); else if (v === 'res') h = vRes(); else if (v === 'card') h = vCard(); else if (v === 'rec') h = vRec(); else if (v === 'tugas') h = vTugas();
+  if (v === 'home' || v === 'poin' || v === 'saya' || v === 'tugas') h += vNav();
   a.innerHTML = h;
 }
 function vLogin() {
@@ -301,11 +303,12 @@ function vHome() {
   var gap = (H.local && H.local.date < '2026-12-08') ? t('boardSoon') : P.inTop10 ? t('in10')(P.rank) : (P.gap == null ? t('gapNone') : t('gap')(P.gap));
   var pts = '<div class="card" style="cursor:pointer" onclick="go(\'poin\')"><h3>' + t('pts') + '</h3><div class="pts"><div class="big">' + P.total + '<small>' + t('u') + '</small></div><div class="gap" onclick="go(\'poin\')">' + gap + ' ›</div></div>' +
     '</div>';
+  var att = '<div class="card" style="cursor:pointer;display:flex;align-items:center;gap:14px" onclick="go(\'rec\')"><div style="width:44px;height:44px;border-radius:12px;background:var(--y);display:flex;align-items:center;justify-content:center;flex:none"><span style="width:24px;height:24px;display:block">' + IC.cal + '</span></div><div style="flex:1"><div style="font-size:16px;font-weight:700">' + t('records') + '</div><div style="font-size:13px;color:var(--g);margin-top:2px">' + t('attSub')(H.att || { days: 0 }) + '</div></div><div style="font-size:22px;color:var(--g)">›</div></div>';
   var more = '<div class="more">' + [IC.box, IC.wrench, IC.book].map(function (ic, k) { return '<div class="soon">' + ic + t('more')[k] + '<br><small>' + t('soon') + '</small></div>'; }).join('') + '</div>';
-  return top + nx + '<div class="card"><h3>' + t('today') + '</h3><div class="steps">' + steps + '</div><div class="sub" style="cursor:pointer" onclick="go(\'rec\')">' + t('records') + ' ›</div></div>' + pts + more;
+  return top + nx + '<div class="card"><h3>' + t('today') + '</h3><div class="steps">' + steps + '</div></div>' + att + pts + more;
 }
 function vNav() {
-  var items = [['home', IC.home], ['poin', IC.star], ['saya', IC.user]];
+  var items = [['home', IC.home], ['tugas', IC.task], ['poin', IC.star], ['saya', IC.user]];
   return '<div class="nav">' + items.map(function (x, k) { return '<a href="#" class="' + (S.view === x[0] ? 'on' : '') + '" onclick="go(\'' + x[0] + '\');return false">' + x[1] + t('nav')[k] + '</a>'; }).join('') + '</div>';
 }
 function go(v) {
@@ -386,6 +389,11 @@ function vPoin() {
         (on ? '<table class="r" style="margin:0 16px 10px;width:calc(100% - 32px)">' + gp.items.map(function (r) { return '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td></tr>'; }).join('') + '</table>' : '') + '</div>'; }).join('');
   }
   return head + tabs + body;
+}
+function vTugas() {
+  return '<div class="top"><div class="name">' + t('taskT') + '</div></div>' +
+    '<div style="padding:12px 14px 8px"><div style="display:flex;background:#e6e4df;border-radius:12px;padding:3px">' + t('taskTabs').map(function (n, k) { return '<button style="flex:1;border:0;border-radius:10px;padding:9px 2px;font-size:13px;font-weight:' + (k === 0 ? '700;background:#fff;color:#000;box-shadow:0 1px 3px rgba(0,0,0,.12)' : '500;background:transparent;color:#6b6b6b') + '">' + n + '</button>'; }).join('') + '</div></div>' +
+    '<div class="card" style="text-align:center;padding:28px 18px"><div style="width:52px;height:52px;margin:0 auto 10px;color:#b0b0ab">' + IC.task + '</div><div style="font-size:17px;font-weight:700">' + t('taskSoonT') + '</div><div style="font-size:14px;color:var(--g);margin-top:8px;line-height:1.5">' + t('taskSoonS') + '</div></div>';
 }
 function vSaya() {
   var u = S.sess.user, H = S.home;
