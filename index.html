@@ -81,7 +81,7 @@ table.r{width:100%;border-collapse:collapse;font-size:14px}table.r td{padding:8p
 <div class="app" id="app"></div>
 <script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261119134215';
+var APP_VER = '20261119134411';
 function chkVer() { fetch('version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
@@ -268,7 +268,7 @@ function vHome() {
   var multi = H && H.stores && H.stores.length > 1;
   var ov = '';
   var top = '<div class="top"><div class="row"><div><div class="hi">' + (H ? dayLbl(H.local.date) : '') + '</div><div class="name">' + esc(u.fullName) + '</div>' +
-    (multi ? stChips(H, H.inToday) + (H.absen && H.shift ? '<div class="store">' + shiftLbl(H.shift) + '</div>' : '') : '<div class="store">' + (H && H.store ? esc(H.store.name) + (H.absen && H.shift ? ' · ' + shiftLbl(H.shift) : '') : '') + '</div>') + '</div></div>' +
+    (multi ? stChips(H, H.inToday) : '<div class="store">' + (H && H.store ? esc(H.store.name) : '') + '</div>') + '</div></div>' +
     '</div>' + ov + '</div>';
   if (u.test) top += '<div class="info">' + t('test') + '</div>';
   if (!H) return top + '<div class="next"><div class="lbl">' + t('next') + '</div><div class="t" style="opacity:.35">· · ·</div><div class="s">&nbsp;</div><button class="btn" disabled>&nbsp;</button></div><div class="card"><h3>' + t('today') + '</h3><div class="steps">' + t('steps').map(function (n, k) { return '<div class="st"><div class="dot">' + (k + 1) + '</div>' + n + '</div>'; }).join('') + '</div></div><div class="card"><h3>' + t('pts') + '</h3><div class="pts"><div class="big" style="opacity:.3">–</div></div></div>';
@@ -321,7 +321,7 @@ function go(v) {
 // 上班打卡：班次自动选好，可以改 → 自拍 → 提交；时间以服务器为准
 function shortSt(n) { var w = String(n || '').split(' '); return w.length > 2 ? w.slice(2).join(' ') : n; }
 function stChips(H, cur) {
-  return '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">' + H.stores.map(function (x) { var on = cur && x.id === cur; return '<span style="font-size:12px;font-weight:' + (on ? '700;background:#000;color:#FDCD17' : '600;background:rgba(0,0,0,.08);color:#000') + ';padding:4px 10px;border-radius:999px">' + (on ? '✓ ' : '') + esc(shortSt(x.name)) + '</span>'; }).join('') + '</div>';
+  return '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">' + H.stores.map(function (x) { var on = cur && x.id === cur; return '<span style="font-size:12px;font-weight:' + (on ? '700;background:#000;color:#FDCD17' : '600;background:rgba(0,0,0,.08);color:#000') + ';padding:4px 10px;border-radius:999px">' + (on ? '✓ ' : '') + esc(x.name) + '</span>'; }).join('') + '</div>';
 }
 function ckMulti() { return S.home.stores && S.home.stores.length > 1; }
 function ckPick(id) { S.ckStore = id; S.ckH = null; S.shift = null; render(); api('home', [S.sess.token, id]).then(function (r) { if (S.ckStore !== id) return; S.ckH = r; var ok = (r.opts || []).filter(function (o) { return o.ok; }); S.shift = ok.length === 1 ? ok[0].code : null; render(); }).catch(function () { toast(t('err')); }); }
