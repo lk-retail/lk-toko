@@ -263,7 +263,7 @@ function vHome() {
   }
   var top = '<div class="top"><div class="row"><div><div class="hi">' + (H ? dayLbl(H.local.date) : '') + '</div><div class="name">' + esc(u.fullName) + '</div>' +
     '<div class="store" onclick="S.ov=!S.ov;render()">' + (H && H.store ? esc(H.store.name) + (H.shift ? ' · ' + shiftLbl(H.shift) : (H.hours ? ' · ' + t('hours') + ' ' + H.hours.open + '–' + H.hours.close : '')) + (multi ? ' ⇅' : '') + ' ▾' : '') + '</div></div>' +
-    '<button class="chip" onclick="swLang()">' + (L === 'id' ? '中文' : 'ID') + '</button></div>' + ov + '</div>';
+    '</div>' + ov + '</div>';
   if (u.test) top += '<div class="info">' + t('test') + '</div>';
   if (!H) return top + '<div class="next"><div class="lbl">' + t('next') + '</div><div class="t" style="opacity:.35">· · ·</div><div class="s">&nbsp;</div><button class="btn" disabled>&nbsp;</button></div><div class="card"><h3>' + t('today') + '</h3><div class="steps">' + t('steps').map(function (n, k) { return '<div class="st"><div class="dot">' + (k + 1) + '</div>' + n + '</div>'; }).join('') + '</div></div><div class="card"><h3>' + t('pts') + '</h3><div class="pts"><div class="big" style="opacity:.3">–</div></div></div>';
   if (!H.store) return top + '<div class="alert">' + t('noStore') + '</div>';
