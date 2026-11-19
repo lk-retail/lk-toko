@@ -174,7 +174,7 @@ function api(fn, args, tries) {
 }
 function toast(m) { var d = document.createElement('div'); d.className = 'toast'; d.textContent = m; document.body.appendChild(d); setTimeout(function () { d.remove(); }, 2800); }
 function busy(m) { var b = document.getElementById('busy'); if (!m) { if (b) b.remove(); return; } if (!b) { b = document.createElement('div'); b.id = 'busy'; b.className = 'busy'; document.body.appendChild(b); } b.textContent = m; }
-function logout() { if (S.sess) api('logout', [S.sess.token], 0).catch(function () {}); S.sess = null; S.home = null; localStorage.removeItem('tk_sess'); S.view = 'home'; render(); }
+function logout() { if (S.sess) api('logout', [S.sess.token], 0).catch(function () {}); S.sess = null; S.home = null; localStorage.removeItem('tk_sess'); try { Object.keys(localStorage).filter(function (k) { return k.indexOf('tk_home_') === 0; }).forEach(function (k) { localStorage.removeItem(k); }); } catch (e) {} S.view = 'home'; render(); }
 
 // ---------- 照片：压缩到长边 1280、JPEG 0.7，上传更快 ----------
 function compress(file) {
@@ -236,8 +236,12 @@ function doNewPw() {
 }
 function swLang() { L = L === 'id' ? 'zh' : 'id'; localStorage.setItem('tk_lang', L); if (S.sess && !S.sess.mustChange) api('setLang', [S.sess.token, L], 0).catch(function () {}); render(); }
 function swStore(id) { S.storeId = id; S.ov = false; S.home = null; render(); loadHome(); }
+function todayStr() { var d = new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+function homeKey() { return 'tk_home_' + (S.sess && S.sess.user.nick || '').toLowerCase(); }
+function cachedHome() { try { var c = JSON.parse(localStorage.getItem(homeKey()) || 'null'); return c && c.local && c.local.date === todayStr() ? c : null; } catch (e) { return null; } }
 function loadHome() {
-  return api('home', [S.sess.token, S.storeId]).then(function (r) { S.home = r; S.storeId = r.store && r.store.id; if (S.view === 'home' || S.view === 'poin' || S.view === 'saya') render(); }).catch(function () { if (!S.home) toast(t('err')); });
+  if (!S.home) { S.home = cachedHome(); if (S.home && (S.view === 'home' || S.view === 'poin' || S.view === 'saya')) render(); }
+  return api('home', [S.sess.token, S.storeId]).then(function (r) { S.home = r; try { localStorage.setItem(homeKey(), JSON.stringify(r)); } catch (e) {} S.storeId = r.store && r.store.id; if (S.view === 'home' || S.view === 'poin' || S.view === 'saya') render(); }).catch(function () { if (!S.home) toast(t('err')); });
 }
 function shiftLbl(s) { return s ? t('shiftN')[s.code] + ' ' + s.start + '–' + s.end : ''; }
 function hmAdd(hm, d) { var p = hm.split(':'), m = +p[0] * 60 + +p[1] + d; return ('0' + Math.floor(m / 60)).slice(-2) + ':' + ('0' + m % 60).slice(-2); }
@@ -261,7 +265,7 @@ function vHome() {
     '<div class="store" onclick="S.ov=!S.ov;render()">' + (H && H.store ? esc(H.store.name) + (H.shift ? ' · ' + shiftLbl(H.shift) : (H.hours ? ' · ' + t('hours') + ' ' + H.hours.open + '–' + H.hours.close : '')) + (multi ? ' ⇅' : '') + ' ▾' : '') + '</div></div>' +
     '<button class="chip" onclick="swLang()">' + (L === 'id' ? '中文' : 'ID') + '</button></div>' + ov + '</div>';
   if (u.test) top += '<div class="info">' + t('test') + '</div>';
-  if (!H) return top + '<div class="card" style="margin-top:14px">…</div>';
+  if (!H) return top + '<div class="next"><div class="lbl">' + t('next') + '</div><div class="t" style="opacity:.35">· · ·</div><div class="s">&nbsp;</div><button class="btn" disabled>&nbsp;</button></div><div class="card"><h3>' + t('today') + '</h3><div class="steps">' + t('steps').map(function (n, k) { return '<div class="st"><div class="dot">' + (k + 1) + '</div>' + n + '</div>'; }).join('') + '</div></div><div class="card"><h3>' + t('pts') + '</h3><div class="pts"><div class="big" style="opacity:.3">–</div></div></div>';
   if (!H.store) return top + '<div class="alert">' + t('noStore') + '</div>';
   if (!H.store.shifts.length) return top + '<div class="alert">' + t('noShift') + '</div>';
   var morning = H.absen ? H.absen.shift === 'M' : (H.shift && H.shift.code === 'M');
@@ -323,7 +327,7 @@ function sendAbsen() {
   if (!S.photo) return toast(t('needPhoto'));
   busy(t('upl'));
   upload(S.photo, 'absen').then(function (pid) { busy(t('sending')); return api('checkIn', [S.sess.token, { storeId: S.home.store.id, shift: S.shift, photo: pid }], 2); })
-    .then(function (r) { busy(); if (!r.ok) return toast(r.err === 'PICK_SHIFT' ? t('pickFirst') : r.err === 'SHIFT_NOT_OPEN' ? t('notOpen') : t('err')); S.res = { kind: 'absen', time: r.time, points: r.points, needBuka: r.needBuka }; S.view = 'res'; render(); loadHome(); })
+    .then(function (r) { busy(); if (!r.ok) return toast(r.err === 'PICK_SHIFT' ? t('pickFirst') : r.err === 'SHIFT_NOT_OPEN' ? t('notOpen') : t('err')); S.res = { kind: 'absen', time: r.time, points: r.points, needBuka: r.needBuka }; if (S.home) { S.home.absen = { time: r.time, points: r.points, shift: S.shift }; S.home.shift = (S.home.store.shifts || []).filter(function (x) { return x.code === S.shift; })[0] || S.home.shift; } S.view = 'res'; render(); loadHome(); })
     .catch(function () { busy(); toast(t('err')); });
 }
 function vRes() {
@@ -345,7 +349,7 @@ function vBuka() {
 function sendBuka() {
   busy(t('upl'));
   upload(S.photo, 'buka').then(function (pid) { busy(t('sending')); return api('openCheck', [S.sess.token, { storeId: S.home.store.id, alat: S.ck.alat, bersih: S.ck.bersih, display: S.ck.display, photo: pid }], 2); })
-    .then(function (r) { busy(); if (!r.ok) return toast(t('err')); S.res = { kind: 'buka', time: r.time || '' }; S.view = 'res'; render(); loadHome(); })
+    .then(function (r) { busy(); if (!r.ok) return toast(t('err')); S.res = { kind: 'buka', time: r.time || '' }; if (S.home) S.home.buka = { nick: S.sess.user.nick, name: S.sess.user.fullName, time: r.time || '' }; S.view = 'res'; render(); loadHome(); })
     .catch(function () { busy(); toast(t('err')); });
 }
 function vPoin() {
@@ -409,7 +413,7 @@ function sendCard() {
   }).then(function (r) {
     busy(); if (!r.ok) return toast(t('err'));
     S.lastShare = { text: shareText(r), files: (c.shots.concat(c.lock ? [c.lock] : [])) };
-    S.res = { kind: 'card', time: r.time, points: r.points }; S.view = 'res'; render(); loadHome();
+    S.res = { kind: 'card', time: r.time, points: r.points }; if (S.home && S.home.card) S.home.card.done = { time: r.time, points: r.points }; S.view = 'res'; render(); loadHome();
   }).catch(function () { busy(); toast(t('err')); });
 }
 // 分享到 WhatsApp 群：文字按门店现在的日报格式排好，照片一起带上（手机支持时）
