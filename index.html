@@ -284,17 +284,36 @@ function toast(m) { var d = document.createElement('div'); d.className = 'toast'
 function busy(m) { var b = document.getElementById('busy'); if (!m) { if (b) b.remove(); return; } if (!b) { b = document.createElement('div'); b.id = 'busy'; b.className = 'busy'; document.body.appendChild(b); } b.textContent = m; }
 function logout() { if (S.sess) api('logout', [S.sess.token], 0).catch(function () {}); S.sess = null; S.home = null; S.pc = null; S.pn = null; S.ss = {}; S.pnPre = 0; S.ssPre = 0; localStorage.removeItem('tk_sess'); try { Object.keys(localStorage).filter(function (k) { return k.indexOf('tk_home_') === 0 || k.indexOf('tk_cal_') === 0 || k.indexOf('tk_pc_') === 0 || k.indexOf('tk_pn_') === 0; }).forEach(function (k) { localStorage.removeItem(k); }); } catch (e) {} S.view = 'home'; render(); }
 
-// ---------- 照片：压缩到长边 1280、JPEG 0.7，上传更快 ----------
-function compress(file) {
+// ---------- 照片：长边 1600、JPEG 0.8（2026-11-19 换数据库后放大），加水印（和 LK Hub 一样：时间、门店、人名、拍的是什么、GPS）----------
+// 时间用服务器给的门店当地时间校正，改手机时间没用
+function wmNow() { var d = new Date(Date.now() + (S.off || 0)); if (S.off == null) d = new Date(Date.now() - new Date().getTimezoneOffset() * 60000); return d.toISOString().slice(0, 19).replace('T', ' ') + ' ' + ((S.home && S.home.store && S.home.store.tzName) || ''); }
+function wmStore() { var C = (typeof ckMulti === 'function' && S.view === 'absen' && ckMulti()) ? S.ckH : S.home; var st = C && C.store; return st ? st.id + ' ' + (st.name || '') : ''; }
+function wmLabel(to) { var zh = L === 'zh', m = { shot: zh ? 'POS 截图' : 'Screenshot POS', lock: zh ? '锁门照' : 'Foto kunci toko', selfie: zh ? '下班自拍' : 'Selfie pulang' }; if (m[to]) return m[to]; return S.view === 'buka' ? (zh ? '门店正面' : 'Foto depan toko') : (zh ? '上班自拍' : 'Selfie absen'); }
+function getGeo(cb) {
+  if (S.geo && Date.now() - S.geo.at < 120000) return cb(S.geo);
+  if (!navigator.geolocation) return cb(null);
+  var done = false, fin = function (g) { if (done) return; done = true; if (g) S.geo = g; cb(g); };
+  try { navigator.geolocation.getCurrentPosition(function (p) { fin({ lat: p.coords.latitude, lng: p.coords.longitude, acc: Math.round(p.coords.accuracy), at: Date.now() }); }, function () { fin(null); }, { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 }); } catch (e) { fin(null); }
+  setTimeout(function () { fin(null); }, 9000);
+}
+function compress(file, to) {
   return new Promise(function (ok, no) {
-    var img = new Image(), url = URL.createObjectURL(file);
-    img.onload = function () {
-      var m = 1280, w = img.width, h = img.height, k = Math.min(1, m / Math.max(w, h));
-      var c = document.createElement('canvas'); c.width = Math.round(w * k); c.height = Math.round(h * k);
-      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(url);
-      ok(c.toDataURL('image/jpeg', 0.7));
+    var img = new Image(), url = URL.createObjectURL(file), geo, gotGeo = false, loaded = false;
+    var draw = function () {
+      if (!gotGeo || !loaded) return;
+      var m = 1600, w = img.width, h = img.height, k = Math.min(1, m / Math.max(w, h));
+      var c = document.createElement('canvas'); c.width = Math.round(w * k); c.height = Math.round(h * k); w = c.width; h = c.height;
+      var x = c.getContext('2d'); x.drawImage(img, 0, 0, w, h); URL.revokeObjectURL(url);
+      var u = (S.sess && S.sess.user) || {};
+      var lines = [wmNow(), wmStore(), (u.fullName || u.nick || '') + (u.fullName && u.nick ? ' (' + u.nick + ')' : '') + ' · ' + wmLabel(to), geo ? ('GPS ' + geo.lat.toFixed(5) + ', ' + geo.lng.toFixed(5) + ' ±' + geo.acc + 'm') : 'GPS -'];
+      var fs = Math.max(16, Math.round(w / 40)); x.font = 'bold ' + fs + 'px Arial'; var bh = (fs + 6) * lines.length + 10;
+      x.fillStyle = 'rgba(0,0,0,.55)'; x.fillRect(0, h - bh, w, bh); x.fillStyle = '#FDCD17';
+      lines.forEach(function (l, i) { x.fillText(l, 10, h - bh + fs + 6 + i * (fs + 6)); });
+      ok(c.toDataURL('image/jpeg', 0.8));
     };
+    img.onload = function () { loaded = true; draw(); };
     img.onerror = no; img.src = url;
+    getGeo(function (g) { geo = g; gotGeo = true; draw(); });
   });
 }
 function upload(dataUrl, kind) {
@@ -380,7 +399,7 @@ function cachedHome() { try { var c = JSON.parse(localStorage.getItem(homeKey())
 // 积分页：先显示上次的数据，后台再刷新（2026-11-19 提速）
 function pnKey() { return 'tk_pn_' + ((S.sess && S.sess.user.nick) || '').toLowerCase(); }
 function loadPoin() { var tok = S.sess && S.sess.token; if (!tok) return; api('poin', [tok]).then(function (r) { if (!S.sess || S.sess.token !== tok) return; S.pn = r; try { localStorage.setItem(pnKey(), JSON.stringify(r)); } catch (e) {} if (S.view === 'poin') render(); }).catch(function () {}); }
-function homeOk(r, tok) { if (!S.sess || S.sess.token !== tok) return; S.home = r; S.swLoading = 0; if (r.store) loadSales(r.store.id); if (!S.pnPre) { S.pnPre = 1; setTimeout(loadPoin, 1500); } try { localStorage.setItem(homeKey(), JSON.stringify(r)); } catch (e) {} if (S.view === 'home' || S.view === 'poin' || S.view === 'saya') render(); }
+function homeOk(r, tok) { if (!S.sess || S.sess.token !== tok) return; S.home = r; if (r.local && r.local.time) S.off = Date.parse(r.local.date + 'T' + r.local.time.slice(0, 8) + 'Z') - Date.now(); S.swLoading = 0; if (r.store) loadSales(r.store.id); if (!S.pnPre) { S.pnPre = 1; setTimeout(loadPoin, 1500); } try { localStorage.setItem(homeKey(), JSON.stringify(r)); } catch (e) {} if (S.view === 'home' || S.view === 'poin' || S.view === 'saya') render(); }
 function loadHome() {
   if (!S.home) { S.home = cachedHome(); if (S.home && (S.view === 'home' || S.view === 'poin' || S.view === 'saya')) render(); }
   if (S.home && S.home.store && !S.ssPre) { S.ssPre = 1; loadSales(S.home.store.id); }
@@ -508,6 +527,7 @@ function vNav() {
 }
 function go(v) {
   S.view = v;
+  if (v === 'absen' || v === 'buka' || v === 'pulang' || v === 'storedata') getGeo(function () {});   // 先拿定位，拍照时水印就有 GPS
   if (v === 'absen') { S.ckStore = null; S.ckH = null; S.photo = null; var ok = (S.home.opts || []).filter(function (o) { return o.ok; }); S.shift = S.home.shift ? S.home.shift.code : (ok.length === 1 ? ok[0].code : null); }
   if (v === 'buka') { S.photo = null; S.ck = { alat: false, bersih: false, display: false }; }
   if (v === 'survey') { if (!S.sv) S.sv = svNew(); if (S.home.out && S.home.out.open) S.svEarly = 0; }
@@ -552,7 +572,7 @@ function vAbsen() {
     '<button class="btn" onclick="sendAbsen()"' + (S.photo ? '' : ' disabled') + '>' + (M ? t('sendAt')(esc(stName)) : t('send')) + '</button>' +
     (S.photo ? '<button class="btn ghost" onclick="document.getElementById(\'cam\').click()">' + t('retake') + '</button>' : '') + '</div>';
 }
-function pick(inp, to) { var f = inp.files && inp.files[0]; if (!f) return; busy('…'); compress(f).then(function (d) { busy(); if (to === 'shot') { if (S.cd.shots.length < 2) S.cd.shots.push(d); } else if (to === 'lock') S.po.lock = d; else if (to === 'selfie') S.po.selfie = d; else S.photo = d; render(); }).catch(function () { busy(); toast(t('err')); }); }
+function pick(inp, to) { var f = inp.files && inp.files[0]; if (!f) return; busy('…'); compress(f, to).then(function (d) { busy(); if (to === 'shot') { if (S.cd.shots.length < 2) S.cd.shots.push(d); } else if (to === 'lock') S.po.lock = d; else if (to === 'selfie') S.po.selfie = d; else S.photo = d; render(); }).catch(function () { busy(); toast(t('err')); }); }
 function sendAbsen() {
   var C = ckMulti() ? S.ckH : S.home; if (!C) return toast(t('pickStore'));
   if (!S.shift && (C.opts || []).length > 1) return toast(t('pickFirst'));
