@@ -91,8 +91,8 @@ var TX = {
     pwdiff: 'Password tidak sama / terlalu pendek', save: 'Simpan', next: 'Langkah berikutnya', today: 'Hari ini', pts: 'Poin bulan ini', u: 'poin',
     steps: ['Absen', 'Cek Buka', 'Kerja', 'Laporan'], stepsM: ['Absen', 'Cek Buka', 'Kerja', 'Kondisi Toko'],
     pickS: 'Pilih shift kamu hari ini, lalu ambil selfie.', hours: 'Buka', pickFirst: 'Pilih shift dulu', notOpen: 'Shift ini belum bisa dipilih (paling cepat 90 menit sebelum mulai).',
-    absenT: 'Absen Masuk', absenS: function (s, p) { return 'Shift ' + s + '. Absen sekarang: ' + fmtP(p) + ' poin.'; }, absenB: 'Absen sekarang',
-    lateT: function (m) { return 'Terlambat ' + m + ' menit'; }, lateS: function (p) { return 'Absen sekarang: ' + fmtP(p) + ' poin. Makin lama makin berkurang.'; },
+    absenT: 'Absen Masuk', absenS: function (s) { return 'Shift ' + s + '. Foto selfie lalu kirim.'; }, absenB: 'Absen sekarang',
+    lateT: function () { return 'Belum absen'; }, lateS: function () { return 'Shift sudah mulai. Segera absen sekarang.'; },
     bukaT: 'Cek Buka Toko', bukaS: 'Cek alat, kebersihan, display + foto depan toko. Sekali sehari per toko.', bukaB: 'Mulai cek',
     workT: 'Selamat bekerja', workS: function (x) { return 'Laporan Akhir Shift dibuka 30 menit sebelum shift selesai (' + x + ').'; },
     noShift: 'Jam shift toko ini belum diisi. Hubungi Operation Manager.', noStore: 'Kamu belum terdaftar di toko mana pun. Hubungi HR.',
@@ -106,7 +106,7 @@ var TX = {
     logout: 'Keluar', lang: 'Bahasa', test: 'AKUN TES — tidak masuk peringkat',
     cardT: 'Laporan Akhir Shift', kondT: 'Kondisi Toko', cardS: 'Penjualan, pelanggan, kondisi toko, SO + foto kunci.', kondS: 'Isi kondisi toko sebelum pulang.', cardB: 'Isi laporan',
     workS2: function (x) { return 'Laporan dibuka jam ' + x + '.'; }, fullBy: function (n, x) { return 'Laporan toko sudah dikirim ' + n + ' ' + x + '. Kamu isi Kondisi Toko saja.'; },
-    doneT: 'Selesai hari ini ✓', doneS: function (x, p) { return 'Laporan terkirim ' + x + ' · ' + fmtP(p) + ' poin. Hati-hati di jalan.'; }, share: 'Bagikan ke grup WhatsApp',
+    doneT: 'Selesai hari ini ✓', doneS: function (x) { return 'Laporan terkirim ' + x + '. Hati-hati di jalan.'; }, share: 'Bagikan ke grup WhatsApp',
     st1: 'Penjualan', st2: 'Pelanggan', st3: 'Kondisi Toko', st4: 'SO & Kunci', cash: 'Tunai', qris: 'QRIS / EDC', grab: 'GrabMart', total: 'Total hari ini',
     shot: 'Foto struk EDC / layar POS (maks. 2)', visitors: 'Pengunjung', buyers: 'Pembeli', googleReview: 'Google Review baru', waJoin: 'Join WA toko', wechatJoin: 'Join WeChat toko', igFollow: 'Follow Instagram',
     ada: 'Ada', tidak: 'Tidak', stockOut: 'Stok menipis / habis', requestNew: 'Produk yang belum pernah ada di toko (diminta pelanggan)', lostSales: 'Pelanggan tidak jadi beli karena stok habis',
@@ -122,8 +122,8 @@ var TX = {
     pwdiff: '两次不一样或太短', save: '保存', next: '下一步', today: '今天', pts: '本月积分', u: '分',
     steps: ['打卡', '开店检查', '上班', '下班卡'], stepsM: ['打卡', '开店检查', '上班', '门店情况'],
     pickS: '先选你今天上的班次，再拍自拍。', hours: '营业', pickFirst: '请先选班次', notOpen: '这个班次现在还不能选（最早开始前 90 分钟）。',
-    absenT: '上班打卡', absenS: function (s, p) { return '班次 ' + s + '。现在打卡：' + fmtP(p) + ' 分。'; }, absenB: '现在打卡',
-    lateT: function (m) { return '已迟到 ' + m + ' 分钟'; }, lateS: function (p) { return '现在打卡：' + fmtP(p) + ' 分，越晚扣得越多。'; },
+    absenT: '上班打卡', absenS: function (s) { return '班次 ' + s + '。拍一张自拍就能提交。'; }, absenB: '现在打卡',
+    lateT: function () { return '还没打卡'; }, lateS: function () { return '班次已经开始，请马上打卡。'; },
     bukaT: '开店检查', bukaS: '设备、卫生、陈列 + 门店正面照。每店每天一次。', bukaB: '开始检查',
     workT: '上班中', workS: function (x) { return '下班卡在下班前 30 分钟开放（' + x + '）。'; },
     noShift: '这家店的班次时间还没填，请联系运营经理。', noStore: '你还没有分配门店，请联系 HR。',
@@ -137,7 +137,7 @@ var TX = {
     logout: '退出登录', lang: '语言', test: '测试账号 — 不进排名',
     cardT: '下班卡', kondT: '门店情况', cardS: '销售、顾客、门店情况、盘点 + 锁门照。', kondS: '下班前填写门店情况。', cardB: '开始填写',
     workS2: function (x) { return '下班卡 ' + x + ' 开放。'; }, fullBy: function (n, x) { return n + ' 已在 ' + x + ' 交了门店的下班卡，你只填门店情况。'; },
-    doneT: '今天完成了 ✓', doneS: function (x, p) { return x + ' 已提交，' + fmtP(p) + ' 分。路上小心。'; }, share: '分享到 WhatsApp 群',
+    doneT: '今天完成了 ✓', doneS: function (x) { return x + ' 已提交。路上小心。'; }, share: '分享到 WhatsApp 群',
     st1: '销售', st2: '顾客', st3: '门店情况', st4: '盘点和锁门', cash: '现金', qris: 'QRIS / EDC', grab: 'GrabMart', total: '今天合计',
     shot: 'EDC 结算单 / POS 截图（最多 2 张）', visitors: '进店人数', buyers: '购买人数', googleReview: '新增 Google 评价', waJoin: '新加门店 WA', wechatJoin: '新加门店微信', igFollow: '新关注 Instagram',
     ada: '有', tidak: '没有', stockOut: '库存不足 / 断货', requestNew: '顾客问到、店里从来没卖过的产品', lostSales: '因为断货没买成的顾客',
@@ -315,7 +315,7 @@ function go(v) {
 function vAbsen() {
   var sh = S.home.store.shifts;
   return '<div class="page"><button class="back" onclick="go(\'home\')">' + t('back') + '</button><h2>' + t('absenT') + '</h2>' +
-    '<label class="f">' + t('shift') + '</label><div class="seg">' + (S.home.opts || sh).map(function (s) { var dis = s.ok === false; return '<button ' + (dis ? 'disabled style="opacity:.4" ' : '') + 'class="' + (S.shift === s.code ? 'on' : '') + '" onclick="S.shift=\'' + s.code + '\';render()">' + shiftLbl(s) + (s.pts != null && !dis ? '<br><small>' + fmtP(s.pts) + ' ' + t('u') + '</small>' : '') + '</button>'; }).join('') + '</div>' +
+    '<label class="f">' + t('shift') + '</label><div class="seg">' + (S.home.opts || sh).map(function (s) { var dis = s.ok === false; return '<button ' + (dis ? 'disabled style="opacity:.4" ' : '') + 'class="' + (S.shift === s.code ? 'on' : '') + '" onclick="S.shift=\'' + s.code + '\';render()">' + shiftLbl(s) + '' + '</button>'; }).join('') + '</div>' +
     '<label class="photo" for="cam">' + (S.photo ? '<img src="' + S.photo + '">' : t('selfie')) + '</label>' +
     '<input id="cam" type="file" accept="image/*" capture="user" style="display:none" onchange="pick(this)">' +
     '<button class="btn" onclick="sendAbsen()"' + (S.photo ? '' : ' disabled') + '>' + t('send') + '</button>' +
@@ -332,9 +332,9 @@ function sendAbsen() {
 }
 function vRes() {
   var R = S.res;
-  if (R.kind === 'absen') return '<div class="res"><div style="font-size:15px;color:var(--g)">' + t('got') + ' · ' + R.time + '</div><div class="big">' + fmtP(R.points) + '</div><div>' + t('ptsGot') + '</div>' +
+  if (R.kind === 'absen') return '<div class="res"><div class="big">✓</div><div style="font-size:18px;font-weight:700">' + t('got') + '</div><div style="color:var(--g)">' + R.time + '</div>' +
     (R.needBuka ? '<button class="btn" onclick="go(\'buka\')">' + t('bukaT') + '</button>' : '') + '<button class="btn ghost" onclick="go(\'home\')">' + t('nav')[0] + '</button></div>';
-  if (R.kind === 'card') return '<div class="res"><div style="font-size:15px;color:var(--g)">' + t('doneT') + ' · ' + R.time + '</div><div class="big">' + fmtP(R.points) + '</div><div>' + t('ptsGot') + '</div><button class="btn" onclick="share()">' + t('share') + '</button><button class="btn ghost" onclick="go(\'home\')">' + t('nav')[0] + '</button></div>';
+  if (R.kind === 'card') return '<div class="res"><div class="big">✓</div><div style="font-size:18px;font-weight:700">' + t('doneT') + '</div><div style="color:var(--g)">' + R.time + '</div><button class="btn" onclick="share()">' + t('share') + '</button><button class="btn ghost" onclick="go(\'home\')">' + t('nav')[0] + '</button></div>';
   return '<div class="res"><div class="big">✓</div><div style="font-size:18px;font-weight:700">' + t('doneBuka') + '</div><div style="color:var(--g)">' + R.time + '</div><button class="btn ghost" onclick="go(\'home\')">' + t('nav')[0] + '</button></div>';
 }
 // 开店检查：3 个打勾 + 门店正面照，每店每天一次
@@ -446,7 +446,7 @@ function vRec() {
   if (!r.length) return h + '<div class="card">' + t('noData') + '</div></div>';
   return h + r.map(function (d) {
     return '<div class="card" style="margin:0 0 10px"><h3>' + dayLbl(d.date) + '</h3>' + d.items.map(function (x) {
-      return '<div style="display:flex;justify-content:space-between;padding:6px 0;border-top:1px dashed #e6e4df;font-size:14px"><div>' + x.time + ' · ' + t('recT')[x.t] + (x.shift ? ' (' + t('shiftN')[x.shift] + ')' : '') + (x.total ? '<br><small style="color:#6b6b6b">' + money(x.total) + '</small>' : '') + '</div><div style="font-weight:700">' + (x.points != null ? fmtP(x.points) : '') + '</div></div>';
+      return '<div style="display:flex;justify-content:space-between;padding:6px 0;border-top:1px dashed #e6e4df;font-size:14px"><div>' + x.time + ' · ' + t('recT')[x.t] + (x.shift ? ' (' + t('shiftN')[x.shift] + ')' : '') + (x.total ? '<br><small style="color:#6b6b6b">' + money(x.total) + '</small>' : '') + '</div></div>';
     }).join('') + '</div>';
   }).join('') + '</div>';
 }
