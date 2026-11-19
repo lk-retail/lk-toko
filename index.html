@@ -102,8 +102,19 @@ var TX = {
     sending: 'Mengirim…', upl: 'Mengunggah foto…', needPhoto: 'Ambil foto dulu', got: 'Absen tercatat', ptsGot: 'poin', doneBuka: 'Toko READY ✓',
     alat: 'HP, tablet/POS, EDC, lampu & AC menyala', bersih: 'Toko bersih: lantai, rak & etalase', display: 'Display rapi & siap', fotoToko: 'Foto depan toko',
     sendBuka: 'Kirim — Toko READY', shiftN: { F: 'Full', M: 'Pagi', E: 'Malam' },
-    rules: 'Aturan poin', rule: [['Datang ≥ 20 mnt lebih awal', '+3'], ['10–20 mnt lebih awal', '+2.5'], ['0–10 mnt lebih awal', '+2'], ['Telat 0–10 mnt', '0'], ['Telat 10–20 mnt', '−2'], ['Telat 20–30 mnt', '−3'], ['Telat > 30 mnt', '−5'], ['Tidak masuk tanpa izin', '−10']],
-    logout: 'Keluar', lang: 'Bahasa', test: 'AKUN TES — tidak masuk peringkat'
+    rules: 'Aturan poin', rule: [['ABSEN MASUK', ''], ['Datang ≥ 20 mnt lebih awal', '+3'], ['10–20 mnt lebih awal', '+2.5'], ['0–10 mnt lebih awal', '+2'], ['Telat 0–10 mnt', '0'], ['Telat 10–20 mnt', '−2'], ['Telat 20–30 mnt', '−3'], ['Telat > 30 mnt', '−5'], ['PULANG', ''], ['Laporan tepat waktu (10 mnt sebelum s/d 60 mnt sesudah shift selesai)', '+2'], ['Pulang 10–20 mnt lebih awal', '−2'], ['Pulang 20–30 mnt lebih awal', '−3'], ['LAINNYA', ''], ['Izin / cuti yang sudah disetujui', '0'], ['Tidak masuk tanpa izin (HR konfirmasi)', '−10'], ['Kuis aturan LK School (sekali)', '+5'], ['PERINGKAT', ''], ['Poin sama: yang lebih sedikit potongan di atas, lalu rata-rata datang lebih awal', ''], ['Peringkat ≤ 10 semua masuk Top 10; poin 0 tidak tampil', ''], ['Tanggal 1–7: tampil peringkat final bulan lalu', ''], ['Salah hitung? Lapor ke atasan dalam 3 hari', '']],
+    logout: 'Keluar', lang: 'Bahasa', test: 'AKUN TES — tidak masuk peringkat',
+    cardT: 'Laporan Akhir Shift', kondT: 'Kondisi Toko', cardS: 'Penjualan, pelanggan, kondisi toko, SO + foto kunci.', kondS: 'Isi kondisi toko sebelum pulang.', cardB: 'Isi laporan',
+    workS2: function (x) { return 'Laporan dibuka jam ' + x + '.'; }, fullBy: function (n, x) { return 'Laporan toko sudah dikirim ' + n + ' ' + x + '. Kamu isi Kondisi Toko saja.'; },
+    doneT: 'Selesai hari ini ✓', doneS: function (x, p) { return 'Laporan terkirim ' + x + ' · ' + fmtP(p) + ' poin. Hati-hati di jalan.'; }, share: 'Bagikan ke grup WhatsApp',
+    st1: 'Penjualan', st2: 'Pelanggan', st3: 'Kondisi Toko', st4: 'SO & Kunci', cash: 'Tunai', qris: 'QRIS / EDC', grab: 'GrabMart', total: 'Total hari ini',
+    shot: 'Foto struk EDC / layar POS (maks. 2)', visitors: 'Pengunjung', buyers: 'Pembeli', googleReview: 'Google Review baru', waJoin: 'Join WA toko', wechatJoin: 'Join WeChat toko', igFollow: 'Follow Instagram',
+    ada: 'Ada', tidak: 'Tidak', stockOut: 'Stok menipis / habis', requestNew: 'Produk yang belum pernah ada di toko (diminta pelanggan)', lostSales: 'Pelanggan tidak jadi beli karena stok habis',
+    opsIssue: 'Kendala operasional', competitor: 'Info kompetitor', defect: 'Barang rusak / cacat', idea: 'Ide / masukan', writeHere: 'Tulis di sini…',
+    soDone: 'SO harian sudah dilakukan', soBrands: 'Brand yang di-SO', soDiff: 'Selisih (tulis 0 kalau tidak ada)', lock: 'Foto toko terkunci', nextStep: 'Lanjut', prev: 'Kembali', submit: 'Kirim laporan',
+    needLock: 'Foto toko terkunci wajib', records: 'Riwayat 7 hari saya', recT: { ABSEN: 'Absen', BUKA: 'Cek Buka Toko', FULL: 'Laporan Akhir Shift', KONDISI: 'Kondisi Toko' },
+    board: 'Peringkat Top 10', boardWait: function (d) { return 'Peringkat mulai tampil ' + d + '.'; }, history: 'Rincian poin bulan ini', noData: 'Belum ada data.',
+    lastMonth: 'Peringkat final bulan lalu'
   },
   zh: {
     login: '登录', eid: '工号', pw: '密码', wrong: '工号或密码不对', locked: '错误次数太多，15 分钟后再试',
@@ -122,8 +133,19 @@ var TX = {
     sending: '提交中…', upl: '正在上传照片…', needPhoto: '请先拍照', got: '打卡成功', ptsGot: '分', doneBuka: '门店已 READY ✓',
     alat: '手机、平板/POS、EDC、灯和空调都已打开', bersih: '店内干净：地面、货架、柜台', display: '陈列整齐，可以营业', fotoToko: '门店正面照',
     sendBuka: '提交 — 门店 READY', shiftN: { F: '全天', M: '早班', E: '晚班' },
-    rules: '积分规则', rule: [['提前 ≥ 20 分钟', '+3'], ['提前 10–20 分钟', '+2.5'], ['提前 0–10 分钟', '+2'], ['迟到 0–10 分钟', '0'], ['迟到 10–20 分钟', '−2'], ['迟到 20–30 分钟', '−3'], ['迟到 30 分钟以上', '−5'], ['无故缺勤', '−10']],
-    logout: '退出登录', lang: '语言', test: '测试账号 — 不进排名'
+    rules: '积分规则', rule: [['上班打卡', ''], ['提前 ≥ 20 分钟', '+3'], ['提前 10–20 分钟', '+2.5'], ['提前 0–10 分钟', '+2'], ['迟到 0–10 分钟', '0'], ['迟到 10–20 分钟', '−2'], ['迟到 20–30 分钟', '−3'], ['迟到 30 分钟以上', '−5'], ['下班', ''], ['下班卡准时交（下班前 10 分钟到下班后 60 分钟）', '+2'], ['早走 10–20 分钟', '−2'], ['早走 20–30 分钟', '−3'], ['其他', ''], ['事先批准的请假', '0'], ['无故缺勤（HR 确认）', '−10'], ['LK School 规则小测验（一次）', '+5'], ['排名', ''], ['同分：扣分次数少的在前，再比平均提前到店', ''], ['名次 ≤ 10 都算前 10；0 分不上榜', ''], ['每月 1–7 号显示上个月最终排名', ''], ['觉得算错：3 天内找上级申诉', '']],
+    logout: '退出登录', lang: '语言', test: '测试账号 — 不进排名',
+    cardT: '下班卡', kondT: '门店情况', cardS: '销售、顾客、门店情况、盘点 + 锁门照。', kondS: '下班前填写门店情况。', cardB: '开始填写',
+    workS2: function (x) { return '下班卡 ' + x + ' 开放。'; }, fullBy: function (n, x) { return n + ' 已在 ' + x + ' 交了门店的下班卡，你只填门店情况。'; },
+    doneT: '今天完成了 ✓', doneS: function (x, p) { return x + ' 已提交，' + fmtP(p) + ' 分。路上小心。'; }, share: '分享到 WhatsApp 群',
+    st1: '销售', st2: '顾客', st3: '门店情况', st4: '盘点和锁门', cash: '现金', qris: 'QRIS / EDC', grab: 'GrabMart', total: '今天合计',
+    shot: 'EDC 结算单 / POS 截图（最多 2 张）', visitors: '进店人数', buyers: '购买人数', googleReview: '新增 Google 评价', waJoin: '新加门店 WA', wechatJoin: '新加门店微信', igFollow: '新关注 Instagram',
+    ada: '有', tidak: '没有', stockOut: '库存不足 / 断货', requestNew: '顾客问到、店里从来没卖过的产品', lostSales: '因为断货没买成的顾客',
+    opsIssue: '运营问题', competitor: '竞争对手情况', defect: '坏货 / 次品', idea: '想法 / 建议', writeHere: '写在这里…',
+    soDone: '今天的盘点做了', soBrands: '盘点了哪些品牌', soDiff: '差异（没有就写 0）', lock: '锁门照', nextStep: '下一步', prev: '上一步', submit: '提交',
+    needLock: '锁门照必须拍', records: '我最近 7 天的记录', recT: { ABSEN: '打卡', BUKA: '开店检查', FULL: '下班卡', KONDISI: '门店情况' },
+    board: '前 10 排行榜', boardWait: function (d) { return '排行榜 ' + d + ' 开始显示。'; }, history: '本月积分明细', noData: '还没有记录。',
+    lastMonth: '上个月最终排名'
   }
 };
 function t(k) { return TX[L][k]; }
@@ -178,7 +200,7 @@ function render() {
   if (!S.sess) { a.innerHTML = vLogin(); return; }
   if (S.sess.mustChange) { a.innerHTML = vNewPw(); return; }
   var v = S.view, h = '';
-  if (v === 'home') h = vHome(); else if (v === 'absen') h = vAbsen(); else if (v === 'buka') h = vBuka(); else if (v === 'poin') h = vPoin(); else if (v === 'saya') h = vSaya(); else if (v === 'res') h = vRes();
+  if (v === 'home') h = vHome(); else if (v === 'absen') h = vAbsen(); else if (v === 'buka') h = vBuka(); else if (v === 'poin') h = vPoin(); else if (v === 'saya') h = vSaya(); else if (v === 'res') h = vRes(); else if (v === 'card') h = vCard(); else if (v === 'rec') h = vRec();
   if (v === 'home' || v === 'poin' || v === 'saya') h += vNav();
   a.innerHTML = h;
 }
@@ -250,12 +272,17 @@ function vHome() {
     else nx = '<div class="next"><div class="lbl">' + t('next') + '</div><div class="t">' + t('absenT') + '</div><div class="s">' + t('absenS')(shiftLbl(H.shift), H.previewPts) + '</div><button class="btn" onclick="go(\'absen\')">' + t('absenB') + '</button></div>';
   } else if (stage === 1) {
     nx = '<div class="next"><div class="lbl">' + t('next') + '</div><div class="t">' + t('bukaT') + '</div><div class="s">' + t('bukaS') + '</div><button class="btn" onclick="go(\'buka\')">' + t('bukaB') + '</button></div>';
+  } else if (H.card && H.card.done) {
+    stage = 4;
+    nx = '<div class="next" style="background:var(--okb);color:#000"><div class="lbl" style="color:var(--ok)">' + t('today') + '</div><div class="t">' + t('doneT') + '</div><div class="s" style="color:#3c4043">' + t('doneS')(H.card.done.time, H.card.done.points) + '</div>' + (S.lastShare ? '<button class="btn" onclick="share()">' + t('share') + '</button>' : '') + '</div>';
+  } else if (H.card && H.card.open) {
+    stage = 3; var full = H.card.kind === 'FULL';
+    nx = '<div class="next"><div class="lbl">' + t('next') + '</div><div class="t">' + (full ? t('cardT') : t('kondT')) + '</div><div class="s">' + (H.card.fullBy ? t('fullBy')(firstName(H.card.fullBy.name), H.card.fullBy.time) : full ? t('cardS') : t('kondS')) + '</div><button class="btn" onclick="go(\'card\')">' + t('cardB') + '</button></div>';
   } else {
-    var end = H.shift ? H.shift.end : '';
-    nx = '<div class="next"><div class="lbl">' + t('next') + '</div><div class="t">' + t('workT') + '</div><div class="s">' + t('doneBuka') + ' ' + esc(firstName(H.buka.name)) + ' ' + H.buka.time + (end ? '<br>' + t('workS')(hmAdd(end, -30)) : '') + '</div></div>';
+    nx = '<div class="next"><div class="lbl">' + t('next') + '</div><div class="t">' + t('workT') + '</div><div class="s">' + t('doneBuka') + ' ' + esc(firstName(H.buka.name)) + ' ' + H.buka.time + (H.card ? '<br>' + t('workS2')(H.card.openAt) : '') + '</div></div>';
   }
-  var names = morning ? t('stepsM') : t('steps');
-  var tms = [H.absen ? H.absen.time : '', H.buka ? (H.buka.nick === u.nick ? H.buka.time : firstName(H.buka.name) + ' ' + H.buka.time) : '', '', ''];
+  var names = (H.card ? H.card.kind !== 'FULL' : morning) ? t('stepsM') : t('steps');
+  var tms = [H.absen ? H.absen.time : '', H.buka ? (H.buka.nick === u.nick ? H.buka.time : firstName(H.buka.name) + ' ' + H.buka.time) : '', '', H.card && H.card.done ? H.card.done.time : ''];
   var steps = names.map(function (n, k) {
     var cls = k < stage ? 'ok' : (k === stage ? 'now' : '');
     return '<div class="st ' + cls + '"><div class="dot">' + (k < stage ? '✓' : k + 1) + '</div>' + n + (tms[k] && k < stage ? '<span class="tm">' + esc(tms[k]) + '</span>' : '') + '</div>';
@@ -265,7 +292,7 @@ function vHome() {
   var pts = '<div class="card"><h3>' + t('pts') + '</h3><div class="pts"><div class="big">' + P.total + '<small>' + t('u') + '</small></div><div class="gap" onclick="go(\'poin\')">' + gap + ' ›</div></div>' +
     (P.today ? '<div class="sub">' + t('todayP')(P.today) + '</div>' : '') + '</div>';
   var more = '<div class="more">' + [IC.box, IC.wrench, IC.book].map(function (ic, k) { return '<div class="soon">' + ic + t('more')[k] + '<br><small>' + t('soon') + '</small></div>'; }).join('') + '</div>';
-  return top + nx + '<div class="card"><h3>' + t('today') + '</h3><div class="steps">' + steps + '</div></div>' + pts + more;
+  return top + nx + '<div class="card"><h3>' + t('today') + '</h3><div class="steps">' + steps + '</div><div class="sub" style="cursor:pointer" onclick="go(\'rec\')">' + t('records') + ' ›</div></div>' + pts + more;
 }
 function vNav() {
   var items = [['home', IC.home], ['poin', IC.star], ['saya', IC.user]];
@@ -275,6 +302,9 @@ function go(v) {
   S.view = v;
   if (v === 'absen') { S.photo = null; var ok = (S.home.opts || []).filter(function (o) { return o.ok; }); S.shift = S.home.shift ? S.home.shift.code : (ok.length === 1 ? ok[0].code : null); }
   if (v === 'buka') { S.photo = null; S.ck = { alat: false, bersih: false, display: false }; }
+  if (v === 'card') { S.cd = { step: S.home.card.kind === 'FULL' ? 1 : 3, full: S.home.card.kind === 'FULL', sales: {}, shots: [], cust: {}, cond: {}, has: {}, so: { done: false }, lock: null }; }
+  if (v === 'rec') { S.rec = null; api('myRecords', [S.sess.token]).then(function (r) { S.rec = r; if (S.view === 'rec') render(); }).catch(function () { toast(t('err')); }); }
+  if (v === 'poin') { api('poin', [S.sess.token]).then(function (r) { S.pn = r; if (S.view === 'poin') render(); }).catch(function () {}); }
   render(); window.scrollTo(0, 0); if (v === 'home') loadHome();
 }
 // 上班打卡：班次自动选好，可以改 → 自拍 → 提交；时间以服务器为准
@@ -287,7 +317,7 @@ function vAbsen() {
     '<button class="btn" onclick="sendAbsen()"' + (S.photo ? '' : ' disabled') + '>' + t('send') + '</button>' +
     (S.photo ? '<button class="btn ghost" onclick="document.getElementById(\'cam\').click()">' + t('retake') + '</button>' : '') + '</div>';
 }
-function pick(inp) { var f = inp.files && inp.files[0]; if (!f) return; busy('…'); compress(f).then(function (d) { busy(); S.photo = d; render(); }).catch(function () { busy(); toast(t('err')); }); }
+function pick(inp, to) { var f = inp.files && inp.files[0]; if (!f) return; busy('…'); compress(f).then(function (d) { busy(); if (to === 'shot') { if (S.cd.shots.length < 2) S.cd.shots.push(d); } else if (to === 'lock') S.cd.lock = d; else S.photo = d; render(); }).catch(function () { busy(); toast(t('err')); }); }
 function sendAbsen() {
   if (!S.shift && (S.home.opts || []).length > 1) return toast(t('pickFirst'));
   if (!S.photo) return toast(t('needPhoto'));
@@ -300,6 +330,7 @@ function vRes() {
   var R = S.res;
   if (R.kind === 'absen') return '<div class="res"><div style="font-size:15px;color:var(--g)">' + t('got') + ' · ' + R.time + '</div><div class="big">' + fmtP(R.points) + '</div><div>' + t('ptsGot') + '</div>' +
     (R.needBuka ? '<button class="btn" onclick="go(\'buka\')">' + t('bukaT') + '</button>' : '') + '<button class="btn ghost" onclick="go(\'home\')">' + t('nav')[0] + '</button></div>';
+  if (R.kind === 'card') return '<div class="res"><div style="font-size:15px;color:var(--g)">' + t('doneT') + ' · ' + R.time + '</div><div class="big">' + fmtP(R.points) + '</div><div>' + t('ptsGot') + '</div><button class="btn" onclick="share()">' + t('share') + '</button><button class="btn ghost" onclick="go(\'home\')">' + t('nav')[0] + '</button></div>';
   return '<div class="res"><div class="big">✓</div><div style="font-size:18px;font-weight:700">' + t('doneBuka') + '</div><div style="color:var(--g)">' + R.time + '</div><button class="btn ghost" onclick="go(\'home\')">' + t('nav')[0] + '</button></div>';
 }
 // 开店检查：3 个打勾 + 门店正面照，每店每天一次
@@ -318,15 +349,102 @@ function sendBuka() {
     .catch(function () { busy(); toast(t('err')); });
 }
 function vPoin() {
-  var P = S.home ? S.home.points : { total: 0 };
-  return '<div class="top"><div class="name">' + t('pts') + '</div><div style="font-size:40px;font-weight:800;margin-top:6px">' + P.total + ' <small style="font-size:14px">' + t('u') + '</small></div></div>' +
-    '<div class="card" style="margin-top:14px"><h3>' + t('rules') + '</h3><table class="r">' + t('rule').map(function (r) { return '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td></tr>'; }).join('') + '</table></div>';
+  var P = S.home ? S.home.points : { total: 0 }, N = S.pn;
+  var gap = P.inTop10 ? t('in10')(P.rank) : (P.gap == null ? t('gapNone') : t('gap')(P.gap));
+  var board = !N ? '…' : !N.board ? t('boardWait')(N.boardFrom) : !N.board.length ? t('noData') :
+    '<table class="r">' + N.board.map(function (b) { return '<tr style="' + (b.me ? 'background:#fff8d6' : '') + '"><td>' + b.rank + '. ' + esc(b.name) + '<br><small style="color:#6b6b6b">' + esc(b.store) + '</small></td><td>' + b.total + '</td></tr>'; }).join('') + '</table>';
+  var hist = !N ? '…' : !N.mine.length ? t('noData') : '<table class="r">' + N.mine.map(function (m) { return '<tr><td>' + m.date.slice(5) + ' · ' + esc(m.reason) + '</td><td>' + fmtP(m.points) + '</td></tr>'; }).join('') + '</table>';
+  return '<div class="top"><div class="name">' + t('pts') + '</div><div style="font-size:40px;font-weight:800;margin-top:6px">' + P.total + ' <small style="font-size:14px">' + t('u') + '</small></div><div style="font-size:14px;margin-top:4px">' + gap.replace(/<b>|<\/b>/g, ' ') + '</div></div>' +
+    '<div class="card" style="margin-top:14px"><h3>' + (N && N.boardMonth && N.boardMonth !== (S.home && S.home.local.date.slice(0, 7)) ? t('lastMonth') : t('board')) + '</h3>' + board + '</div>' +
+    '<div class="card"><h3>' + t('history') + '</h3>' + hist + '</div>' +
+    '<div class="card" style="margin-top:14px"><h3>' + t('rules') + '</h3><table class="r">' + t('rule').map(function (r) { return ['ABSEN MASUK', 'PULANG', 'LAINNYA', 'PERINGKAT', '上班打卡', '下班', '其他', '排名'].indexOf(r[0]) >= 0 ? '<tr><td colspan=2 style="font-weight:700;padding-top:14px;color:#000">' + r[0] + '</td></tr>' : '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td></tr>'; }).join('') + '</table></div>';
 }
 function vSaya() {
   var u = S.sess.user, H = S.home;
   return '<div class="top"><div class="name">' + esc(u.fullName) + '</div><div class="store">' + esc(u.nick) + ' · ' + esc(u.role) + '</div><div class="store">' + (H && H.stores ? H.stores.map(function (s) { return esc(s.name); }).join(', ') : '') + '</div></div>' +
     '<div class="page"><button class="btn ghost" onclick="swLang()">' + t('lang') + ': ' + (L === 'id' ? 'Bahasa Indonesia → 中文' : '中文 → Bahasa Indonesia') + '</button>' +
     '<button class="btn ghost" onclick="logout()">' + t('logout') + '</button></div>';
+}
+
+// ---------- 下班卡：关店的人 4 步；其他班次只填「门店情况」----------
+function money(n) { n = Number(String(n || '').replace(/[^0-9]/g, '')) || 0; return 'Rp ' + n.toLocaleString('en-US'); }
+function num(v) { return Number(String(v || '').replace(/[^0-9]/g, '')) || 0; }
+function fld(obj, k, lbl, isMoney) {
+  return '<label class="f">' + lbl + '</label><input class="in" inputmode="numeric" value="' + esc(S.cd[obj][k] ? (isMoney ? num(S.cd[obj][k]).toLocaleString('en-US') : S.cd[obj][k]) : '') + '" oninput="S.cd.' + obj + '.' + k + '=this.value' + (isMoney ? ';document.getElementById(\'tot\').textContent=money(num(S.cd.sales.cash)+num(S.cd.sales.qris)+num(S.cd.sales.grab))' : '') + '">';
+}
+function yn(k) {
+  var on = S.cd.has[k];
+  return '<div class="card" style="margin:8px 0;padding:12px"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div style="font-size:15px">' + t(k) + '</div><div class="seg" style="flex:none;width:130px">' +
+    '<button class="' + (on === false ? 'on' : '') + '" onclick="S.cd.has.' + k + '=false;S.cd.cond.' + k + '=\'\';render()">' + t('tidak') + '</button><button class="' + (on ? 'on' : '') + '" onclick="S.cd.has.' + k + '=true;render()">' + t('ada') + '</button></div></div>' +
+    (on ? '<textarea class="in" style="margin-top:8px;min-height:70px" placeholder="' + t('writeHere') + '" oninput="S.cd.cond.' + k + '=this.value">' + esc(S.cd.cond[k] || '') + '</textarea>' : '') + '</div>';
+}
+var CONDS = ['stockOut', 'lostSales', 'requestNew', 'opsIssue', 'defect', 'competitor', 'idea'];
+function vCard() {
+  var c = S.cd, st = c.step, steps = c.full ? [t('st1'), t('st2'), t('st3'), t('st4')] : [t('st3')], idx = c.full ? st - 1 : 0, body = '';
+  if (st === 1) body = fld('sales', 'cash', t('cash'), 1) + fld('sales', 'qris', t('qris'), 1) + fld('sales', 'grab', t('grab'), 1) +
+    '<div class="card" style="margin:12px 0"><h3>' + t('total') + '</h3><div style="font-size:24px;font-weight:800" id="tot">' + money(num(c.sales.cash) + num(c.sales.qris) + num(c.sales.grab)) + '</div></div>' +
+    '<label class="f">' + t('shot') + '</label><div style="display:flex;gap:8px">' + c.shots.map(function (d) { return '<img src="' + d + '" style="width:30%;border-radius:8px">'; }).join('') +
+    (c.shots.length < 2 ? '<label for="shot" class="photo" style="width:30%;aspect-ratio:3/4;margin:0;font-size:28px">+</label>' : '') + '</div><input id="shot" type="file" accept="image/*" style="display:none" onchange="pick(this,\'shot\')">';
+  if (st === 2) body = ['visitors', 'buyers', 'googleReview', 'waJoin', 'wechatJoin', 'igFollow'].map(function (k) { return fld('cust', k, t(k)); }).join('');
+  if (st === 3) body = CONDS.map(yn).join('');
+  if (st === 4) body = '<label class="toggle">' + t('soDone') + '<input type="checkbox" ' + (c.so.done ? 'checked' : '') + ' onchange="S.cd.so.done=this.checked;render()"></label>' +
+    (c.so.done ? '<label class="f">' + t('soBrands') + '</label><input class="in" value="' + esc(c.so.brands || '') + '" oninput="S.cd.so.brands=this.value"><label class="f">' + t('soDiff') + '</label><input class="in" value="' + esc(c.so.diff || '') + '" oninput="S.cd.so.diff=this.value">' : '') +
+    '<label class="f">' + t('lock') + '</label><label class="photo" for="lk" style="aspect-ratio:4/3">' + (c.lock ? '<img src="' + c.lock + '">' : t('lock')) + '</label><input id="lk" type="file" accept="image/*" capture="environment" style="display:none" onchange="pick(this,\'lock\')">';
+  var last = !c.full || st === 4;
+  return '<div class="page"><button class="back" onclick="' + (st > 1 && c.full ? 'S.cd.step--;render()' : 'go(\'home\')') + '">' + t('back') + '</button>' +
+    '<h2>' + (c.full ? t('cardT') : t('kondT')) + '</h2>' + (c.full ? '<div style="display:flex;gap:6px;margin-bottom:8px">' + steps.map(function (n, k) { return '<div style="flex:1;text-align:center;font-size:11px;padding:6px 0;border-radius:8px;' + (k === idx ? 'background:#000;color:#FDCD17;font-weight:700' : k < idx ? 'background:#e6e4df' : 'background:#fff;border:1px solid #e6e4df') + '">' + (k + 1) + '. ' + n + '</div>'; }).join('') + '</div>' : '') +
+    body + (last ? '<button class="btn" onclick="sendCard()">' + t('submit') + '</button>' : '<button class="btn" onclick="S.cd.step++;render();window.scrollTo(0,0)">' + t('nextStep') + '</button>') + '</div>';
+}
+function sendCard() {
+  var c = S.cd;
+  if (CONDS.some(function (k) { return c.has[k] === undefined; })) return toast(L === 'id' ? 'Jawab semua kondisi toko (Ada / Tidak)' : '门店情况每一项都要选「有」或「没有」');
+  if (c.full && !c.lock) return toast(t('needLock'));
+  busy(t('upl'));
+  var ups = c.shots.map(function (d, i) { return upload(d, 'struk' + i); });
+  if (c.full) ups.push(upload(c.lock, 'kunci'));
+  Promise.all(ups).then(function (ids) {
+    busy(t('sending'));
+    var lock = c.full ? ids.pop() : '';
+    return api('submitCard', [S.sess.token, { storeId: S.home.store.id, kind: c.full ? 'FULL' : 'KONDISI', sales: c.sales, salesPhotos: ids, cust: c.cust, cond: c.cond, so: c.so, lockPhoto: lock }], 2);
+  }).then(function (r) {
+    busy(); if (!r.ok) return toast(t('err'));
+    S.lastShare = { text: shareText(r), files: (c.shots.concat(c.lock ? [c.lock] : [])) };
+    S.res = { kind: 'card', time: r.time, points: r.points }; S.view = 'res'; render(); loadHome();
+  }).catch(function () { busy(); toast(t('err')); });
+}
+// 分享到 WhatsApp 群：文字按门店现在的日报格式排好，照片一起带上（手机支持时）
+function shareText(r) {
+  var c = S.cd, H = S.home, u = S.sess.user, k = c.cond, lines = [];
+  var cond = function (key, lbl) { return '• ' + lbl + ' : ' + (k[key] ? k[key] : '-'); };
+  if (c.full) {
+    lines.push('🌙 LAPORAN PENUTUPAN HARIAN', '', '📅 Tanggal : ' + H.local.date, '📍 Toko : ' + H.store.name, '👤 Vaporista : ' + u.fullName, '',
+      '💵 Tunai : ' + money(c.sales.cash), '• GRAB MERCHANT : ' + money(c.sales.grab), '📱 QRIS/EDC : ' + money(c.sales.qris), '💰 Penjualan Hari Ini : ' + money(num(c.sales.cash) + num(c.sales.qris) + num(c.sales.grab)), '',
+      '👥 LAPORAN PELANGGAN', '• Jumlah Pengunjung : ' + num(c.cust.visitors), '• Jumlah Customer Membeli : ' + num(c.cust.buyers), '• Google Review : ' + num(c.cust.googleReview),
+      '• Customer Bergabung WA Toko : ' + num(c.cust.waJoin), '• Customer Bergabung WeChat Toko : ' + num(c.cust.wechatJoin), '• Follow Instagram : ' + num(c.cust.igFollow), '');
+  } else lines.push('📝 KONDISI TOKO', '📅 ' + H.local.date + ' · ' + H.store.name, '👤 ' + u.fullName, '');
+  lines.push('📝 CATATAN', cond('stockOut', 'Stok Menipis / Habis'), cond('lostSales', 'Tidak jadi beli (stok habis)'), cond('requestNew', 'Permintaan produk belum tersedia'),
+    cond('opsIssue', 'Kendala Operasional'), cond('defect', 'Barang rusak'), cond('competitor', 'Kompetitor'), cond('idea', 'Ide / masukan'));
+  if (c.full) lines.push('', '📋 SO : ' + (c.so.done ? (c.so.brands || '-') + ' · Selisih : ' + (c.so.diff || '0') : '-'));
+  return lines.join('\n');
+}
+function share() {
+  var sh = S.lastShare; if (!sh) return;
+  var files = [];
+  try { files = sh.files.map(function (d, i) { var b = atob(d.split(',')[1]), a = new Uint8Array(b.length); for (var j = 0; j < b.length; j++) a[j] = b.charCodeAt(j); return new File([a], 'foto' + (i + 1) + '.jpg', { type: 'image/jpeg' }); }); } catch (e) { files = []; }
+  if (navigator.canShare && files.length && navigator.canShare({ files: files })) { navigator.share({ text: sh.text, files: files }).catch(function () {}); return; }
+  if (navigator.share) { navigator.share({ text: sh.text }).catch(function () {}); return; }
+  location.href = 'https://wa.me/?text=' + encodeURIComponent(sh.text);
+}
+// ---------- 我的记录：最近 7 天 ----------
+function vRec() {
+  var r = S.rec, h = '<div class="page"><button class="back" onclick="go(\'home\')">' + t('back') + '</button><h2>' + t('records') + '</h2>';
+  if (!r) return h + '<div class="card">…</div></div>';
+  if (!r.length) return h + '<div class="card">' + t('noData') + '</div></div>';
+  return h + r.map(function (d) {
+    return '<div class="card" style="margin:0 0 10px"><h3>' + dayLbl(d.date) + '</h3>' + d.items.map(function (x) {
+      return '<div style="display:flex;justify-content:space-between;padding:6px 0;border-top:1px dashed #e6e4df;font-size:14px"><div>' + x.time + ' · ' + t('recT')[x.t] + (x.shift ? ' (' + t('shiftN')[x.shift] + ')' : '') + (x.total ? '<br><small style="color:#6b6b6b">' + money(x.total) + '</small>' : '') + '</div><div style="font-weight:700">' + (x.points != null ? fmtP(x.points) : '') + '</div></div>';
+    }).join('') + '</div>';
+  }).join('') + '</div>';
 }
 render();
 if (S.sess && !S.sess.mustChange) loadHome();
