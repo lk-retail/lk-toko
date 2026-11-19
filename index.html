@@ -88,6 +88,7 @@ var TX = {
     useHub: 'Akun ini untuk LK Hub. Mengalihkan…', notFound: 'ID tidak ditemukan. Cek lagi ID Karyawan kamu (contoh: ID-2026-08096).', err: 'Koneksi gagal, coba lagi', newpw: 'Buat password baru', newpw1: 'Password baru (min. 6 karakter)', newpw2: 'Ulangi password baru',
     pwdiff: 'Password tidak sama / terlalu pendek', save: 'Simpan', next: 'Langkah berikutnya', today: 'Hari ini', pts: 'Poin bulan ini', u: 'poin',
     steps: ['Absen', 'Cek Buka', 'Kerja', 'Laporan'], stepsM: ['Absen', 'Cek Buka', 'Kerja', 'Kondisi Toko'],
+    pickS: 'Pilih shift kamu hari ini, lalu ambil selfie.', hours: 'Buka', pickFirst: 'Pilih shift dulu', notOpen: 'Shift ini belum bisa dipilih (paling cepat 90 menit sebelum mulai).',
     absenT: 'Absen Masuk', absenS: function (s, p) { return 'Shift ' + s + '. Absen sekarang: ' + fmtP(p) + ' poin.'; }, absenB: 'Absen sekarang',
     lateT: function (m) { return 'Terlambat ' + m + ' menit'; }, lateS: function (p) { return 'Absen sekarang: ' + fmtP(p) + ' poin. Makin lama makin berkurang.'; },
     bukaT: 'Cek Buka Toko', bukaS: 'Cek alat, kebersihan, display + foto depan toko. Sekali sehari per toko.', bukaB: 'Mulai cek',
@@ -107,6 +108,7 @@ var TX = {
     useHub: '这个账号用 LK Hub，正在跳转…', notFound: '找不到这个工号，请检查一下（例如 ID-2026-08096）。核心团队请用 LK Hub。', err: '网络失败，请再试一次', newpw: '设置新密码', newpw1: '新密码（至少 6 位）', newpw2: '再输一次新密码',
     pwdiff: '两次不一样或太短', save: '保存', next: '下一步', today: '今天', pts: '本月积分', u: '分',
     steps: ['打卡', '开店检查', '上班', '下班卡'], stepsM: ['打卡', '开店检查', '上班', '门店情况'],
+    pickS: '先选你今天上的班次，再拍自拍。', hours: '营业', pickFirst: '请先选班次', notOpen: '这个班次现在还不能选（最早开始前 90 分钟）。',
     absenT: '上班打卡', absenS: function (s, p) { return '班次 ' + s + '。现在打卡：' + fmtP(p) + ' 分。'; }, absenB: '现在打卡',
     lateT: function (m) { return '已迟到 ' + m + ' 分钟'; }, lateS: function (p) { return '现在打卡：' + fmtP(p) + ' 分，越晚扣得越多。'; },
     bukaT: '开店检查', bukaS: '设备、卫生、陈列 + 门店正面照。每店每天一次。', bukaB: '开始检查',
@@ -219,7 +221,7 @@ function firstName(n) { return String(n || '').split(' ')[0]; }
 function vHome() {
   var H = S.home, u = S.sess.user;
   var top = '<div class="top"><div class="row"><div><div class="hi">' + (H ? H.local.date : '') + '</div><div class="name">' + esc(u.fullName) + '</div>' +
-    '<div class="store">' + (H && H.store ? esc(H.store.name) + (H.shift ? ' · ' + shiftLbl(H.shift) : '') : '') + '</div></div>' +
+    '<div class="store">' + (H && H.store ? esc(H.store.name) + (H.shift ? ' · ' + shiftLbl(H.shift) : (H.hours ? ' · ' + t('hours') + ' ' + H.hours.open + '–' + H.hours.close : '')) : '') + '</div></div>' +
     '<button class="chip" onclick="swLang()">' + (L === 'id' ? '中文' : 'ID') + '</button></div></div>';
   if (u.test) top += '<div class="info">' + t('test') + '</div>';
   if (!H) return top + '<div class="card" style="margin-top:14px">…</div>';
@@ -228,7 +230,8 @@ function vHome() {
   var morning = H.absen ? H.absen.shift === 'M' : (H.shift && H.shift.code === 'M');
   var stage = !H.absen ? 0 : !H.buka ? 1 : 2, nx = '';
   if (stage === 0) {
-    if (H.lateBy > 0) nx = '<div class="next late"><div class="lbl">' + t('next') + '</div><div class="t">' + t('lateT')(H.lateBy) + '</div><div class="s">' + t('lateS')(H.previewPts) + '</div><button class="btn red" onclick="go(\'absen\')">' + t('absenB') + '</button></div>';
+    if (!H.shift) nx = '<div class="next"><div class="lbl">' + t('next') + '</div><div class="t">' + t('absenT') + '</div><div class="s">' + t('pickS') + '</div><button class="btn" onclick="go(\'absen\')">' + t('absenB') + '</button></div>';
+    else if (H.lateBy > 0) nx = '<div class="next late"><div class="lbl">' + t('next') + '</div><div class="t">' + t('lateT')(H.lateBy) + '</div><div class="s">' + t('lateS')(H.previewPts) + '</div><button class="btn red" onclick="go(\'absen\')">' + t('absenB') + '</button></div>';
     else nx = '<div class="next"><div class="lbl">' + t('next') + '</div><div class="t">' + t('absenT') + '</div><div class="s">' + t('absenS')(shiftLbl(H.shift), H.previewPts) + '</div><button class="btn" onclick="go(\'absen\')">' + t('absenB') + '</button></div>';
   } else if (stage === 1) {
     nx = '<div class="next"><div class="lbl">' + t('next') + '</div><div class="t">' + t('bukaT') + '</div><div class="s">' + t('bukaS') + '</div><button class="btn" onclick="go(\'buka\')">' + t('bukaB') + '</button></div>';
@@ -255,7 +258,7 @@ function vNav() {
 }
 function go(v) {
   S.view = v;
-  if (v === 'absen') { S.photo = null; S.shift = S.home && S.home.shift ? S.home.shift.code : null; }
+  if (v === 'absen') { S.photo = null; var ok = (S.home.opts || []).filter(function (o) { return o.ok; }); S.shift = S.home.shift ? S.home.shift.code : (ok.length === 1 ? ok[0].code : null); }
   if (v === 'buka') { S.photo = null; S.ck = { alat: false, bersih: false, display: false }; }
   render(); window.scrollTo(0, 0); if (v === 'home') loadHome();
 }
@@ -263,7 +266,7 @@ function go(v) {
 function vAbsen() {
   var sh = S.home.store.shifts;
   return '<div class="page"><button class="back" onclick="go(\'home\')">' + t('back') + '</button><h2>' + t('absenT') + '</h2>' +
-    '<label class="f">' + t('shift') + '</label><div class="seg">' + sh.map(function (s) { return '<button class="' + (S.shift === s.code ? 'on' : '') + '" onclick="S.shift=\'' + s.code + '\';render()">' + shiftLbl(s) + '</button>'; }).join('') + '</div>' +
+    '<label class="f">' + t('shift') + '</label><div class="seg">' + (S.home.opts || sh).map(function (s) { var dis = s.ok === false; return '<button ' + (dis ? 'disabled style="opacity:.4" ' : '') + 'class="' + (S.shift === s.code ? 'on' : '') + '" onclick="S.shift=\'' + s.code + '\';render()">' + shiftLbl(s) + (s.pts != null && !dis ? '<br><small>' + fmtP(s.pts) + ' ' + t('u') + '</small>' : '') + '</button>'; }).join('') + '</div>' +
     '<label class="photo" for="cam">' + (S.photo ? '<img src="' + S.photo + '">' : t('selfie')) + '</label>' +
     '<input id="cam" type="file" accept="image/*" capture="user" style="display:none" onchange="pick(this)">' +
     '<button class="btn" onclick="sendAbsen()"' + (S.photo ? '' : ' disabled') + '>' + t('send') + '</button>' +
@@ -271,10 +274,11 @@ function vAbsen() {
 }
 function pick(inp) { var f = inp.files && inp.files[0]; if (!f) return; busy('…'); compress(f).then(function (d) { busy(); S.photo = d; render(); }).catch(function () { busy(); toast(t('err')); }); }
 function sendAbsen() {
+  if (!S.shift && (S.home.opts || []).length > 1) return toast(t('pickFirst'));
   if (!S.photo) return toast(t('needPhoto'));
   busy(t('upl'));
   upload(S.photo, 'absen').then(function (pid) { busy(t('sending')); return api('checkIn', [S.sess.token, { storeId: S.home.store.id, shift: S.shift, photo: pid }], 2); })
-    .then(function (r) { busy(); if (!r.ok) return toast(t('err')); S.res = { kind: 'absen', time: r.time, points: r.points, needBuka: r.needBuka }; S.view = 'res'; render(); loadHome(); })
+    .then(function (r) { busy(); if (!r.ok) return toast(r.err === 'PICK_SHIFT' ? t('pickFirst') : r.err === 'SHIFT_NOT_OPEN' ? t('notOpen') : t('err')); S.res = { kind: 'absen', time: r.time, points: r.points, needBuka: r.needBuka }; S.view = 'res'; render(); loadHome(); })
     .catch(function () { busy(); toast(t('err')); });
 }
 function vRes() {
