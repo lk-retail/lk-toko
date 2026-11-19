@@ -124,7 +124,7 @@ table.r{width:100%;border-collapse:collapse;font-size:14px}table.r td{padding:8p
 <div class="app" id="app"></div>
 <script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261119171807';
+var APP_VER = '20261119172216';
 function chkVer() { fetch('version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
@@ -279,7 +279,7 @@ function api(fn, args, tries) {
 }
 function toast(m) { var d = document.createElement('div'); d.className = 'toast'; d.textContent = m; document.body.appendChild(d); setTimeout(function () { d.remove(); }, 2800); }
 function busy(m) { var b = document.getElementById('busy'); if (!m) { if (b) b.remove(); return; } if (!b) { b = document.createElement('div'); b.id = 'busy'; b.className = 'busy'; document.body.appendChild(b); } b.textContent = m; }
-function logout() { if (S.sess) api('logout', [S.sess.token], 0).catch(function () {}); S.sess = null; S.home = null; S.pc = null; localStorage.removeItem('tk_sess'); try { Object.keys(localStorage).filter(function (k) { return k.indexOf('tk_home_') === 0 || k.indexOf('tk_cal_') === 0 || k.indexOf('tk_pc_') === 0; }).forEach(function (k) { localStorage.removeItem(k); }); } catch (e) {} S.view = 'home'; render(); }
+function logout() { if (S.sess) api('logout', [S.sess.token], 0).catch(function () {}); S.sess = null; S.home = null; S.pc = null; S.pn = null; S.ss = {}; S.pnPre = 0; S.ssPre = 0; localStorage.removeItem('tk_sess'); try { Object.keys(localStorage).filter(function (k) { return k.indexOf('tk_home_') === 0 || k.indexOf('tk_cal_') === 0 || k.indexOf('tk_pc_') === 0 || k.indexOf('tk_pn_') === 0; }).forEach(function (k) { localStorage.removeItem(k); }); } catch (e) {} S.view = 'home'; render(); }
 
 // ---------- 照片：压缩到长边 1280、JPEG 0.7，上传更快 ----------
 function compress(file) {
@@ -372,10 +372,14 @@ function swLang() { var _e = document.getElementById('eid'), _p = document.getEl
 function todayStr() { var d = new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
 function homeKey() { return 'tk_home_' + (S.sess && S.sess.user.nick || '').toLowerCase(); }
 function cachedHome() { try { var c = JSON.parse(localStorage.getItem(homeKey()) || 'null'); return c && c.local && c.local.date === todayStr() ? c : null; } catch (e) { return null; } }
+// 积分页：先显示上次的数据，后台再刷新（2026-11-19 提速）
+function pnKey() { return 'tk_pn_' + ((S.sess && S.sess.user.nick) || '').toLowerCase(); }
+function loadPoin() { var tok = S.sess && S.sess.token; if (!tok) return; api('poin', [tok]).then(function (r) { if (!S.sess || S.sess.token !== tok) return; S.pn = r; try { localStorage.setItem(pnKey(), JSON.stringify(r)); } catch (e) {} if (S.view === 'poin') render(); }).catch(function () {}); }
 function loadHome() {
   if (!S.home) { S.home = cachedHome(); if (S.home && (S.view === 'home' || S.view === 'poin' || S.view === 'saya')) render(); }
+  if (S.home && S.home.store && !S.ssPre) { S.ssPre = 1; loadSales(S.home.store.id); }
   var tok = S.sess.token;
-  return api('home', [tok, S.selSt || null, prefSt()]).then(function (r) { if (!S.sess || S.sess.token !== tok) return; S.home = r; S.swLoading = 0; if (r.store) loadSales(r.store.id); try { localStorage.setItem(homeKey(), JSON.stringify(r)); } catch (e) {} if (S.view === 'home' || S.view === 'poin' || S.view === 'saya') render(); }).catch(function () { if (!S.home) toast(t('err')); });
+  return api('home', [tok, S.selSt || null, prefSt()]).then(function (r) { if (!S.sess || S.sess.token !== tok) return; S.home = r; S.swLoading = 0; if (r.store) loadSales(r.store.id); if (!S.pnPre) { S.pnPre = 1; setTimeout(loadPoin, 1500); } try { localStorage.setItem(homeKey(), JSON.stringify(r)); } catch (e) {} if (S.view === 'home' || S.view === 'poin' || S.view === 'saya') render(); }).catch(function () { if (!S.home) toast(t('err')); });
 }
 function shiftLbl(s) { return s ? t('shiftN')[s.code] + ' ' + s.start + '–' + s.end : ''; }
 function hmAdd(hm, d) { var p = hm.split(':'), m = +p[0] * 60 + +p[1] + d; return ('0' + Math.floor(m / 60)).slice(-2) + ':' + ('0' + m % 60).slice(-2); }
@@ -482,7 +486,7 @@ function go(v) {
   S.stOpen = false;
   if (v === 'rec') { S.calSel = null; S.calYm = null; calLoad(null); }
   if (v === 'saya' && S.sess) { var pk = 'tk_pc_' + (S.sess.user.nick || '').toLowerCase(); try { S.pc = S.pc || JSON.parse(localStorage.getItem(pk) || 'null'); } catch (e) {} api('myPetty', [S.sess.token]).then(function (r) { S.pc = r; try { localStorage.setItem(pk, JSON.stringify(r)); } catch (e) {} if (S.view === 'saya') render(); }).catch(function () {}); }
-  if (v === 'poin') { S.pMon = null; api('poin', [S.sess.token]).then(function (r) { S.pn = r; if (S.view === 'poin') render(); }).catch(function () {}); }
+  if (v === 'poin') { S.pMon = null; if (!S.pn) { try { S.pn = JSON.parse(localStorage.getItem(pnKey()) || 'null'); } catch (e) {} } loadPoin(); }
   render(); window.scrollTo(0, 0); if (v === 'home') loadHome();
 }
 // 上班打卡：班次自动选好，可以改 → 自拍 → 提交；时间以服务器为准
