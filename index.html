@@ -20,10 +20,10 @@ button{font-family:inherit}
 .hb{position:sticky;top:0;z-index:30;background:#111;color:#fff;height:calc(50px + env(safe-area-inset-top));padding:env(safe-area-inset-top) 16px 0;display:flex;align-items:center;justify-content:space-between;font-size:18px}
 .hb b{color:var(--y);margin-right:6px}
 .hb .lang{border:1px solid var(--y);color:var(--y);background:none;border-radius:8px;padding:4px 10px;font-size:14px;font-family:inherit}
-.pf{position:relative;overflow:hidden;background:var(--y);color:#111;border-radius:16px;margin:12px 14px 0;padding:16px 16px 19px}
+.pf{position:relative;background:var(--y);color:#111;border-radius:16px;border-bottom:3px solid #111;margin:12px 14px 0;padding:16px 16px 16px;z-index:6}
 .pf .av{flex:0 0 72px;width:72px;height:72px;border-radius:50%;background:#111 center/cover no-repeat;color:var(--y);font-weight:800;font-size:26px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 3px var(--y),0 0 0 5px #111;cursor:pointer}
 .pf .gear{position:absolute;top:8px;right:8px;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#5a4a00;cursor:pointer}
-.pf .bar{height:3px;background:#111;position:absolute;left:0;right:0;bottom:0}
+
 .top .row{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
 .top .hi{font-size:13px;font-weight:600}
 .top .store{cursor:pointer}
@@ -91,7 +91,7 @@ input.in{width:100%;font-size:17px;padding:13px;border:1px solid var(--line);bor
 .sl-sheet .it{padding:13px 12px;border-radius:10px;font-size:16px;display:flex;justify-content:space-between;cursor:pointer}.sl-sheet .it.on{background:#fff8d6;font-weight:700}
 .pcmore{margin:0 14px 14px;padding:11px;border:1px solid var(--line);border-radius:12px;background:#fff;font-size:14px;font-weight:600;text-align:center;cursor:pointer}
 .guide{background:#fff8d6;border:1px solid #f0dc8a;border-radius:12px;padding:10px 12px;font-size:14px;line-height:1.5;margin-bottom:12px}
-.q{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.q{scroll-margin-top:calc(62px + env(safe-area-inset-top));background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
 .q.bad{border:2px solid var(--r)}
 .qh{display:flex;gap:10px;align-items:flex-start}
 .qn{flex:none;width:26px;height:26px;border-radius:50%;background:var(--y);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px}
@@ -113,8 +113,8 @@ textarea.in{min-height:72px;resize:vertical}
 .stmenu button.on{font-weight:700}.stmenu small{color:var(--ok);font-weight:600;font-size:12px}
 .res{text-align:center;padding:30px 14px 30px}
 .res .big{font-size:56px;font-weight:800}
-.toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%);background:#000;color:#fff;padding:12px 16px;border-radius:12px;font-size:14px;max-width:86%;text-align:center;z-index:9}
-.busy{position:fixed;inset:0;background:rgba(255,255,255,.75);display:flex;align-items:center;justify-content:center;z-index:8;font-size:16px;font-weight:600}
+.toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%);background:#000;color:#fff;padding:12px 16px;border-radius:12px;font-size:14px;max-width:86%;text-align:center;z-index:90}
+.busy{position:fixed;inset:0;background:rgba(255,255,255,.75);display:flex;align-items:center;justify-content:center;z-index:80;font-size:16px;font-weight:600}
 table.r{width:100%;border-collapse:collapse;font-size:14px}table.r td{padding:8px 4px;border-bottom:1px solid var(--line)}table.r td:last-child{text-align:right;font-weight:700}
 .login{padding:28px 22px 40px}
 .login .logo{width:84px;height:84px;border-radius:20px;display:block;margin:0 auto 16px}
@@ -124,7 +124,7 @@ table.r{width:100%;border-collapse:collapse;font-size:14px}table.r td{padding:8p
 <div class="app" id="app"></div>
 <script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261119153838';
+var APP_VER = '20261119154438';
 function chkVer() { fetch('version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
@@ -301,7 +301,7 @@ function upload(dataUrl, kind) {
 // ---------- 页面 ----------
 function render() {
   var a = document.getElementById('app');
-  if (!S.sess) { a.innerHTML = vHb() + vLogin(); return; }
+  if (!S.sess) { a.innerHTML = vHb() + vLogin(); if (S._li) { document.getElementById('eid').value = S._li[0]; document.getElementById('pw').value = S._li[1]; S._li = null; } return; }
   if (S.sess.mustChange) { a.innerHTML = vHb() + vNewPw(); return; }
   var v = S.view, h = '';
   if (v === 'home') h = vHome(); else if (v === 'absen') h = vAbsen(); else if (v === 'buka') h = vBuka(); else if (v === 'poin') h = vPoin(); else if (v === 'saya') h = vSaya(); else if (v === 'res') h = vRes(); else if (v === 'survey') h = vSurvey(); else if (v === 'storedata') h = vStoreData(); else if (v === 'pulang') h = vPulang(); else if (v === 'sales') h = vSales(); else if (v === 'mysales') h = vMySales(); else if (v === 'rec') h = vRec(); else if (v === 'tugas') h = vTugas(); else if (v === 'mystore') h = vMyStore(); else if (v === 'mypc') h = vMyPc();
@@ -367,7 +367,7 @@ function doNewPw() {
   api('changePassword', [S.sess.token, a]).then(function (r) { busy(); if (!r.ok) return toast(t('pwdiff')); S.sess.mustChange = false; localStorage.setItem('tk_sess', JSON.stringify(S.sess)); render(); loadHome(); })
     .catch(function () { busy(); toast(t('err')); });
 }
-function swLang() { L = L === 'id' ? 'zh' : 'id'; localStorage.setItem('tk_lang', L); if (S.sess && !S.sess.mustChange) api('setLang', [S.sess.token, L], 0).catch(function () {}); render(); }
+function swLang() { var _e = document.getElementById('eid'), _p = document.getElementById('pw'); S._li = _e ? [_e.value, _p ? _p.value : ''] : null; L = L === 'id' ? 'zh' : 'id'; localStorage.setItem('tk_lang', L); if (S.sess && !S.sess.mustChange) api('setLang', [S.sess.token, L], 0).catch(function () {}); render(); }
 function todayStr() { var d = new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
 function homeKey() { return 'tk_home_' + (S.sess && S.sess.user.nick || '').toLowerCase(); }
 function cachedHome() { try { var c = JSON.parse(localStorage.getItem(homeKey()) || 'null'); return c && c.local && c.local.date === todayStr() ? c : null; } catch (e) { return null; } }
@@ -394,7 +394,7 @@ function pfCard(H, u) {
   return '<div class="pf"><div class="gear" onclick="avMenu()">' + GEAR + '</div><div style="display:flex;gap:16px;align-items:center">' +
     '<div class="av" onclick="avMenu()" style="' + (av ? 'background-image:url(' + av + ')' : '') + '">' + (av ? '' : esc(ini || 'LK')) + '</div>' +
     '<div style="min-width:0;flex:1;padding-right:22px"><div style="font-size:13px;color:#4a3d00">' + greetT() + (H ? ' · ' + dayLbl(H.local.date) : '') + '</div>' +
-    '<div style="font-size:22px;font-weight:800;line-height:1.25;margin-top:2px;overflow-wrap:anywhere">' + esc(nm) + '</div>' + (H ? stSel(H) : '') + '</div></div><div class="bar"></div></div>';
+    '<div style="font-size:22px;font-weight:800;line-height:1.25;margin-top:2px;overflow-wrap:anywhere">' + esc(nm) + '</div>' + (H ? stSel(H) : '') + '</div></div></div>';
 }
 function avMenu() {
   var zh = L === 'zh', has = !!myAv(), m = document.createElement('div'); m.id = 'avm'; m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:60;display:flex;align-items:flex-end'; m.onclick = function (e) { if (e.target === m) m.remove(); };
