@@ -124,7 +124,7 @@ table.r{width:100%;border-collapse:collapse;font-size:14px}table.r td{padding:8p
 <div class="app" id="app"></div>
 <script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261119172216';
+var APP_VER = '20261119173731';
 function chkVer() { fetch('version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
@@ -815,11 +815,10 @@ function pcCard() {
   return '<div style="margin:0 14px">' + finNote(P) + '</div>' + pcDetail(P.me);
 }
 function vSaya() {
+  // 2026-11-19：和「今天」页用同一张人员卡；工号和岗位放到退出按钮上方
   var u = S.sess.user, H = S.home;
-  var ss = H && H.stores ? H.stores : [], cur = H && H.store ? H.store.name : (ss[0] ? ss[0].name : '');
-  var stl = H ? stSel(H) : '<div class="store">' + esc(cur) + '</div>';
-  return '<div class="top"><div class="row"><div><div class="hi">' + esc(u.nick) + ' · ' + esc(u.role) + '</div><div class="name">' + esc(u.fullName) + '</div>' + stl + '</div></div></div>' +
-    sayaRows(H) + '<div class="page">' +
+  return pfCard(H, u) + sayaRows(H) + '<div class="page">' +
+    '<div style="text-align:center;font-size:12px;color:#9a9a9a;margin:0 0 8px">' + esc(u.nick) + (u.role ? ' · ' + esc(u.role) : '') + '</div>' +
     '<button class="btn ghost" onclick="logout()">' + t('logout') + '</button></div>';
 }
 
