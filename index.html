@@ -81,7 +81,7 @@ table.r{width:100%;border-collapse:collapse;font-size:14px}table.r td{padding:8p
 <div class="app" id="app"></div>
 <script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261119134206';
+var APP_VER = '20261119134215';
 function chkVer() { fetch('version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
@@ -113,7 +113,7 @@ var TX = {
     logout: 'Keluar', lang: 'Bahasa', test: 'AKUN TES — tidak masuk peringkat',
     cardT: 'Laporan Akhir Shift', kondT: 'Kondisi Toko', cardS: 'Penjualan, pelanggan, kondisi toko, SO + foto kunci.', kondS: 'Isi kondisi toko sebelum pulang.', cardB: 'Isi laporan',
     workS2: function (x) { return 'Laporan dibuka jam ' + x + '.'; }, fullBy: function (n, x) { return 'Laporan toko sudah dikirim ' + n + ' ' + x + '. Kamu isi Kondisi Toko saja.'; },
-    doneT: 'Selesai hari ini ✓', doneS: function (x) { return 'Laporan terkirim ' + x + '. Hati-hati di jalan.'; }, share: 'Bagikan ke grup WhatsApp',
+    doneT: 'Kerja hari ini selesai ✓', doneS: function (x) { return 'Laporan terkirim ' + x + '. Terima kasih atas kerja kerasnya hari ini, hati-hati di jalan!'; }, share: 'Bagikan ke grup WhatsApp',
     st1: 'Penjualan', st2: 'Pelanggan', st3: 'Kondisi Toko', st4: 'SO & Kunci', cash: 'Tunai', qris: 'QRIS / EDC', grab: 'GrabMart', total: 'Total hari ini',
     shot: 'Foto struk EDC / layar POS (maks. 2)', visitors: 'Pengunjung', buyers: 'Pembeli', googleReview: 'Google Review baru', waJoin: 'Join WA toko', wechatJoin: 'Join WeChat toko', igFollow: 'Follow Instagram',
     ada: 'Ada', tidak: 'Tidak', stockOut: 'Stok menipis / habis', requestNew: 'Produk yang belum pernah ada di toko (diminta pelanggan)', lostSales: 'Pelanggan tidak jadi beli karena stok habis',
@@ -144,7 +144,7 @@ var TX = {
     logout: '退出登录', lang: '语言', test: '测试账号 — 不进排名',
     cardT: '下班卡', kondT: '门店情况', cardS: '销售、顾客、门店情况、盘点 + 锁门照。', kondS: '下班前填写门店情况。', cardB: '开始填写',
     workS2: function (x) { return '下班卡 ' + x + ' 开放。'; }, fullBy: function (n, x) { return n + ' 已在 ' + x + ' 交了门店的下班卡，你只填门店情况。'; },
-    doneT: '今天完成了 ✓', doneS: function (x) { return x + ' 已提交。路上小心。'; }, share: '分享到 WhatsApp 群',
+    doneT: '今天的工作结束了 ✓', doneS: function (x) { return x + ' 已提交。今天辛苦了，路上小心！'; }, share: '分享到 WhatsApp 群',
     st1: '销售', st2: '顾客', st3: '门店情况', st4: '盘点和锁门', cash: '现金', qris: 'QRIS / EDC', grab: 'GrabMart', total: '今天合计',
     shot: 'EDC 结算单 / POS 截图（最多 2 张）', visitors: '进店人数', buyers: '购买人数', googleReview: '新增 Google 评价', waJoin: '新加门店 WA', wechatJoin: '新加门店微信', igFollow: '新关注 Instagram',
     ada: '有', tidak: '没有', stockOut: '库存不足 / 断货', requestNew: '顾客问到、店里从来没卖过的产品', lostSales: '因为断货没买成的顾客',
