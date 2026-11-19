@@ -124,7 +124,7 @@ table.r{width:100%;border-collapse:collapse;font-size:14px}table.r td{padding:8p
 <div class="app" id="app"></div>
 <script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261119171743';
+var APP_VER = '20261119171807';
 function chkVer() { fetch('version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
@@ -732,7 +732,7 @@ function poinChart(N, sel) {
   var tag = c.live ? t('pLive') : !c.settled ? t('pSettling') : '';
   var sum = '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:10px"><b style="font-size:16px">' + monLbl(c.m, 1) + (tag ? ' <span style="font-size:12px;font-weight:600;color:#b06000">' + tag + '</span>' : '') + '</b><b style="font-size:20px">' + totP(c.total) + ' <small style="font-size:12px;color:var(--g)">' + t('u') + '</small></b></div>' +
     (c.rank ? '<div style="font-size:13px;margin-top:4px"><b>' + t('rankN')(c.rank) + '</b></div>' : '');
-  return '<div class="card"><h3>' + t('p12') + '</h3><svg viewBox="0 0 ' + W + ' ' + H + '" style="width:100%;display:block">' + g + '</svg><div style="font-size:12px;color:var(--g);margin-top:2px">' + t('pTap') + '</div>' + sum + '</div>';
+  return '<div class="card"><h3>' + t('p12') + '</h3><svg viewBox="0 0 ' + W + ' ' + H + '" style="width:100%;display:block">' + g + '</svg>' + (M.length > 1 ? '<div style="font-size:12px;color:var(--g);margin-top:2px">' + t('pTap') + '</div>' : '') + sum + '</div>';
 }
 function vTugas() {
   return '<div class="top"><div class="name">' + t('taskT') + '</div></div>' +
