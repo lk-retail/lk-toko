@@ -80,7 +80,7 @@ table.r{width:100%;border-collapse:collapse;font-size:14px}table.r td{padding:8p
 <div class="app" id="app"></div>
 <script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261119125655';
+var APP_VER = '20261119130201';
 function chkVer() { fetch('version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
@@ -104,7 +104,7 @@ var TX = {
     noShift: 'Jam shift toko ini belum diisi. Hubungi Operation Manager.', noStore: 'Kamu belum terdaftar di toko mana pun. Hubungi HR.',
     in10: function (r) { return '<b>Top 10</b>peringkat ' + r; }, gap: function (g) { return '<b>' + fmtP(g).replace('+', '') + ' poin lagi</b>masuk Top 10'; }, gapNone: '<b>Absen tepat waktu</b>untuk masuk Top 10', boardSoon: '<b>Peringkat Top 10</b>mulai 8 Des',
     todayP: function (p) { return 'Hari ini: ' + fmtP(p) + ' poin'; }, more: ['Barang', 'Perbaikan & Laporan', 'LK School'], soon: 'Segera',
-    nav: ['Hari Ini', 'Tugas', 'Poin', 'Saya'], attSub: function (a) { return a.days ? 'Bulan ini: masuk ' + a.days + ' hari · tepat waktu ' + a.onTime + (a.late ? ' · terlambat ' + a.late : '') + (a.early ? ' · pulang awal ' + a.early : '') + (a.noCard ? ' · tanpa laporan ' + a.noCard : '') : 'Kalender kehadiran bulan ini'; }, taskT: 'Tugas Toko', taskTabs: ['Belum selesai', 'Selesai'], taskSoonT: 'Segera hadir', taskSoonS: 'Di sini nanti ada tugas dari Area Supervisor / tim operasional, misalnya pasang materi promo atau foto display. Tiap tugas ada batas waktu (bisa beberapa hari) dan tidak menghalangi absen pulang.', back: '‹ Kembali', shift: 'Shift', selfie: 'Ambil selfie', retake: 'Foto ulang', send: 'Kirim absen',
+    nav: ['Hari Ini', 'Tugas', 'Poin', 'Saya'], attSub: function (a) { return a.days ? 'Bulan ini: masuk ' + a.days + ' hari · tepat waktu ' + a.onTime + (a.late ? ' · terlambat ' + a.late : '') + (a.early ? ' · pulang awal ' + a.early : '') + (a.noCard ? ' · tanpa laporan ' + a.noCard : '') : 'Kalender kehadiran bulan ini'; }, taskT: 'Tugas Toko', pcT: 'Kas kecil saya', pcNone: 'Belum ada kas kecil', pcBal: 'Saldo', pcAsOf: 'Data per', pcCols: ['Ambil', 'Dipakai', 'Kembali', 'Saldo'], taskTabs: ['Belum selesai', 'Selesai'], taskSoonT: 'Segera hadir', taskSoonS: 'Di sini nanti ada tugas dari Area Supervisor / tim operasional, misalnya pasang materi promo atau foto display. Tiap tugas ada batas waktu (bisa beberapa hari) dan tidak menghalangi absen pulang.', back: '‹ Kembali', shift: 'Shift', selfie: 'Ambil selfie', retake: 'Foto ulang', send: 'Kirim absen',
     sending: 'Mengirim…', upl: 'Mengunggah foto…', needPhoto: 'Ambil foto dulu', got: 'Absen tercatat', ptsGot: 'poin', doneBuka: 'Toko READY ✓',
     alat: 'HP, tablet/POS, EDC, lampu & AC menyala', bersih: 'Toko bersih: lantai, rak & etalase', display: 'Display rapi & siap', fotoToko: 'Foto depan toko',
     sendBuka: 'Kirim — Toko READY', shiftN: { F: 'Full', M: 'Pagi', E: 'Malam' },
@@ -135,7 +135,7 @@ var TX = {
     noShift: '这家店的班次时间还没填，请联系运营经理。', noStore: '你还没有分配门店，请联系 HR。',
     in10: function (r) { return '<b>前 10</b>第 ' + r + ' 名'; }, gap: function (g) { return '<b>还差 ' + fmtP(g).replace('+', '') + ' 分</b>进前 10'; }, gapNone: '<b>准时打卡</b>就能进前 10', boardSoon: '<b>前 10 排行榜</b>12/8 开始',
     todayP: function (p) { return '今天：' + fmtP(p) + ' 分'; }, more: ['货品', '报修与反馈', 'LK School'], soon: '即将上线',
-    nav: ['今天', '任务', '积分', '我的'], attSub: function (a) { return a.days ? '本月上班 ' + a.days + ' 天 · 准时 ' + a.onTime + ' 天' + (a.late ? ' · 迟到 ' + a.late + ' 次' : '') + (a.early ? ' · 早退 ' + a.early + ' 次' : '') + (a.noCard ? ' · 缺下班卡 ' + a.noCard + ' 次' : '') : '查看本月考勤日历'; }, taskT: '门店任务', taskTabs: ['待完成', '已完成'], taskSoonT: '即将上线', taskSoonS: '这里以后会有区域主管和运营团队发的任务，比如摆放促销物料、拍陈列照片。每个任务有自己的期限（可以是几天），不影响每天的下班打卡。', back: '‹ 返回', shift: '班次', selfie: '拍自拍', retake: '重拍', send: '提交打卡',
+    nav: ['今天', '任务', '积分', '我的'], attSub: function (a) { return a.days ? '本月上班 ' + a.days + ' 天 · 准时 ' + a.onTime + ' 天' + (a.late ? ' · 迟到 ' + a.late + ' 次' : '') + (a.early ? ' · 早退 ' + a.early + ' 次' : '') + (a.noCard ? ' · 缺下班卡 ' + a.noCard + ' 次' : '') : '查看本月考勤日历'; }, taskT: '门店任务', pcT: '我的备用金', pcNone: '暂无备用金', pcBal: '余额', pcAsOf: '数据更新于', pcCols: ['申请', '核销', '归还', '余额'], taskTabs: ['待完成', '已完成'], taskSoonT: '即将上线', taskSoonS: '这里以后会有区域主管和运营团队发的任务，比如摆放促销物料、拍陈列照片。每个任务有自己的期限（可以是几天），不影响每天的下班打卡。', back: '‹ 返回', shift: '班次', selfie: '拍自拍', retake: '重拍', send: '提交打卡',
     sending: '提交中…', upl: '正在上传照片…', needPhoto: '请先拍照', got: '打卡成功', ptsGot: '分', doneBuka: '门店已 READY ✓',
     alat: '手机、平板/POS、EDC、灯和空调都已打开', bersih: '店内干净：地面、货架、柜台', display: '陈列整齐，可以营业', fotoToko: '门店正面照',
     sendBuka: '提交 — 门店 READY', shiftN: { F: '全天', M: '早班', E: '晚班' },
@@ -182,7 +182,7 @@ function api(fn, args, tries) {
 }
 function toast(m) { var d = document.createElement('div'); d.className = 'toast'; d.textContent = m; document.body.appendChild(d); setTimeout(function () { d.remove(); }, 2800); }
 function busy(m) { var b = document.getElementById('busy'); if (!m) { if (b) b.remove(); return; } if (!b) { b = document.createElement('div'); b.id = 'busy'; b.className = 'busy'; document.body.appendChild(b); } b.textContent = m; }
-function logout() { if (S.sess) api('logout', [S.sess.token], 0).catch(function () {}); S.sess = null; S.home = null; localStorage.removeItem('tk_sess'); try { Object.keys(localStorage).filter(function (k) { return k.indexOf('tk_home_') === 0 || k.indexOf('tk_cal_') === 0; }).forEach(function (k) { localStorage.removeItem(k); }); } catch (e) {} S.view = 'home'; render(); }
+function logout() { if (S.sess) api('logout', [S.sess.token], 0).catch(function () {}); S.sess = null; S.home = null; S.pc = null; localStorage.removeItem('tk_sess'); try { Object.keys(localStorage).filter(function (k) { return k.indexOf('tk_home_') === 0 || k.indexOf('tk_cal_') === 0 || k.indexOf('tk_pc_') === 0; }).forEach(function (k) { localStorage.removeItem(k); }); } catch (e) {} S.view = 'home'; render(); }
 
 // ---------- 照片：压缩到长边 1280、JPEG 0.7，上传更快 ----------
 function compress(file) {
@@ -317,6 +317,7 @@ function go(v) {
   if (v === 'buka') { S.photo = null; S.ck = { alat: false, bersih: false, display: false }; }
   if (v === 'card') { S.cd = { step: S.home.card.kind === 'FULL' ? 1 : 3, full: S.home.card.kind === 'FULL', sales: {}, shots: [], cust: {}, cond: {}, has: {}, so: { done: false }, lock: null }; }
   if (v === 'rec') { S.calSel = null; S.calYm = null; calLoad(null); }
+  if (v === 'saya' && S.sess) { var pk = 'tk_pc_' + (S.sess.user.nick || '').toLowerCase(); try { S.pc = S.pc || JSON.parse(localStorage.getItem(pk) || 'null'); } catch (e) {} api('myPetty', [S.sess.token]).then(function (r) { S.pc = r; try { localStorage.setItem(pk, JSON.stringify(r)); } catch (e) {} if (S.view === 'saya') render(); }).catch(function () {}); }
   if (v === 'poin') { api('poin', [S.sess.token]).then(function (r) { S.pn = r; if (S.view === 'poin') render(); }).catch(function () {}); }
   render(); window.scrollTo(0, 0); if (v === 'home') loadHome();
 }
@@ -395,10 +396,21 @@ function vTugas() {
     '<div style="padding:12px 14px 8px"><div style="display:flex;background:#e6e4df;border-radius:12px;padding:3px">' + t('taskTabs').map(function (n, k) { return '<button style="flex:1;border:0;border-radius:10px;padding:9px 2px;font-size:13px;font-weight:' + (k === 0 ? '700;background:#fff;color:#000;box-shadow:0 1px 3px rgba(0,0,0,.12)' : '500;background:transparent;color:#6b6b6b') + '">' + n + '</button>'; }).join('') + '</div></div>' +
     '<div class="card" style="text-align:center;padding:28px 18px"><div style="width:52px;height:52px;margin:0 auto 10px;color:#b0b0ab">' + IC.task + '</div><div style="font-size:17px;font-weight:700">' + t('taskSoonT') + '</div><div style="font-size:14px;color:var(--g);margin-top:8px;line-height:1.5">' + t('taskSoonS') + '</div></div>';
 }
+function pcCard() {
+  var m2 = function (n, raw) { n = Number(n) || 0; var x = money(Math.abs(n)); return (n < 0 ? '-' : '') + (raw ? x.replace('Rp ', '') : x); };
+  var P = S.pc, h = '<div class="card" style="margin-top:14px"><h3>' + t('pcT') + '</h3>';
+  if (!P) return h + '<div style="opacity:.35;font-size:26px;font-weight:800">–</div></div>';
+  if (!P.has) return h + '<div style="font-size:16px;color:var(--g)">' + t('pcNone') + '</div></div>';
+  var c = t('pcCols');
+  return h + '<div style="font-size:13px;color:var(--g)">' + t('pcBal') + '</div><div style="font-size:28px;font-weight:800">' + m2(P.bal) + '</div>' +
+    '<table class="r" style="margin-top:10px;font-size:13px"><tr style="color:var(--g)"><td></td>' + c.map(function (x) { return '<td style="text-align:right;font-weight:600">' + x + '</td>'; }).join('') + '</tr>' +
+    P.hist.map(function (x) { return '<tr><td>' + esc(x.p) + '</td><td style="text-align:right;font-weight:400">' + m2(x.req, 1) + '</td><td style="text-align:right;font-weight:400">' + m2(x.wo, 1) + '</td><td style="text-align:right;font-weight:400">' + m2(x.rep, 1) + '</td><td>' + m2(x.bal, 1) + '</td></tr>'; }).join('') + '</table>' +
+    (P.asOf ? '<div class="sub" style="margin-top:8px">' + t('pcAsOf') + ' ' + P.asOf + '</div>' : '') + '</div>';
+}
 function vSaya() {
   var u = S.sess.user, H = S.home;
   return '<div class="top"><div class="name">' + esc(u.fullName) + '</div><div class="store">' + esc(u.nick) + ' · ' + esc(u.role) + '</div><div class="store">' + (H && H.stores ? H.stores.map(function (s) { return esc(s.name); }).join(', ') : '') + '</div></div>' +
-    '<div class="page"><button class="btn" onclick="go(\'rec\')">📅 ' + t('records') + '</button><button class="btn ghost" onclick="swLang()">' + t('lang') + ': ' + (L === 'id' ? 'Bahasa Indonesia → 中文' : '中文 → Bahasa Indonesia') + '</button>' +
+    pcCard() + '<div class="page"><button class="btn ghost" onclick="swLang()">' + t('lang') + ': ' + (L === 'id' ? 'Bahasa Indonesia → 中文' : '中文 → Bahasa Indonesia') + '</button>' +
     '<button class="btn ghost" onclick="logout()">' + t('logout') + '</button></div>';
 }
 
