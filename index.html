@@ -68,6 +68,8 @@ input.in{width:100%;font-size:17px;padding:13px;border:1px solid var(--line);bor
 .toggle{display:flex;justify-content:space-between;align-items:center;gap:10px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:8px;font-size:15px}
 .toggle input{width:24px;height:24px;accent-color:#000;flex:none}
 .back{background:none;border:0;font-size:15px;color:var(--g);padding:4px 0 12px}
+.small{font-size:13px}.muted{color:#777;font-size:13px}
+.pcmore{margin:0 14px 14px;padding:11px;border:1px solid var(--line);border-radius:12px;background:#fff;font-size:14px;font-weight:600;text-align:center;cursor:pointer}
 .guide{background:#fff8d6;border:1px solid #f0dc8a;border-radius:12px;padding:10px 12px;font-size:14px;line-height:1.5;margin-bottom:12px}
 .q{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
 .q.bad{border:2px solid var(--r)}
@@ -102,7 +104,7 @@ table.r{width:100%;border-collapse:collapse;font-size:14px}table.r td{padding:8p
 <div class="app" id="app"></div>
 <script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261119140705';
+var APP_VER = '20261119141536';
 function chkVer() { fetch('version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
@@ -507,16 +509,49 @@ function storeCards(H, noTitle) {
       (sh.length ? '<div style="font-size:13px;margin-top:4px">' + t('hours') + ' ' + op + '–' + cl + ' (' + esc(x.tzName || '') + ')</div><div style="font-size:13px;color:var(--g);margin-top:2px">' + sh.map(function (z) { return shiftLbl(z); }).join(' · ') + '</div>' : '<div style="font-size:13px;color:var(--g);margin-top:4px">' + t('noShift') + '</div>') +
       (x.sup ? '<div style="font-size:13px;margin-top:4px">' + t('supL') + ': <b>' + esc(x.sup) + '</b></div>' : x.om ? '<div style="font-size:13px;margin-top:4px">' + t('omL') + ': <b>' + esc(x.om) + '</b></div>' : '') + '</div>'; }).join('') + '</div>';
 }
+// ---------- 我的备用金：和 LK Hub「我的备用金」同一套页面（2026-11-19 从 LK Hub 搬过来）----------
+function rp(n){n=Math.round(Number(n)||0);return (n<0?'-':'')+'Rp '+Math.abs(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g,',');}
+function pLabel(p){var zh=L==='zh',m=/^(\d{4})(\d{2})$/.exec(p),mn=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];if(m)return zh?m[1]+'年'+Number(m[2])+'月':mn[Number(m[2])-1]+' '+m[1];if(/26H1/.test(p))return zh?'2026 上半年':'Jan–Jun 2026';var y=/(\d{4})/.exec(p);return y?y[1]:p;}
+function pcHist(me,title){var zh=L==='zh';if(!me)return '<div class="card">'+(zh?'暂时没有你的备用金记录。如果你领过备用金，请联系 Finance 核对姓名。':'Belum ada catatan petty cash atas namamu. Jika pernah menerima petty cash, hubungi Finance untuk cek nama.')+'</div>';
+ var neg=me.bal<0,h='<div class="card"><div class="small muted">'+(title||(zh?'我的备用金余额':'Saldo petty cash saya'))+'</div><div style="font-size:30px;font-weight:800;margin:2px 0'+(neg?';color:#2e7d32':'')+'">'+rp(Math.abs(me.bal))+'</div><div class="small '+(neg?'':'muted')+'" style="'+(neg?'color:#2e7d32':'')+'">'+(neg?(zh?'核销超过领用，这部分是公司应付你的':'Realisasi melebihi pengajuan; jumlah ini hutang perusahaan ke kamu'):(zh?'还在你手上、未核销的钱':'Uang yang masih di tanganmu dan belum direalisasi'))+'</div></div>';
+ var ln=function(l,v,c,sign){return '<div style="display:flex;justify-content:space-between;font-size:14px;padding:3px 0"><span class="muted">'+l+'</span><span style="color:'+c+'">'+sign+rp(Math.abs(v)).replace('-','')+'</span></div>';};
+ h+='<div class="card"><b>'+(zh?'历史记录（按月）':'Riwayat per bulan')+'</b><div class="small muted" style="margin-bottom:4px">'+(zh?'绿色 = 申请领出，红色 = 核销 / 归还':'Hijau = pengajuan, merah = realisasi / pengembalian')+'</div>'+me.hist.slice().reverse().map(function(x){var r='<div style="border-top:1px solid #eee;padding:8px 0"><div style="font-weight:700;margin-bottom:2px">'+pLabel(x.p)+'</div>';
+  if(x.prev!=null)r+=ln(zh?'期初结余':'Saldo awal',x.prev,'#555','');
+  if(x.req)r+=ln(zh?'申请':'Pengajuan',x.req,'#2e7d32','+ ');
+  if(x.wo)r+=ln(zh?'核销':'Realisasi',x.wo,'#c62828','− ');
+  if(x.rep)r+=ln(zh?'归还':'Pengembalian',x.rep,'#c62828','− ');
+  r+='<div style="display:flex;justify-content:space-between;font-size:15px;padding-top:4px;border-top:1px dashed #ddd;margin-top:3px"><b>'+(zh?'期末余额':'Saldo akhir')+'</b><b>'+rp(x.bal)+'</b></div></div>';return r;}).join('')+'</div>';
+ return h;}
+function md(d){var m=/\d{4}-(\d{2})-(\d{2})/.exec(d||''),mn=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];if(!m)return '—';return L==='zh'?Number(m[1])+'/'+Number(m[2]):Number(m[2])+' '+mn[Number(m[1])-1];}
+function mLabelBefore(p){var zh=L==='zh',m=/^(\d{4})(\d{2})$/.exec(p),mn=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];return m?(zh?Number(m[2])+' 月前结余':'Saldo sebelum '+mn[Number(m[2])-1]+' '+m[1]):'';}
+function mLabelEnd(p){var zh=L==='zh',m=/^(\d{4})(\d{2})$/.exec(p),mn=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];return m?(zh?Number(m[2])+' 月底结余':'Saldo akhir '+mn[Number(m[2])-1]+' '+m[1]):'';}
+function pcDetail(me,title){var zh=L==='zh',d=me&&me.det;if(!me||!d||!d.ok)return (me&&d&&!d.ok?'<div class="guide" style="margin:0 0 10px">'+(zh?'逐笔明细正在和 Finance 汇总核对，先显示月度汇总。':'Rincian per transaksi sedang dicocokkan dengan Finance; sementara ditampilkan ringkasan per bulan.')+'</div>':'')+pcHist(me,title);
+ var h=pcHist({bal:me.bal,hist:[]},title).replace(/<div class="card"><b>[\s\S]*$/,'');
+ var row=function(l,v,c,b){return '<div style="display:flex;justify-content:space-between;align-items:baseline;padding:8px 0;border-top:1px dashed #ddd;font-size:14px'+(b?';font-weight:700':'')+'"><span'+(b?'':' class="muted"')+'>'+l+'</span><span style="color:'+(c||'#111')+'">'+v+'</span></div>';};
+ var T={r:[zh?'申请':'Pengajuan','#2e7d32','+ ',zh?'到账':'Diterima'],w:[zh?'核销':'Realisasi','#c62828','− ',zh?'通过':'Disetujui'],b:[zh?'归还':'Pengembalian','#c62828','− ',zh?'到账':'Diterima']};
+ var c='<div class="card"><b>'+(zh?'收支明细':'Rincian transaksi')+'</b><div class="small muted" style="margin-bottom:2px">'+(zh?'本月和上个月逐笔显示；绿色 = 申请领出，红色 = 核销 / 归还':'Bulan ini & bulan lalu per transaksi; hijau = pengajuan, merah = realisasi / pengembalian')+'</div>';
+ c+=row(mLabelBefore(d.from),rp(d.open),'#555',1);
+ var months=[];d.ev.forEach(function(e){if(months.indexOf(e.m)<0)months.push(e.m);});Object.keys(d.ends||{}).forEach(function(m){if(months.indexOf(m)<0)months.push(m);});months.sort();
+ var cur=months[months.length-1];
+ months.forEach(function(m){c+='<div style="font-weight:700;margin:10px 0 0;padding-top:8px;border-top:1px solid #eee">'+pLabel(m)+'</div>';
+  var es=d.ev.filter(function(e){return e.m===m});if(!es.length)c+='<div class="small muted" style="padding:6px 0">'+(zh?'这个月没有记录':'Tidak ada transaksi')+'</div>';
+  es.forEach(function(e){var k=T[e.t],open=S.finOpen&&S.finOpen[e.id],has=e.it&&e.it.length;
+   c+='<div style="padding:8px 0;border-top:1px dashed #eee'+(has?';cursor:pointer':'')+'"'+(has?' onclick="S.finOpen=S.finOpen||{};S.finOpen[\''+esc(e.id)+'\']=!S.finOpen[\''+esc(e.id)+'\'];render()"':'')+'><div style="display:flex;justify-content:space-between;align-items:baseline;font-size:14px"><span><b>'+md(e.d)+'</b> &nbsp;'+k[0]+(has?' <span class="muted">'+(open?'▾':'▸')+'</span>':'')+'</span><b style="color:'+k[1]+'">'+k[2]+rp(e.a).replace('Rp ','Rp ')+'</b></div>';
+   var nt=e.n==='SALARY'?(zh?'从工资扣回':'Potong gaji'):e.n==='TRANSFER'?(zh?'转账还给公司':'Transfer ke rekening perusahaan'):e.n;var sub=(e.s?(zh?'提交 ':'Diajukan ')+md(e.s)+' · ':'')+(e.s?k[3]:(zh?'入账':'Dicatat'))+' '+md(e.d);if(nt)sub=esc(nt)+' · '+sub;if(has)sub=e.it.length+(zh?' 项费用 · ':' item · ')+sub;
+   c+='<div class="small muted">'+sub+'</div>';
+   if(has&&open)c+=e.it.map(function(x){var nm=String(x[0]).split('｜');nm=(zh?nm[0]:(nm[1]||nm[0])).trim();return '<div style="display:flex;justify-content:space-between;gap:8px;font-size:13px;padding:3px 0 3px 12px;border-left:2px solid #eee;margin-top:3px"><span>'+esc(nm)+(x[1]?' · '+esc(x[1]):'')+(x[2]?'<br><span class="muted small">'+esc(x[2])+'</span>':'')+'</span><span style="white-space:nowrap">'+rp(x[3])+'</span></div>';}).join('');
+   c+='</div>';});
+  if(m!==cur&&d.ends&&d.ends[m]!=null)c+=row(mLabelEnd(m),rp(d.ends[m]),'#111',1);});
+ c+='<div style="display:flex;justify-content:space-between;padding:10px 0 2px;border-top:2px solid #111;margin-top:6px;font-size:15px"><b>'+(zh?'当前余额':'Saldo saat ini')+'</b><b>'+rp(me.bal)+'</b></div></div>';
+ var old=(me.hist||[]).filter(function(x){return !/^\d{6}$/.test(x.p)||x.p<d.from});
+ if(old.length)c+=S.finOld?pcHist({bal:me.bal,hist:old}).replace(/^<div class="card">[\s\S]*?<\/div><\/div>/,'').replace(zh?'历史记录（按月）':'Riwayat per bulan',zh?'更早的月度汇总':'Ringkasan bulan sebelumnya'):'<div class="pcmore" onclick="S.finOld=1;render()">'+(zh?'查看更早的月度汇总':'Lihat ringkasan bulan sebelumnya')+' ▾</div>';
+ return h+c;}
+function finNote(f){var zh=L==='zh';return '<div class="guide" style="margin:0 0 10px">ℹ️ '+(zh?'数据截至 ':'Data per ')+'<b>'+esc((f&&f.asOf)||'—')+'</b>'+(zh?'，每周更新，有疑问请联系 Finance。':', diperbarui tiap minggu; ada pertanyaan hubungi Finance.')+'</div>';}
 function pcCard() {
-  var m2 = function (n, raw) { n = Number(n) || 0; var x = money(Math.abs(n)); return (n < 0 ? '-' : '') + (raw ? x.replace('Rp ', '') : x); };
-  var P = S.pc, h = '<div class="card">';
-  if (!P) return h + '<div style="opacity:.35;font-size:26px;font-weight:800">–</div></div>';
-  if (!P.has) return h + '<div style="font-size:16px;color:var(--g)">' + t('pcNone') + '</div></div>';
-  var c = t('pcCols');
-  return h + '<div style="font-size:13px;color:var(--g)">' + t('pcBal') + '</div><div style="font-size:28px;font-weight:800">' + m2(P.bal) + '</div>' +
-    '<table class="r" style="margin-top:10px;font-size:13px"><tr style="color:var(--g)"><td></td>' + c.map(function (x) { return '<td style="text-align:right;font-weight:600">' + x + '</td>'; }).join('') + '</tr>' +
-    P.hist.map(function (x) { return '<tr><td>' + esc(x.p) + '</td><td style="text-align:right;font-weight:400">' + m2(x.req, 1) + '</td><td style="text-align:right;font-weight:400">' + m2(x.wo, 1) + '</td><td style="text-align:right;font-weight:400">' + m2(x.rep, 1) + '</td><td>' + m2(x.bal, 1) + '</td></tr>'; }).join('') + '</table>' +
-    (P.asOf ? '<div class="sub" style="margin-top:8px">' + t('pcAsOf') + ' ' + P.asOf + '</div>' : '') + '</div>';
+  var P = S.pc;
+  if (!P) return '<div class="card"><div style="opacity:.35;font-size:26px;font-weight:800">–</div></div>';
+  if (!P.has) return '<div class="card"><div style="font-size:16px;color:var(--g)">' + t('pcNone') + '</div></div>';
+  return '<div style="margin:0 14px">' + finNote(P) + '</div>' + pcDetail(P.me);
 }
 function vSaya() {
   var u = S.sess.user, H = S.home;
