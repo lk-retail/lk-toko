@@ -80,7 +80,7 @@ table.r{width:100%;border-collapse:collapse;font-size:14px}table.r td{padding:8p
 <div class="app" id="app"></div>
 <script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261119131044';
+var APP_VER = '20261119131158';
 function chkVer() { fetch('version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
@@ -96,7 +96,7 @@ var TX = {
     useHub: 'Akun ini untuk LK Hub. Mengalihkan…', notFound: 'ID tidak ditemukan. Cek lagi ID Karyawan kamu (contoh: ID-2026-08096).', err: 'Koneksi gagal, coba lagi', newpw: 'Buat password baru', newpw1: 'Password baru (min. 6 karakter)', newpw2: 'Ulangi password baru',
     pwdiff: 'Password tidak sama / terlalu pendek', save: 'Simpan', next: 'Langkah berikutnya', today: 'Hari ini', pts: 'Poin bulan ini', u: 'poin',
     steps: ['Absen', 'Cek Buka', 'Kerja', 'Laporan'], stepsM: ['Absen', 'Cek Buka', 'Kerja', 'Kondisi Toko'],
-    pickS: 'Pilih shift kamu hari ini, lalu ambil selfie.', hours: 'Buka', pickFirst: 'Pilih shift dulu', storePick: 'Absen di toko mana?', pickStore: 'Pilih toko dulu', sendAt: function (n) { return 'Absen di ' + n; }, already: function (n) { return 'Hari ini kamu sudah absen di ' + n + '.'; }, myStores: 'Toko saya', supL: 'Area Supervisor', omL: 'Operations Manager', moreStores: function (n) { return ' +' + n + ' toko'; }, notOpen: 'Shift ini belum bisa dipilih (paling cepat 90 menit sebelum mulai).',
+    pickS: 'Pilih shift kamu hari ini, lalu ambil selfie.', pickSM: 'Pilih toko dan shift kamu hari ini, lalu ambil selfie.', hours: 'Buka', pickFirst: 'Pilih shift dulu', storePick: 'Absen di toko mana?', pickStore: 'Pilih toko dulu', sendAt: function (n) { return 'Absen di ' + n; }, already: function (n) { return 'Hari ini kamu sudah absen di ' + n + '.'; }, myStores: 'Toko saya', supL: 'Area Supervisor', omL: 'Operations Manager', moreStores: function (n) { return ' +' + n + ' toko'; }, notOpen: 'Shift ini belum bisa dipilih (paling cepat 90 menit sebelum mulai).',
     absenT: 'Absen Masuk', absenS: function (s) { return 'Shift ' + s + '. Foto selfie lalu kirim.'; }, absenB: 'Absen sekarang',
     lateT: function () { return 'Belum absen'; }, lateS: function () { return 'Shift sudah mulai. Segera absen sekarang.'; },
     bukaT: 'Cek Buka Toko', bukaS: 'Cek alat, kebersihan, display + foto depan toko. Sekali sehari per toko.', bukaB: 'Mulai cek',
@@ -127,7 +127,7 @@ var TX = {
     useHub: '这个账号用 LK Hub，正在跳转…', notFound: '找不到这个工号，请检查一下（例如 ID-2026-08096）。核心团队请用 LK Hub。', err: '网络失败，请再试一次', newpw: '设置新密码', newpw1: '新密码（至少 6 位）', newpw2: '再输一次新密码',
     pwdiff: '两次不一样或太短', save: '保存', next: '下一步', today: '今天', pts: '本月积分', u: '分',
     steps: ['打卡', '开店检查', '上班', '下班卡'], stepsM: ['打卡', '开店检查', '上班', '门店情况'],
-    pickS: '先选你今天上的班次，再拍自拍。', hours: '营业', pickFirst: '请先选班次', storePick: '在哪家店打卡？', pickStore: '请先选门店', sendAt: function (n) { return '在 ' + n + ' 打卡'; }, already: function (n) { return '你今天已经在 ' + n + ' 打过卡了。'; }, myStores: '我的门店', supL: '区域主管', omL: '运营经理', moreStores: function (n) { return ' 等 ' + (n + 1) + ' 家店'; }, notOpen: '这个班次现在还不能选（最早开始前 90 分钟）。',
+    pickS: '先选你今天上的班次，再拍自拍。', pickSM: '先选今天在哪家店、上哪个班次，再拍自拍。', hours: '营业', pickFirst: '请先选班次', storePick: '在哪家店打卡？', pickStore: '请先选门店', sendAt: function (n) { return '在 ' + n + ' 打卡'; }, already: function (n) { return '你今天已经在 ' + n + ' 打过卡了。'; }, myStores: '我的门店', supL: '区域主管', omL: '运营经理', moreStores: function (n) { return ' 等 ' + (n + 1) + ' 家店'; }, notOpen: '这个班次现在还不能选（最早开始前 90 分钟）。',
     absenT: '上班打卡', absenS: function (s) { return '班次 ' + s + '。拍一张自拍就能提交。'; }, absenB: '现在打卡',
     lateT: function () { return '还没打卡'; }, lateS: function () { return '班次已经开始，请马上打卡。'; },
     bukaT: '开店检查', bukaS: '设备、卫生、陈列 + 门店正面照。每店每天一次。', bukaB: '开始检查',
@@ -273,7 +273,7 @@ function vHome() {
   var morning = H.absen ? H.absen.shift === 'M' : (H.shift && H.shift.code === 'M');
   var stage = !H.absen ? 0 : !H.buka ? 1 : 2, nx = '';
   if (stage === 0) {
-    if (!H.shift) nx = '<div class="next"><div class="lbl">' + t('next') + '</div><div class="t">' + t('absenT') + '</div><div class="s">' + t('pickS') + '</div><button class="btn" onclick="go(\'absen\')">' + t('absenB') + '</button></div>';
+    if (!H.shift) nx = '<div class="next"><div class="lbl">' + t('next') + '</div><div class="t">' + t('absenT') + '</div><div class="s">' + (multi ? t('pickSM') : t('pickS')) + '</div><button class="btn" onclick="go(\'absen\')">' + t('absenB') + '</button></div>';
     else if (H.lateBy > 0) nx = '<div class="next late"><div class="lbl">' + t('next') + '</div><div class="t">' + t('lateT')(H.lateBy) + '</div><div class="s">' + t('lateS')(H.previewPts) + '</div><button class="btn red" onclick="go(\'absen\')">' + t('absenB') + '</button></div>';
     else nx = '<div class="next"><div class="lbl">' + t('next') + '</div><div class="t">' + t('absenT') + '</div><div class="s">' + t('absenS')(shiftLbl(H.shift), H.previewPts) + '</div><button class="btn" onclick="go(\'absen\')">' + t('absenB') + '</button></div>';
   } else if (stage === 1) {
