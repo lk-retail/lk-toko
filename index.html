@@ -117,7 +117,7 @@ table.r{width:100%;border-collapse:collapse;font-size:14px}table.r td{padding:8p
 <div class="app" id="app"></div>
 <script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261119150909';
+var APP_VER = '20261119151926';
 function chkVer() { fetch('version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
@@ -543,20 +543,41 @@ function slCalc(R) {
   return o;
 }
 function slBar(fill, col, mark) { return '<div class="sl-track"><i style="width:' + Math.max(0, Math.min(100, (fill || 0) * 100)) + '%;background:' + col + '"></i>' + (mark != null ? '<b style="left:' + Math.min(100, mark * 100) + '%"></b>' : '') + '</div>'; }
-function slGap(a, t, R, money) {
+// 和计划比：按天平均分摊目标，到数据日应该卖多少，实际多 / 少卖多少
+function slGap(a, t, R) {
   var zh = L === 'zh'; if (!(t > 0) || R.m !== 'cur') return '';
-  var tp = R.e / R.dim, d = Math.round((a / t - tp) * 100), m = a - t * tp, c = d >= 0 ? '#1d7a3a' : achCol(a / t / tp);
-  var tx = d === 0 ? (zh ? '和时间进度持平' : 'sejalan dengan waktu') : (d > 0 ? (zh ? '领先 ' : 'unggul ') + d + (zh ? ' 个点' : ' poin') : (zh ? '落后 ' : 'tertinggal ') + (-d) + (zh ? ' 个点' : ' poin')) + (money && d !== 0 ? (zh ? '（' : ' (') + (d > 0 ? '+' : (zh ? '差 ' : 'kurang ')) + jt(Math.abs(m)) + (zh ? '）' : ')') : '');
+  var m = a - t * R.e / R.dim, c = m >= 0 ? '#1d7a3a' : achCol(a / t / (R.e / R.dim));
+  var tx = Math.abs(m) < t * 0.005 ? (zh ? '和计划持平' : 'Sesuai rencana') : m > 0 ? (zh ? '比计划多卖 ' : 'Lebih ') + jt(m) + (zh ? '' : ' dari rencana') : (zh ? '比计划少卖 ' : 'Kurang ') + jt(-m) + (zh ? '' : ' dari rencana');
   return '<span class="sl-gap" style="color:' + c + ';background:' + c + '14">' + tx + '</span>';
+}
+// 一句白话判断：顺不顺、要做什么
+function ssSay(o, R) {
+  var zh = L === 'zh', cur = R.m === 'cur', c, tx;
+  if (o.t > 0 && cur) {
+    if (o.proj >= 1) { c = '#1d7a3a'; tx = zh ? '👍 进度不错，照这个速度月底能完成 ' + pc1(o.proj) : '👍 Bagus, dengan laju ini akhir bulan tercapai ' + pc1(o.proj); }
+    else if (o.proj >= 0.85) { c = '#b26a00'; tx = zh ? '再加把劲，现在比计划少卖 ' + jt(o.t * R.e / R.dim - o.a) : 'Ayo semangat, sekarang kurang ' + jt(o.t * R.e / R.dim - o.a) + ' dari rencana'; }
+    else { c = '#b3261e'; tx = zh ? '落后了，接下来每天要卖 ' + jt(o.need) + ' 才能完成目标' : 'Tertinggal, mulai sekarang harus jual ' + jt(o.need) + ' per hari untuk capai target'; }
+  } else if (o.t > 0) {
+    if (o.ach >= 1) { c = '#1d7a3a'; tx = zh ? '这个月完成了 ' + pc1(o.ach) + ' 👍' : 'Bulan ini tercapai ' + pc1(o.ach) + ' 👍'; }
+    else { c = achCol(o.ach); tx = zh ? '这个月差 ' + jt(o.t - o.a) + ' 没完成（完成 ' + pc1(o.ach) + '）' : 'Bulan ini kurang ' + jt(o.t - o.a) + ' dari target (' + pc1(o.ach) + ')'; }
+  } else {
+    if (o.mom == null || !isFinite(o.mom)) return '';
+    var v = Math.round(Math.abs(o.mom) * 100); c = o.mom >= 0 ? '#1d7a3a' : '#b3261e';
+    tx = zh ? (cur ? '比上月同期' : '比上个月') + (o.mom >= 0 ? '多卖 ' + v + '% 👍' : '少卖 ' + v + '%') : (o.mom >= 0 ? 'Naik ' + v + '% 👍' : 'Turun ' + v + '%') + (cur ? ' dibanding periode sama bulan lalu' : ' dibanding bulan lalu');
+  }
+  return '<div style="font-size:16px;font-weight:700;color:' + c + ';line-height:1.4;margin-bottom:8px">' + tx + '</div>';
+}
+// 今天要卖 vs 最近一天卖了多少
+function ssToday(o, R) {
+  var zh = L === 'zh', y = R.days.length ? R.days[R.days.length - 1] : null, yv = y ? y[0] : 0, ok = o.need > 0 ? yv >= o.need : true;
+  return '<div class="sl-need"><div><div class="l">' + (zh ? '今天要卖' : 'Target hari ini') + '</div><div class="v">' + (o.need > 0 ? jt(o.need) : '✓') + '</div></div><div><div class="l">' + mdShort(R.asOf) + (zh ? ' 卖了' : ' terjual') + '</div><div class="v" style="color:' + (ok ? '#1d7a3a' : '#b3261e') + '">' + jt(yv) + ' ' + (ok ? '✓' : '✗') + '</div></div></div>';
 }
 function slKpi(l, v, c) { return '<div class="sl-kpi"><div class="l">' + l + '</div><div class="v"' + (c ? ' style="color:' + c + '"' : '') + '>' + v + '</div></div>'; }
 function slHero(o, R) {
-  var zh = L === 'zh', cur = R.m === 'cur', A = o.a, T = o.t, c = achCol(o.proj);
-  var h = '<div class="small muted">' + (cur ? (zh ? '已完成目标' : 'Pencapaian target') : (zh ? '月达成' : 'Pencapaian bulan ini')) + '</div><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><div class="sl-big" style="color:' + c + '">' + pc1(o.ach) + '</div>' + slGap(A, T, R, 1) + '</div>';
-  h += slBar(o.ach, c, cur ? R.e / R.dim : null) + '<div class="small muted">' + jt(A) + ' / ' + jt(T) + (cur ? ' · ' + (zh ? '时间进度 ' : 'waktu berjalan ') + pc1(R.e / R.dim) + (zh ? '（竖线）' : ' (garis)') : '') + '</div>';
-  if (cur) { var a7 = o.l7 / 7, c7 = o.need > 0 && a7 < o.need ? '#b3261e' : '#1d7a3a';
-    h += '<div class="sl-need"><div><div class="l">' + (zh ? '剩余每天要卖' : 'Sisa target / hari') + '</div><div class="v">' + (o.need > 0 ? jt(o.need) : '✓') + '</div></div><div><div class="l">' + (zh ? '最近 7 天日均' : 'Rata-rata 7 hari') + '</div><div class="v" style="color:' + c7 + '">' + jt(a7) + '</div></div></div>' +
-      '<div class="small muted" style="margin-top:6px">' + (zh ? '照现在的速度，月底约 ' : 'Dengan laju sekarang, akhir bulan ±') + '<b style="color:' + c + '">' + pc1(o.proj) + '</b></div>'; }
+  var zh = L === 'zh', cur = R.m === 'cur', c = achCol(o.proj);
+  var h = ssSay(o, R) + '<div class="small muted">' + (cur ? (zh ? '已完成目标' : 'Pencapaian target') : (zh ? '月达成' : 'Pencapaian bulan ini')) + '</div><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><div class="sl-big" style="color:' + c + '">' + pc1(o.ach) + '</div>' + slGap(o.a, o.t, R) + '</div>';
+  h += slBar(o.ach, c, cur ? R.e / R.dim : null) + '<div class="small muted">' + jt(o.a) + ' / ' + jt(o.t) + (cur ? ' · ' + (zh ? '这个月过了 ' : 'bulan sudah berjalan ') + pc1(R.e / R.dim) + (zh ? '（竖线）' : ' (garis)') : '') + '</div>';
+  if (cur) h += ssToday(o, R);
   return h;
 }
 // 首页卡片：本月达成 + 领先/落后 + 剩余每天要卖；点进去看完整页面
@@ -564,12 +585,10 @@ function salesCard(H) {
   if (!H || !H.store) return '';
   var R = S.ss && S.ss[H.store.id + '_cur'], zh = L === 'zh';
   if (!R) return '<div class="card"><h3>' + t('ssT') + '</h3><div style="opacity:.35;font-size:24px;font-weight:800">–</div></div>';
-  var o = slCalc(R), c = achCol(o.proj), y = R.days.length ? R.days[R.days.length - 1] : null;
-  var body = o.t > 0 ? '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:6px"><b style="font-size:28px;color:' + c + '">' + pc1(o.ach) + '</b>' + slGap(o.a, o.t, R, 0) + '</div>' + slBar(o.ach, c, R.e / R.dim) +
-      '<div class="small muted">' + jt(o.a) + ' / ' + jt(o.t) + (o.need > 0 ? ' · ' + (zh ? '剩余每天要卖 ' : 'sisa target/hari ') + '<b style="color:#000">' + jt(o.need) + '</b>' : '') + '</div>'
-    : '<div style="display:flex;align-items:baseline;gap:8px;margin-top:6px"><b style="font-size:28px">' + jt(o.a) + '</b><span class="small muted">' + (zh ? '同期 ' : 'vs bln lalu ') + '<b style="color:' + grCol(o.mom) + '">' + sgn(o.mom) + '</b></span></div>';
-  return '<div class="card" style="cursor:pointer" onclick="go(\'sales\')"><div style="display:flex;justify-content:space-between;align-items:baseline"><h3 style="margin:0">' + t('ssT') + '</h3><span style="font-size:12px;color:var(--g)">' + t('ssAsOf')(mdShort(R.asOf)) + '</span></div>' + body +
-    '<div style="display:flex;justify-content:space-between;font-size:13px;color:var(--g);margin-top:8px;border-top:1px dashed var(--line);padding-top:8px"><span>' + mdShort(R.asOf) + ' <b style="color:#000">' + jt(y ? y[0] : 0) + '</b>' + (o.g ? ' · ' + t('ssGrabM') + ' <b style="color:#000">' + jt(o.g) + '</b>' : '') + '</span><span>›</span></div></div>';
+  var o = slCalc(R), c = achCol(o.proj);
+  var body = ssSay(o, R) + (o.t > 0 ? slBar(o.ach, c, R.e / R.dim) + '<div class="small muted">' + jt(o.a) + ' / ' + jt(o.t) + ' · ' + (zh ? '完成 ' : 'tercapai ') + pc1(o.ach) + '</div>' + ssToday(o, R)
+    : '<div class="small muted">' + (zh ? '本月累计 ' : 'Total bulan ini ') + '<b style="color:#000">' + jt(o.a) + '</b></div>');
+  return '<div class="card" style="cursor:pointer" onclick="go(\'sales\')"><div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px"><h3 style="margin:0">' + t('ssT') + '</h3><span style="font-size:12px;color:var(--g)">' + t('ssAsOf')(mdShort(R.asOf)) + ' ›</span></div>' + body + '</div>';
 }
 function slChart(R) {
   var zh = L === 'zh', cur = R.m === 'cur', n = R.dim, o = slCalc(R), line = cur ? (o.need > 0 ? o.need : null) : (o.t > 0 ? o.t / n : null), dd = R;
@@ -597,8 +616,8 @@ function vSales() {
   h += '</div>';
   if (!R) return h + '<div class="card">…</div>';
   var o = slCalc(R), cur = R.m === 'cur', hasG = R.o.g > 0 || R.o.pg > 0;
-  h += '<div class="card">' + (o.t > 0 ? slHero(o, R) : '<div class="small muted">' + (zh ? '累计销售' : 'Total penjualan') + '</div><div class="sl-big">' + jt(o.a) + '</div><div class="small muted" style="margin-top:4px">' + (zh ? '这家店这个月没有目标' : 'Toko ini belum ada target bulan ini') + '</div>') +
-    '<div class="sl-kpis">' + slKpi(zh ? '累计销售' : 'Total penjualan', jt(o.a)) + slKpi(cur ? (zh ? '同期增长' : 'Pertumbuhan') : (zh ? '比上月' : 'vs bulan lalu'), sgn(o.mom), grCol(o.mom)) +
+  h += '<div class="card">' + (o.t > 0 ? slHero(o, R) : ssSay(o, R) + '<div class="small muted">' + (zh ? '累计销售' : 'Total penjualan') + '</div><div class="sl-big">' + jt(o.a) + '</div><div class="small muted" style="margin-top:4px">' + (zh ? '这家店这个月没有目标' : 'Toko ini belum ada target bulan ini') + '</div>') +
+    '<div class="sl-kpis" style="grid-template-columns:1fr 1fr">' + slKpi(cur ? (zh ? '比上月同期' : 'vs periode sama bln lalu') : (zh ? '比上个月' : 'vs bulan lalu'), sgn(o.mom), grCol(o.mom)) +
     (hasG ? slKpi('GrabMart', jt(o.g) + '<span style="font-size:12px;color:#999;font-weight:600"> · ' + pc1(o.share) + '</span>') : slKpi(zh ? '日均' : 'Rata-rata/hari', jt(o.a / (o.days || 1)))) + '</div></div>';
   h += R.o.hasDays ? slChart(R) : '<div class="card muted">' + (zh ? '这个月没有每日明细（系统只保留最近约 2 个月的每日数据）' : 'Rincian harian bulan ini tidak tersedia (hanya ±2 bulan terakhir)') + '</div>';
   return h + '<div class="card" style="cursor:pointer" onclick="go(\'mysales\')"><div style="display:flex;justify-content:space-between;align-items:center"><b>' + t('msT') + '</b><span style="color:var(--g)">›</span></div></div>';
