@@ -112,7 +112,7 @@ var TX = {
     ada: 'Ada', tidak: 'Tidak', stockOut: 'Stok menipis / habis', requestNew: 'Produk yang belum pernah ada di toko (diminta pelanggan)', lostSales: 'Pelanggan tidak jadi beli karena stok habis',
     opsIssue: 'Kendala operasional', competitor: 'Info kompetitor', defect: 'Barang rusak / cacat', idea: 'Ide / masukan', writeHere: 'Tulis di sini…',
     soDone: 'SO harian sudah dilakukan', soBrands: 'Brand yang di-SO', soDiff: 'Selisih (tulis 0 kalau tidak ada)', lock: 'Foto toko terkunci', nextStep: 'Lanjut', prev: 'Kembali', submit: 'Kirim laporan',
-    needLock: 'Foto toko terkunci wajib', records: 'Riwayat 7 hari saya', recT: { ABSEN: 'Absen', BUKA: 'Cek Buka Toko', FULL: 'Laporan Akhir Shift', KONDISI: 'Kondisi Toko' },
+    needLock: 'Foto toko terkunci wajib', records: 'Kehadiran saya', calSum: ['Masuk', 'Tepat waktu', 'Terlambat', 'Pulang awal', 'Tanpa laporan'], calLeg: { green: 'Tepat waktu', yellow: 'Terlambat / pulang awal', red: 'Tanpa laporan pulang', live: 'Sedang kerja', grey: 'Tidak ada catatan', plan: 'Jadwal shift' }, wk: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'], calIn: 'Absen masuk', calBuka: 'Cek buka toko', calOut: 'Laporan pulang', calNote: 'Masukan yang saya kirim', calNone: 'Belum ada', calLate: function (m) { return 'terlambat ' + m + ' mnt'; }, calEarly: function (m) { return m + ' mnt lebih awal'; }, calOnTime: 'tepat waktu', calOutEarly: function (m) { return 'pulang ' + m + ' mnt lebih awal'; }, calPlan: 'Jadwal', calSales: 'Penjualan toko', calNoRec: 'Tidak ada catatan absen hari ini.', calClose: 'Tutup', calHint: 'Ketuk tanggal untuk lihat detail.', recT: { ABSEN: 'Absen', BUKA: 'Cek Buka Toko', FULL: 'Laporan Akhir Shift', KONDISI: 'Kondisi Toko' },
     board: 'Peringkat Top 10', boardWait: function (d) { return 'Peringkat mulai tampil ' + d + '.'; }, history: 'Rincian poin bulan ini', noData: 'Belum ada data.',
     lastMonth: 'Peringkat final bulan lalu'
   },
@@ -143,7 +143,7 @@ var TX = {
     ada: '有', tidak: '没有', stockOut: '库存不足 / 断货', requestNew: '顾客问到、店里从来没卖过的产品', lostSales: '因为断货没买成的顾客',
     opsIssue: '运营问题', competitor: '竞争对手情况', defect: '坏货 / 次品', idea: '想法 / 建议', writeHere: '写在这里…',
     soDone: '今天的盘点做了', soBrands: '盘点了哪些品牌', soDiff: '差异（没有就写 0）', lock: '锁门照', nextStep: '下一步', prev: '上一步', submit: '提交',
-    needLock: '锁门照必须拍', records: '我最近 7 天的记录', recT: { ABSEN: '打卡', BUKA: '开店检查', FULL: '下班卡', KONDISI: '门店情况' },
+    needLock: '锁门照必须拍', records: '我的考勤', calSum: ['上班', '准时', '迟到', '早退', '缺下班卡'], calLeg: { green: '准时', yellow: '迟到 / 早退', red: '没交下班卡', live: '上班中', grey: '没有记录', plan: '排班' }, wk: ['一', '二', '三', '四', '五', '六', '日'], calIn: '上班打卡', calBuka: '开店检查', calOut: '下班卡', calNote: '我提交的反馈', calNone: '没有', calLate: function (m) { return '迟到 ' + m + ' 分钟'; }, calEarly: function (m) { return '提前 ' + m + ' 分钟'; }, calOnTime: '准时', calOutEarly: function (m) { return '提前 ' + m + ' 分钟下班'; }, calPlan: '排班', calSales: '门店销售', calNoRec: '这一天没有打卡记录。', calClose: '关闭', calHint: '点日期看当天明细。', recT: { ABSEN: '打卡', BUKA: '开店检查', FULL: '下班卡', KONDISI: '门店情况' },
     board: '前 10 排行榜', boardWait: function (d) { return '排行榜 ' + d + ' 开始显示。'; }, history: '本月积分明细', noData: '还没有记录。',
     lastMonth: '上个月最终排名'
   }
@@ -174,7 +174,7 @@ function api(fn, args, tries) {
 }
 function toast(m) { var d = document.createElement('div'); d.className = 'toast'; d.textContent = m; document.body.appendChild(d); setTimeout(function () { d.remove(); }, 2800); }
 function busy(m) { var b = document.getElementById('busy'); if (!m) { if (b) b.remove(); return; } if (!b) { b = document.createElement('div'); b.id = 'busy'; b.className = 'busy'; document.body.appendChild(b); } b.textContent = m; }
-function logout() { if (S.sess) api('logout', [S.sess.token], 0).catch(function () {}); S.sess = null; S.home = null; localStorage.removeItem('tk_sess'); try { Object.keys(localStorage).filter(function (k) { return k.indexOf('tk_home_') === 0; }).forEach(function (k) { localStorage.removeItem(k); }); } catch (e) {} S.view = 'home'; render(); }
+function logout() { if (S.sess) api('logout', [S.sess.token], 0).catch(function () {}); S.sess = null; S.home = null; localStorage.removeItem('tk_sess'); try { Object.keys(localStorage).filter(function (k) { return k.indexOf('tk_home_') === 0 || k.indexOf('tk_cal_') === 0; }).forEach(function (k) { localStorage.removeItem(k); }); } catch (e) {} S.view = 'home'; render(); }
 
 // ---------- 照片：压缩到长边 1280、JPEG 0.7，上传更快 ----------
 function compress(file) {
@@ -307,7 +307,7 @@ function go(v) {
   if (v === 'absen') { S.photo = null; var ok = (S.home.opts || []).filter(function (o) { return o.ok; }); S.shift = S.home.shift ? S.home.shift.code : (ok.length === 1 ? ok[0].code : null); }
   if (v === 'buka') { S.photo = null; S.ck = { alat: false, bersih: false, display: false }; }
   if (v === 'card') { S.cd = { step: S.home.card.kind === 'FULL' ? 1 : 3, full: S.home.card.kind === 'FULL', sales: {}, shots: [], cust: {}, cond: {}, has: {}, so: { done: false }, lock: null }; }
-  if (v === 'rec') { S.rec = null; api('myRecords', [S.sess.token]).then(function (r) { S.rec = r; if (S.view === 'rec') render(); }).catch(function () { toast(t('err')); }); }
+  if (v === 'rec') { S.calSel = null; calLoad(S.calYm || null); }
   if (v === 'poin') { api('poin', [S.sess.token]).then(function (r) { S.pn = r; if (S.view === 'poin') render(); }).catch(function () {}); }
   render(); window.scrollTo(0, 0); if (v === 'home') loadHome();
 }
@@ -366,7 +366,7 @@ function vPoin() {
 function vSaya() {
   var u = S.sess.user, H = S.home;
   return '<div class="top"><div class="name">' + esc(u.fullName) + '</div><div class="store">' + esc(u.nick) + ' · ' + esc(u.role) + '</div><div class="store">' + (H && H.stores ? H.stores.map(function (s) { return esc(s.name); }).join(', ') : '') + '</div></div>' +
-    '<div class="page"><button class="btn ghost" onclick="swLang()">' + t('lang') + ': ' + (L === 'id' ? 'Bahasa Indonesia → 中文' : '中文 → Bahasa Indonesia') + '</button>' +
+    '<div class="page"><button class="btn" onclick="go(\'rec\')">📅 ' + t('records') + '</button><button class="btn ghost" onclick="swLang()">' + t('lang') + ': ' + (L === 'id' ? 'Bahasa Indonesia → 中文' : '中文 → Bahasa Indonesia') + '</button>' +
     '<button class="btn ghost" onclick="logout()">' + t('logout') + '</button></div>';
 }
 
@@ -440,15 +440,55 @@ function share() {
   location.href = 'https://wa.me/?text=' + encodeURIComponent(sh.text);
 }
 // ---------- 我的记录：最近 7 天 ----------
+function calLoad(ym) {
+  var key = 'tk_cal_' + (S.sess.user.nick || '').toLowerCase() + '_' + (ym || 'cur');
+  try { var c = JSON.parse(localStorage.getItem(key) || 'null'); if (c) { S.cal = c; S.calYm = c.ym; } else S.cal = null; } catch (e) { S.cal = null; }
+  if (S.view === 'rec') render();
+  api('myMonth', [S.sess.token, ym || '']).then(function (r) { S.cal = r; S.calYm = r.ym; try { localStorage.setItem(key, JSON.stringify(r)); } catch (e) {} if (S.view === 'rec') render(); }).catch(function () { if (!S.cal) toast(t('err')); });
+}
+function calMove(n) { var y = +S.calYm.slice(0, 4), m = +S.calYm.slice(5, 7) - 1 + n; y += Math.floor(m / 12); m = ((m % 12) + 12) % 12; S.calSel = null; calLoad(y + '-' + ('0' + (m + 1)).slice(-2)); }
+function calStat(dt, D, C) {
+  if (D && D.absen) { if (!D.card) return dt < C.today ? 'red' : 'live'; return (D.absen.diff > 0 || D.card.early > 10) ? 'yellow' : 'green'; }
+  if (dt > C.today) return C.sched[dt] ? 'plan' : 'none';
+  return dt < C.today ? 'grey' : (C.sched[dt] ? 'plan' : 'none');
+}
+var CAL_BG = { green: '#34a853', yellow: '#fbbc04', red: '#ea4335', live: '#ceead6', grey: '#e3e3e0', plan: '#fff', none: '#fff' };
 function vRec() {
-  var r = S.rec, h = '<div class="page"><button class="back" onclick="go(\'home\')">' + t('back') + '</button><h2>' + t('records') + '</h2>';
-  if (!r) return h + '<div class="card">…</div></div>';
-  if (!r.length) return h + '<div class="card">' + t('noData') + '</div></div>';
-  return h + r.map(function (d) {
-    return '<div class="card" style="margin:0 0 10px"><h3>' + dayLbl(d.date) + '</h3>' + d.items.map(function (x) {
-      return '<div style="display:flex;justify-content:space-between;padding:6px 0;border-top:1px dashed #e6e4df;font-size:14px"><div>' + x.time + ' · ' + t('recT')[x.t] + (x.shift ? ' (' + t('shiftN')[x.shift] + ')' : '') + (x.total ? '<br><small style="color:#6b6b6b">' + money(x.total) + '</small>' : '') + '</div></div>';
-    }).join('') + '</div>';
-  }).join('') + '</div>';
+  var C = S.cal, h = '<div class="page"><button class="back" onclick="go(\'home\')">' + t('back') + '</button><h2>' + t('records') + '</h2>';
+  if (!C) return h + '<div class="card" style="margin:0">…</div></div>';
+  var y = +C.ym.slice(0, 4), m = +C.ym.slice(5, 7), first = new Date(Date.UTC(y, m - 1, 1)), nd = new Date(Date.UTC(y, m, 0)).getUTCDate(), lead = (first.getUTCDay() + 6) % 7;
+  var sum = [0, 0, 0, 0, 0], cells = '';
+  for (var k = 0; k < lead; k++) cells += '<div></div>';
+  for (var d = 1; d <= nd; d++) {
+    var dt = C.ym + '-' + ('0' + d).slice(-2), D = C.days[dt], st = calStat(dt, D, C);
+    if (D && D.absen) { sum[0]++; if (D.absen.diff > 0) sum[2]++; if (D.card && D.card.early > 10) sum[3]++; if (D.card && D.absen.diff <= 0 && D.card.early <= 10) sum[1]++; if (!D.card && dt < C.today) sum[4]++; }
+    var dark = st === 'green' || st === 'red';
+    cells += '<div onclick="S.calSel=\'' + dt + '\';render()" style="aspect-ratio:1;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;cursor:pointer;background:' + CAL_BG[st] + ';color:' + (dark ? '#fff' : st === 'none' && dt > C.today ? '#b0b0b0' : '#000') +
+      ';border:' + (dt === C.today ? '2.5px solid #000' : st === 'plan' ? '1.5px dashed #9aa0a6' : st === 'none' ? '1px solid #eee' : '0') + '">' + d + '</div>';
+  }
+  var nav = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><button class="back" style="margin:0" onclick="calMove(-1)">‹</button><b style="font-size:17px">' + (L === 'id' ? ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'][m - 1] + ' ' + y : y + '年' + m + '月') + '</b><button class="back" style="margin:0' + (C.ym >= C.today.slice(0, 7) ? ';visibility:hidden' : '') + '" onclick="calMove(1)">›</button></div>';
+  var sumH = '<div style="display:flex;gap:6px;margin-bottom:12px">' + t('calSum').map(function (n, k) { return '<div style="flex:1;text-align:center;background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 0"><div style="font-size:18px;font-weight:800' + (k >= 2 && sum[k] ? ';color:' + (k === 4 ? '#ea4335' : '#b06000') : '') + '">' + sum[k] + '</div><div style="font-size:11px;color:var(--g)">' + n + '</div></div>'; }).join('') + '</div>';
+  var grid = '<div class="card" style="margin:0 0 10px"><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;text-align:center;font-size:12px;color:var(--g);margin-bottom:6px">' + t('wk').map(function (w) { return '<div>' + w + '</div>'; }).join('') + '</div><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px">' + cells + '</div></div>';
+  var lg = t('calLeg'), leg = '<div style="display:flex;flex-wrap:wrap;gap:8px 14px;font-size:12px;color:#3c4043;margin-bottom:6px">' + ['green', 'yellow', 'red', 'live', 'grey', 'plan'].map(function (k) { return '<span style="display:flex;align-items:center;gap:5px"><i style="width:12px;height:12px;border-radius:3px;display:inline-block;background:' + CAL_BG[k] + (k === 'plan' ? ';border:1.5px dashed #9aa0a6' : '') + '"></i>' + lg[k] + '</span>'; }).join('') + '</div><div style="font-size:12px;color:var(--g)">' + t('calHint') + '</div>';
+  return h + nav + sumH + grid + leg + '</div>' + (S.calSel ? calPop(S.calSel) : '');
+}
+function calPop(dt) {
+  var C = S.cal, D = C.days[dt] || {}, st = calStat(dt, C.days[dt], C), lg = t('calLeg'), P = C.sched[dt], rows = [];
+  var row = function (a, b) { rows.push('<div style="display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-top:1px solid #f0efeb;font-size:15px"><span style="color:var(--g)">' + a + '</span><span style="text-align:right;font-weight:600">' + b + '</span></div>'); };
+  if (P) row(t('calPlan'), t('shiftN')[P.shift] + ' ' + P.start + '–' + P.end);
+  if (D.absen) {
+    row(t('calIn'), D.absen.time + ' · ' + (D.absen.diff > 0 ? t('calLate')(D.absen.diff) : D.absen.diff < 0 ? t('calEarly')(-D.absen.diff) : t('calOnTime')) + '<br><small style="color:var(--g);font-weight:400">' + t('shiftN')[D.absen.shift] + ' ' + D.absen.start + '–' + D.absen.end + ' · ' + esc(D.absen.store) + '</small>');
+    row(t('calBuka'), D.buka ? D.buka.time : t('calNone'));
+    row(t('calOut'), D.card ? D.card.time + ' · ' + (D.card.early > 10 ? t('calOutEarly')(D.card.early) : t('calOnTime')) + '<br><small style="color:var(--g);font-weight:400">' + t('recT')[D.card.kind] + '</small>' : t('calNone'));
+    if (D.card && D.card.kind === 'FULL' && D.card.total) row(t('calSales'), money(D.card.total));
+    var n = D.card && D.card.notes ? Object.keys(D.card.notes) : [];
+    if (n.length) rows.push('<div style="padding:10px 0 2px;border-top:1px solid #f0efeb;font-size:13px;color:var(--g)">' + t('calNote') + '</div>' + n.map(function (k) { return '<div style="font-size:14px;padding:4px 0"><b>' + t(k) + '</b><br>' + esc(D.card.notes[k]) + '</div>'; }).join(''));
+  } else if (!P) rows.push('<div style="padding:12px 0;color:var(--g)">' + t('calNoRec') + '</div>');
+  var dd = new Date(dt + 'T00:00:00Z'), wd = t('wk')[(dd.getUTCDay() + 6) % 7];
+  return '<div onclick="if(event.target===this){S.calSel=null;render()}" style="position:fixed;inset:0;background:rgba(0,0,0,.35);display:flex;align-items:flex-end;z-index:50"><div style="background:#fff;width:100%;max-width:520px;margin:0 auto;border-radius:20px 20px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom));max-height:80vh;overflow:auto">' +
+    '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><i style="width:14px;height:14px;border-radius:4px;display:inline-block;background:' + CAL_BG[st] + (st === 'plan' || st === 'none' ? ';border:1.5px dashed #9aa0a6' : '') + '"></i><b style="font-size:17px">' + dayLbl(dt) + ' · ' + wd + '</b></div>' +
+    (st !== 'none' ? '<div style="font-size:14px;margin-bottom:6px">' + lg[st] + '</div>' : '') + rows.join('') +
+    '<button class="btn ghost" style="margin-top:12px" onclick="S.calSel=null;render()">' + t('calClose') + '</button></div></div>';
 }
 render();
 if (S.sess && !S.sess.mustChange) loadHome();
