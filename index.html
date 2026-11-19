@@ -104,7 +104,7 @@ table.r{width:100%;border-collapse:collapse;font-size:14px}table.r td{padding:8p
 <div class="app" id="app"></div>
 <script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261119145601';
+var APP_VER = '20261119150025';
 function chkVer() { fetch('version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
@@ -132,7 +132,7 @@ var TX = {
     sending: 'Mengirim…', upl: 'Mengunggah foto…', needPhoto: 'Ambil foto dulu', got: 'Absen tercatat', ptsGot: 'poin', doneBuka: 'Toko READY ✓',
     alat: 'HP, tablet/POS, EDC, lampu & AC menyala', bersih: 'Toko bersih: lantai, rak & etalase', display: 'Display rapi & siap', fotoToko: 'Foto depan toko',
     sendBuka: 'Kirim — Toko READY', shiftN: { F: 'Full', M: 'Pagi', E: 'Malam' },
-    rules: 'Aturan poin', rule: [['ABSEN MASUK', ''], ['Datang ≥ 20 mnt lebih awal', '+3'], ['10–20 mnt lebih awal', '+2.5'], ['0–10 mnt lebih awal', '+2'], ['Telat 0–10 mnt', '0'], ['Telat 10–20 mnt', '−2'], ['Telat 20–30 mnt', '−3'], ['Telat > 30 mnt', '−5'], ['PULANG', ''], ['Absen pulang tepat waktu (paling cepat 10 mnt sebelum shift selesai)', '+2'], ['Pulang 10–20 mnt lebih awal', '−2'], ['Pulang 20–30 mnt lebih awal', '−3'], ['Pulang > 30 mnt lebih awal', '−5'], ['LAINNYA', ''], ['Izin / cuti yang sudah disetujui', '0'], ['Tidak masuk tanpa izin (HR konfirmasi)', '−10'], ['Kuis aturan LK School (sekali)', '+5'], ['PERINGKAT', ''], ['Poin sama: yang lebih sedikit potongan di atas, lalu rata-rata datang lebih awal', ''], ['Peringkat ≤ 10 semua masuk Top 10; poin 0 tidak tampil', ''], ['Tanggal 1–7: tampil peringkat final bulan lalu', ''], ['Salah hitung? Lapor ke atasan dalam 3 hari', '']],
+    rules: 'Aturan poin', rule: [['ABSEN MASUK', ''], ['Datang ≥ 20 mnt lebih awal', '+3'], ['10–20 mnt lebih awal', '+2.5'], ['0–10 mnt lebih awal', '+2'], ['Telat 0–10 mnt', '0'], ['Telat 10–20 mnt', '−2'], ['Telat 20–30 mnt', '−3'], ['Telat > 30 mnt', '−5'], ['PULANG', ''], ['Absen pulang tepat waktu (10 mnt sebelum s/d 60 mnt sesudah shift selesai)', '+2'], ['Pulang 10–20 mnt lebih awal', '−2'], ['Pulang 20–30 mnt lebih awal', '−3'], ['Pulang > 30 mnt lebih awal', '−5'], ['LAINNYA', ''], ['Izin / cuti yang sudah disetujui', '0'], ['Tidak masuk tanpa izin (HR konfirmasi)', '−10'], ['Kuis aturan LK School (sekali)', '+5'], ['PERINGKAT', ''], ['Poin sama: yang lebih sedikit potongan di atas, lalu rata-rata datang lebih awal', ''], ['Peringkat ≤ 10 semua masuk Top 10; poin 0 tidak tampil', ''], ['Tanggal 1–7: tampil peringkat final bulan lalu', ''], ['Salah hitung? Lapor ke atasan dalam 3 hari', '']],
     logout: 'Keluar', lang: 'Bahasa', test: 'AKUN TES — tidak masuk peringkat',
     cardT: 'Laporan Akhir Shift', kondT: 'Kondisi Toko', cardS: 'Penjualan, pelanggan, kondisi toko, SO + foto kunci.', kondS: 'Isi kondisi toko sebelum pulang.', cardB: 'Isi laporan',
     workS2: function (x) { return 'Laporan Akhir Shift dibuka jam ' + x + '.'; }, fullBy: function (n, x) { return 'Laporan toko sudah dikirim ' + n + ' ' + x + '. Kamu isi Kondisi Toko saja.'; },
@@ -187,7 +187,7 @@ var TX = {
     sending: '提交中…', upl: '正在上传照片…', needPhoto: '请先拍照', got: '打卡成功', ptsGot: '分', doneBuka: '门店已 READY ✓',
     alat: '手机、平板/POS、EDC、灯和空调都已打开', bersih: '店内干净：地面、货架、柜台', display: '陈列整齐，可以营业', fotoToko: '门店正面照',
     sendBuka: '提交 — 门店 READY', shiftN: { F: '全天', M: '早班', E: '晚班' },
-    rules: '积分规则', rule: [['上班打卡', ''], ['提前 ≥ 20 分钟', '+3'], ['提前 10–20 分钟', '+2.5'], ['提前 0–10 分钟', '+2'], ['迟到 0–10 分钟', '0'], ['迟到 10–20 分钟', '−2'], ['迟到 20–30 分钟', '−3'], ['迟到 30 分钟以上', '−5'], ['下班', ''], ['下班打卡准时（最早下班前 10 分钟）', '+2'], ['早走 10–20 分钟', '−2'], ['早走 20–30 分钟', '−3'], ['早走 30 分钟以上', '−5'], ['其他', ''], ['事先批准的请假', '0'], ['无故缺勤（HR 确认）', '−10'], ['LK School 规则小测验（一次）', '+5'], ['排名', ''], ['同分：扣分次数少的在前，再比平均提前到店', ''], ['名次 ≤ 10 都算前 10；0 分不上榜', ''], ['每月 1–7 号显示上个月最终排名', ''], ['觉得算错：3 天内找上级申诉', '']],
+    rules: '积分规则', rule: [['上班打卡', ''], ['提前 ≥ 20 分钟', '+3'], ['提前 10–20 分钟', '+2.5'], ['提前 0–10 分钟', '+2'], ['迟到 0–10 分钟', '0'], ['迟到 10–20 分钟', '−2'], ['迟到 20–30 分钟', '−3'], ['迟到 30 分钟以上', '−5'], ['下班', ''], ['下班打卡准时（下班前 10 分钟到下班后 60 分钟）', '+2'], ['早走 10–20 分钟', '−2'], ['早走 20–30 分钟', '−3'], ['早走 30 分钟以上', '−5'], ['其他', ''], ['事先批准的请假', '0'], ['无故缺勤（HR 确认）', '−10'], ['LK School 规则小测验（一次）', '+5'], ['排名', ''], ['同分：扣分次数少的在前，再比平均提前到店', ''], ['名次 ≤ 10 都算前 10；0 分不上榜', ''], ['每月 1–7 号显示上个月最终排名', ''], ['觉得算错：3 天内找上级申诉', '']],
     logout: '退出登录', lang: '语言', test: '测试账号 — 不进排名',
     cardT: '下班卡', kondT: '门店情况', cardS: '销售、顾客、门店情况、盘点 + 锁门照。', kondS: '下班前填写门店情况。', cardB: '开始填写',
     workS2: function (x) { return '下班问卷 ' + x + ' 开放。'; }, fullBy: function (n, x) { return n + ' 已在 ' + x + ' 交了门店的下班卡，你只填门店情况。'; },
@@ -466,7 +466,7 @@ function sendBuka() {
 function rsn(r) {
   r = String(r || '').replace(/^((?:Absen|Laporan Akhir Shift|Kondisi Toko) )\d{1,2}:\d{2} /, '$1'); if (L !== 'zh') return r;
   return r.replace(/pulang (\d+) mnt lebih awal/g, '提前 $1 分钟下班').replace(/terlambat (\d+) mnt/g, '迟到 $1 分钟').replace(/lebih awal (\d+) mnt/g, '提前 $1 分钟').replace(/tepat waktu/g, '准时')
-    .replace(/, \+(\d+) mnt\)/g, '，迟到 $1 分钟)').replace(/, -(\d+) mnt\)/g, '，提前 $1 分钟)').replace(/^Absen Pulang/, '下班打卡').replace(/shift selesai (\d{1,2}:\d{2})/, '班次 $1 结束').replace(/^Absen /, '上班打卡 ').replace(/^Laporan Akhir Shift /, '下班卡 ').replace(/^Kondisi Toko /, '门店情况 ').replace(/shift /, '班次 ').replace(/, /g, '，').replace(/ ?\(/g, '（').replace(/\)/g, '）');
+    .replace(/, \+(\d+) mnt\)/g, '，迟到 $1 分钟)').replace(/, -(\d+) mnt\)/g, '，提前 $1 分钟)').replace(/^Absen Pulang/, '下班打卡').replace(/shift selesai (\d{1,2}:\d{2})/, '班次 $1 结束').replace(/absen pulang (\d+) mnt sesudah shift selesai/, '下班后 $1 分钟才打卡').replace(/^Absen /, '上班打卡 ').replace(/^Laporan Akhir Shift /, '下班卡 ').replace(/^Kondisi Toko /, '门店情况 ').replace(/shift /, '班次 ').replace(/, /g, '，').replace(/ ?\(/g, '（').replace(/\)/g, '）');
 }
 function vPoin() {
   var P = S.home ? S.home.points : { total: 0 }, N = S.pn, tab = S.pTab || 0;
