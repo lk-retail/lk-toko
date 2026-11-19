@@ -80,7 +80,7 @@ table.r{width:100%;border-collapse:collapse;font-size:14px}table.r td{padding:8p
 <div class="app" id="app"></div>
 <script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261119131158';
+var APP_VER = '20261119131815';
 function chkVer() { fetch('version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
@@ -104,7 +104,7 @@ var TX = {
     noShift: 'Jam shift toko ini belum diisi. Hubungi Operation Manager.', noStore: 'Kamu belum terdaftar di toko mana pun. Hubungi HR.',
     in10: function (r) { return '<b>Top 10</b>peringkat ' + r; }, gap: function (g) { return '<b>' + fmtP(g).replace('+', '') + ' poin lagi</b>masuk Top 10'; }, gapNone: '<b>Absen tepat waktu</b>untuk masuk Top 10', boardSoon: '<b>Peringkat Top 10</b>mulai 8 Des',
     todayP: function (p) { return 'Hari ini: ' + fmtP(p) + ' poin'; }, more: ['Barang', 'Perbaikan & Laporan', 'LK School'], soon: 'Segera',
-    nav: ['Hari Ini', 'Tugas', 'Poin', 'Saya'], attSub: function (a) { return a.days ? 'Bulan ini: masuk ' + a.days + ' hari · tepat waktu ' + a.onTime + (a.late ? ' · terlambat ' + a.late : '') + (a.early ? ' · pulang awal ' + a.early : '') + (a.noCard ? ' · tanpa laporan ' + a.noCard : '') : 'Kalender kehadiran bulan ini'; }, taskT: 'Tugas Toko', pcT: 'Kas kecil saya', pcNone: 'Belum ada kas kecil', pcBal: 'Saldo', pcAsOf: 'Data per', pcCols: ['Ambil', 'Dipakai', 'Kembali', 'Saldo'], taskTabs: ['Belum selesai', 'Selesai'], taskSoonT: 'Segera hadir', taskSoonS: 'Di sini nanti ada tugas dari Area Supervisor / tim operasional, misalnya pasang materi promo atau foto display. Tiap tugas ada batas waktu (bisa beberapa hari) dan tidak menghalangi absen pulang.', back: '‹ Kembali', shift: 'Shift', selfie: 'Ambil selfie', retake: 'Foto ulang', send: 'Kirim absen',
+    nav: ['Hari Ini', 'Tugas', 'Poin', 'Saya'], attSub: function (a) { return a.days ? 'Bulan ini: masuk ' + a.days + ' hari · tepat waktu ' + a.onTime + (a.late ? ' · terlambat ' + a.late : '') + (a.early ? ' · pulang awal ' + a.early : '') + (a.noCard ? ' · tanpa laporan ' + a.noCard : '') : 'Kalender kehadiran bulan ini'; }, taskT: 'Tugas Toko', pcT: 'Kas kecil saya', pcNone: 'Belum ada kas kecil', pcBal: 'Saldo', pcAsOf: 'Data per', pcCols: ['Ambil', 'Dipakai', 'Kembali', 'Saldo'], nStores: function (n) { return n + ' toko'; }, taskTabs: ['Belum selesai', 'Riwayat'], taskSoonT: 'Segera hadir', taskSoonS: 'Di sini nanti ada tugas dari Area Supervisor / tim operasional, misalnya pasang materi promo atau foto display. Tiap tugas ada batas waktu (bisa beberapa hari) dan tidak menghalangi absen pulang.', back: '‹ Kembali', shift: 'Shift', selfie: 'Ambil selfie', retake: 'Foto ulang', send: 'Kirim absen',
     sending: 'Mengirim…', upl: 'Mengunggah foto…', needPhoto: 'Ambil foto dulu', got: 'Absen tercatat', ptsGot: 'poin', doneBuka: 'Toko READY ✓',
     alat: 'HP, tablet/POS, EDC, lampu & AC menyala', bersih: 'Toko bersih: lantai, rak & etalase', display: 'Display rapi & siap', fotoToko: 'Foto depan toko',
     sendBuka: 'Kirim — Toko READY', shiftN: { F: 'Full', M: 'Pagi', E: 'Malam' },
@@ -135,7 +135,7 @@ var TX = {
     noShift: '这家店的班次时间还没填，请联系运营经理。', noStore: '你还没有分配门店，请联系 HR。',
     in10: function (r) { return '<b>前 10</b>第 ' + r + ' 名'; }, gap: function (g) { return '<b>还差 ' + fmtP(g).replace('+', '') + ' 分</b>进前 10'; }, gapNone: '<b>准时打卡</b>就能进前 10', boardSoon: '<b>前 10 排行榜</b>12/8 开始',
     todayP: function (p) { return '今天：' + fmtP(p) + ' 分'; }, more: ['货品', '报修与反馈', 'LK School'], soon: '即将上线',
-    nav: ['今天', '任务', '积分', '我的'], attSub: function (a) { return a.days ? '本月上班 ' + a.days + ' 天 · 准时 ' + a.onTime + ' 天' + (a.late ? ' · 迟到 ' + a.late + ' 次' : '') + (a.early ? ' · 早退 ' + a.early + ' 次' : '') + (a.noCard ? ' · 缺下班卡 ' + a.noCard + ' 次' : '') : '查看本月考勤日历'; }, taskT: '门店任务', pcT: '我的备用金', pcNone: '暂无备用金', pcBal: '余额', pcAsOf: '数据更新于', pcCols: ['申请', '核销', '归还', '余额'], taskTabs: ['待完成', '已完成'], taskSoonT: '即将上线', taskSoonS: '这里以后会有区域主管和运营团队发的任务，比如摆放促销物料、拍陈列照片。每个任务有自己的期限（可以是几天），不影响每天的下班打卡。', back: '‹ 返回', shift: '班次', selfie: '拍自拍', retake: '重拍', send: '提交打卡',
+    nav: ['今天', '任务', '积分', '我的'], attSub: function (a) { return a.days ? '本月上班 ' + a.days + ' 天 · 准时 ' + a.onTime + ' 天' + (a.late ? ' · 迟到 ' + a.late + ' 次' : '') + (a.early ? ' · 早退 ' + a.early + ' 次' : '') + (a.noCard ? ' · 缺下班卡 ' + a.noCard + ' 次' : '') : '查看本月考勤日历'; }, taskT: '门店任务', pcT: '我的备用金', pcNone: '暂无备用金', pcBal: '余额', pcAsOf: '数据更新于', pcCols: ['申请', '核销', '归还', '余额'], nStores: function (n) { return n + ' 家店'; }, taskTabs: ['待完成', '记录'], taskSoonT: '即将上线', taskSoonS: '这里以后会有区域主管和运营团队发的任务，比如摆放促销物料、拍陈列照片。每个任务有自己的期限（可以是几天），不影响每天的下班打卡。', back: '‹ 返回', shift: '班次', selfie: '拍自拍', retake: '重拍', send: '提交打卡',
     sending: '提交中…', upl: '正在上传照片…', needPhoto: '请先拍照', got: '打卡成功', ptsGot: '分', doneBuka: '门店已 READY ✓',
     alat: '手机、平板/POS、EDC、灯和空调都已打开', bersih: '店内干净：地面、货架、柜台', display: '陈列整齐，可以营业', fotoToko: '门店正面照',
     sendBuka: '提交 — 门店 READY', shiftN: { F: '全天', M: '早班', E: '晚班' },
@@ -164,6 +164,8 @@ var IC = {
   home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11l9-7 9 7v9h-6v-6H9v6H3z"/></svg>',
   star: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>',
   task: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="17" rx="2"/><path d="M9 3h6v3H9z"/><path d="M8.5 13l2.5 2.5 4.5-5"/></svg>',
+  shop: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 9l1.5-5h13L20 9"/><path d="M4 9h16v2a3 3 0 0 1-5.3 1.9A3 3 0 0 1 12 14a3 3 0 0 1-2.7-1.1A3 3 0 0 1 4 11z"/><path d="M5 13v7h14v-7"/><path d="M10 20v-4h4v4"/></svg>',
+  wallet: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="6" width="18" height="14" rx="2"/><path d="M3 10h18"/><circle cx="16.5" cy="14.5" r="1.2"/><path d="M6 6l9-3 1.5 3"/></svg>',
   cal: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>',
   user: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4.5-6 8-6s7 2 8 6"/></svg>'
 };
@@ -208,7 +210,7 @@ function render() {
   if (!S.sess) { a.innerHTML = vLogin(); return; }
   if (S.sess.mustChange) { a.innerHTML = vNewPw(); return; }
   var v = S.view, h = '';
-  if (v === 'home') h = vHome(); else if (v === 'absen') h = vAbsen(); else if (v === 'buka') h = vBuka(); else if (v === 'poin') h = vPoin(); else if (v === 'saya') h = vSaya(); else if (v === 'res') h = vRes(); else if (v === 'card') h = vCard(); else if (v === 'rec') h = vRec(); else if (v === 'tugas') h = vTugas();
+  if (v === 'home') h = vHome(); else if (v === 'absen') h = vAbsen(); else if (v === 'buka') h = vBuka(); else if (v === 'poin') h = vPoin(); else if (v === 'saya') h = vSaya(); else if (v === 'res') h = vRes(); else if (v === 'card') h = vCard(); else if (v === 'rec') h = vRec(); else if (v === 'tugas') h = vTugas(); else if (v === 'mystore') h = vMyStore(); else if (v === 'mypc') h = vMyPc();
   if (v === 'home' || v === 'poin' || v === 'saya' || v === 'tugas') h += vNav();
   a.innerHTML = h;
 }
@@ -400,19 +402,35 @@ function vTugas() {
     '<div style="padding:12px 14px 8px"><div style="display:flex;background:#e6e4df;border-radius:12px;padding:3px">' + t('taskTabs').map(function (n, k) { return '<button style="flex:1;border:0;border-radius:10px;padding:9px 2px;font-size:13px;font-weight:' + (k === 0 ? '700;background:#fff;color:#000;box-shadow:0 1px 3px rgba(0,0,0,.12)' : '500;background:transparent;color:#6b6b6b') + '">' + n + '</button>'; }).join('') + '</div></div>' +
     '<div class="card" style="text-align:center;padding:28px 18px"><div style="width:52px;height:52px;margin:0 auto 10px;color:#b0b0ab">' + IC.task + '</div><div style="font-size:17px;font-weight:700">' + t('taskSoonT') + '</div><div style="font-size:14px;color:var(--g);margin-top:8px;line-height:1.5">' + t('taskSoonS') + '</div></div>';
 }
-function attCard(H) {
-  return '<div class="card" style="cursor:pointer;display:flex;align-items:center;gap:14px" onclick="go(\'rec\')"><div style="width:44px;height:44px;border-radius:12px;background:var(--y);display:flex;align-items:center;justify-content:center;flex:none"><span style="width:24px;height:24px;display:block">' + IC.cal + '</span></div><div style="flex:1"><div style="font-size:16px;font-weight:700">' + t('records') + '</div><div style="font-size:13px;color:var(--g);margin-top:2px">' + t('attSub')((H && H.att) || { days: 0 }) + '</div></div><div style="font-size:22px;color:var(--g)">›</div></div>';
+function entryRow(ic, title, sub, go_, last) {
+  return '<div' + (go_ ? ' onclick="go(\'' + go_ + '\')"' : '') + ' style="display:flex;align-items:center;gap:14px;padding:14px 16px;' + (go_ ? 'cursor:pointer;' : '') + (last ? '' : 'border-bottom:1px solid var(--line)') + '"><div style="width:44px;height:44px;border-radius:12px;background:var(--y);display:flex;align-items:center;justify-content:center;flex:none"><span style="width:24px;height:24px;display:block">' + ic + '</span></div><div style="flex:1;min-width:0"><div style="font-size:16px;font-weight:700">' + title + '</div><div style="font-size:13px;color:var(--g);margin-top:2px">' + sub + '</div></div><div style="font-size:22px;color:' + (go_ ? 'var(--g)' : 'transparent') + '">›</div></div>';
 }
-function storeCards(H) {
+function sayaRows(H) {
+  var ss = H && H.stores ? H.stores : [], P = S.pc;
+  var stSub = ss.length > 1 ? t('nStores')(ss.length) + ' · ' + ss.map(function (x) { return esc(shortSt(x.name)); }).join(', ') : ss.length ? (function (x) { var sh = x.shifts || []; return esc(x.name) + (sh.length ? ' · ' + t('hours') + ' ' + sh.map(function (z) { return z.start; }).sort()[0] + '–' + sh.map(function (z) { return z.end; }).sort().slice(-1)[0] : ''); })(ss[0]) : '';
+  var pcSub = !P ? '…' : P.has ? t('pcBal') + ' ' + (P.bal < 0 ? '-' : '') + money(Math.abs(P.bal)) : t('pcNone');
+  return '<div class="card" style="padding:0;overflow:hidden;margin-top:14px">' +
+    entryRow(IC.shop, t('myStores'), stSub, 'mystore') +
+    entryRow(IC.cal, t('records'), t('attSub')((H && H.att) || { days: 0 }), 'rec') +
+    entryRow(IC.wallet, t('pcT'), pcSub, P && P.has ? 'mypc' : null, true) + '</div>';
+}
+function vMyStore() {
+  var H = S.home;
+  return '<div class="page"><button class="back" onclick="go(\'saya\')">' + t('back') + '</button><h2>' + t('myStores') + '</h2></div>' + storeCards(H, 1);
+}
+function vMyPc() {
+  return '<div class="page"><button class="back" onclick="go(\'saya\')">' + t('back') + '</button><h2>' + t('pcT') + '</h2></div>' + pcCard();
+}
+function storeCards(H, noTitle) {
   if (!H || !H.stores) return '';
-  return '<div class="card"><h3>' + t('myStores') + '</h3>' + H.stores.map(function (x, k) { var sh = x.shifts || [], op = sh.map(function (z) { return z.start; }).sort()[0], cl = sh.map(function (z) { return z.end; }).sort().slice(-1)[0];
+  return '<div class="card">' + (noTitle ? '' : '<h3>' + t('myStores') + '</h3>') + H.stores.map(function (x, k) { var sh = x.shifts || [], op = sh.map(function (z) { return z.start; }).sort()[0], cl = sh.map(function (z) { return z.end; }).sort().slice(-1)[0];
     return '<div style="padding:10px 0;' + (k ? 'border-top:1px solid var(--line)' : '') + '"><div style="font-size:15px;font-weight:700">' + esc(x.name) + '</div>' +
       (sh.length ? '<div style="font-size:13px;margin-top:4px">' + t('hours') + ' ' + op + '–' + cl + ' (' + esc(x.tzName || '') + ')</div><div style="font-size:13px;color:var(--g);margin-top:2px">' + sh.map(function (z) { return shiftLbl(z); }).join(' · ') + '</div>' : '<div style="font-size:13px;color:var(--g);margin-top:4px">' + t('noShift') + '</div>') +
       (x.sup ? '<div style="font-size:13px;margin-top:4px">' + t('supL') + ': <b>' + esc(x.sup) + '</b></div>' : x.om ? '<div style="font-size:13px;margin-top:4px">' + t('omL') + ': <b>' + esc(x.om) + '</b></div>' : '') + '</div>'; }).join('') + '</div>';
 }
 function pcCard() {
   var m2 = function (n, raw) { n = Number(n) || 0; var x = money(Math.abs(n)); return (n < 0 ? '-' : '') + (raw ? x.replace('Rp ', '') : x); };
-  var P = S.pc, h = '<div class="card"><h3>' + t('pcT') + '</h3>';
+  var P = S.pc, h = '<div class="card">';
   if (!P) return h + '<div style="opacity:.35;font-size:26px;font-weight:800">–</div></div>';
   if (!P.has) return h + '<div style="font-size:16px;color:var(--g)">' + t('pcNone') + '</div></div>';
   var c = t('pcCols');
@@ -426,7 +444,7 @@ function vSaya() {
   var ss = H && H.stores ? H.stores : [], cur = H && H.store ? H.store.name : (ss[0] ? ss[0].name : '');
   var stl = ss.length > 1 ? stChips(H, H.inToday) : '<div class="store">' + esc(cur) + '</div>';
   return '<div class="top"><div class="row"><div><div class="hi">' + esc(u.nick) + ' · ' + esc(u.role) + '</div><div class="name">' + esc(u.fullName) + '</div>' + stl + '</div></div></div>' +
-    '<div style="height:14px"></div>' + storeCards(H) + attCard(H) + pcCard() + '<div class="page"><button class="btn ghost" onclick="swLang()">' + t('lang') + ': ' + (L === 'id' ? 'Bahasa Indonesia → 中文' : '中文 → Bahasa Indonesia') + '</button>' +
+    sayaRows(H) + '<div class="page"><button class="btn ghost" onclick="swLang()">' + t('lang') + ': ' + (L === 'id' ? 'Bahasa Indonesia → 中文' : '中文 → Bahasa Indonesia') + '</button>' +
     '<button class="btn ghost" onclick="logout()">' + t('logout') + '</button></div>';
 }
 
