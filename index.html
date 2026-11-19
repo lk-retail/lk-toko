@@ -80,7 +80,7 @@ table.r{width:100%;border-collapse:collapse;font-size:14px}table.r td{padding:8p
 <div class="app" id="app"></div>
 <script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261119131815';
+var APP_VER = '20261119132337';
 function chkVer() { fetch('version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
@@ -308,7 +308,7 @@ function vNav() {
 }
 function go(v) {
   S.view = v;
-  if (v === 'absen') { S.ckStore = null; S.ck = null; S.photo = null; var ok = (S.home.opts || []).filter(function (o) { return o.ok; }); S.shift = S.home.shift ? S.home.shift.code : (ok.length === 1 ? ok[0].code : null); }
+  if (v === 'absen') { S.ckStore = null; S.ckH = null; S.photo = null; var ok = (S.home.opts || []).filter(function (o) { return o.ok; }); S.shift = S.home.shift ? S.home.shift.code : (ok.length === 1 ? ok[0].code : null); }
   if (v === 'buka') { S.photo = null; S.ck = { alat: false, bersih: false, display: false }; }
   if (v === 'card') { S.cd = { step: S.home.card.kind === 'FULL' ? 1 : 3, full: S.home.card.kind === 'FULL', sales: {}, shots: [], cust: {}, cond: {}, has: {}, so: { done: false }, lock: null }; }
   if (v === 'rec') { S.calSel = null; S.calYm = null; calLoad(null); }
@@ -322,13 +322,14 @@ function stChips(H, cur) {
   return '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">' + H.stores.map(function (x) { var on = cur && x.id === cur; return '<span style="font-size:12px;font-weight:' + (on ? '700;background:#000;color:#FDCD17' : '600;background:rgba(0,0,0,.08);color:#000') + ';padding:4px 10px;border-radius:999px">' + (on ? '✓ ' : '') + esc(shortSt(x.name)) + '</span>'; }).join('') + '</div>';
 }
 function ckMulti() { return S.home.stores && S.home.stores.length > 1; }
-function ckPick(id) { S.ckStore = id; S.ck = null; S.shift = null; render(); api('home', [S.sess.token, id]).then(function (r) { if (S.ckStore !== id) return; S.ck = r; var ok = (r.opts || []).filter(function (o) { return o.ok; }); S.shift = ok.length === 1 ? ok[0].code : null; render(); }).catch(function () { toast(t('err')); }); }
+function ckPick(id) { S.ckStore = id; S.ckH = null; S.shift = null; render(); api('home', [S.sess.token, id]).then(function (r) { if (S.ckStore !== id) return; S.ckH = r; var ok = (r.opts || []).filter(function (o) { return o.ok; }); S.shift = ok.length === 1 ? ok[0].code : null; render(); }).catch(function () { toast(t('err')); }); }
 function vAbsen() {
-  var M = ckMulti(), C = M ? S.ck : S.home, sh = C ? C.store.shifts : [], back = '<div class="page"><button class="back" onclick="go(\'home\')">' + t('back') + '</button><h2>' + t('absenT') + '</h2>';
+  var M = ckMulti(), C = M ? S.ckH : S.home, sh = C ? C.store.shifts : [], back = '<div class="page"><button class="back" onclick="go(\'home\')">' + t('back') + '</button><h2>' + t('absenT') + '</h2>';
   var pickH = M ? '<label class="f">' + t('storePick') + '</label><div style="display:flex;flex-direction:column;gap:8px;margin-bottom:6px">' + S.home.stores.map(function (s) { var on = S.ckStore === s.id; return '<button onclick="ckPick(\'' + s.id + '\')" style="text-align:left;padding:14px 16px;border-radius:12px;font-size:15px;font-weight:700;border:2px solid ' + (on ? '#000;background:#000;color:#FDCD17' : '#e6e4df;background:#fff;color:#000') + '">' + (on ? '✓ ' : '') + esc(s.name) + '</button>'; }).join('') + '</div>' : '';
   if (M && !S.ckStore) return back + pickH + '</div>';
   if (M && !C) return back + pickH + '<div class="card" style="margin:10px 0">…</div></div>';
   var stName = C.store.name;
+  if (!sh.length) return back + pickH + '<div class="alert" style="margin:10px 0">' + t('noShift') + '</div></div>';
   return back + pickH +
     '<label class="f">' + t('shift') + '</label><div class="seg">' + (C.opts || sh).map(function (s) { var dis = s.ok === false; return '<button ' + (dis ? 'disabled style="opacity:.4" ' : '') + 'class="' + (S.shift === s.code ? 'on' : '') + '" onclick="S.shift=\'' + s.code + '\';render()">' + shiftLbl(s) + '' + '</button>'; }).join('') + '</div>' +
     '<label class="photo" for="cam">' + (S.photo ? '<img src="' + S.photo + '">' : t('selfie')) + '</label>' +
@@ -338,7 +339,7 @@ function vAbsen() {
 }
 function pick(inp, to) { var f = inp.files && inp.files[0]; if (!f) return; busy('…'); compress(f).then(function (d) { busy(); if (to === 'shot') { if (S.cd.shots.length < 2) S.cd.shots.push(d); } else if (to === 'lock') S.cd.lock = d; else S.photo = d; render(); }).catch(function () { busy(); toast(t('err')); }); }
 function sendAbsen() {
-  var C = ckMulti() ? S.ck : S.home; if (!C) return toast(t('pickStore'));
+  var C = ckMulti() ? S.ckH : S.home; if (!C) return toast(t('pickStore'));
   if (!S.shift && (C.opts || []).length > 1) return toast(t('pickFirst'));
   if (!S.photo) return toast(t('needPhoto'));
   busy(t('upl'));
