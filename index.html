@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#FDCD17">
+<title>LK Toko</title>
+<style>
+:root{--y:#FDCD17;--k:#111;--g:#6b6b6b;--l:#f3f3f1;--line:#e6e4df;--r:#d93025;--rb:#fdecea;--ok:#1e8e3e;--okb:#e6f4ea}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:#e9e7e2;color:var(--k);-webkit-font-smoothing:antialiased}
+.app{max-width:420px;margin:0 auto;min-height:100vh;background:var(--l);position:relative;padding-bottom:84px}
+.demo{background:#222;color:#fff;font-size:12px;padding:8px 12px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.demo b{color:var(--y);margin-right:4px}
+.demo button{background:#444;color:#fff;border:0;border-radius:6px;padding:4px 8px;font-size:12px}
+.demo button.on{background:var(--y);color:#111}
+.top{background:var(--y);padding:16px 18px 18px}
+.top .row{display:flex;justify-content:space-between;align-items:center}
+.top .hi{font-size:13px;opacity:.75}
+.top .name{font-size:20px;font-weight:700;margin-top:2px}
+.top .store{font-size:13px;margin-top:4px}
+.lang{background:rgba(0,0,0,.08);border:0;border-radius:14px;padding:5px 10px;font-size:12px;font-weight:600}
+.alert{margin:12px 14px 0;background:var(--rb);color:var(--r);border:1px solid #f5c2bd;border-radius:12px;padding:10px 12px;font-size:13px;display:flex;gap:8px}
+.alert b{font-weight:700}
+.next{margin:14px;background:var(--k);color:#fff;border-radius:18px;padding:18px}
+.next .lbl{font-size:12px;color:var(--y);letter-spacing:.04em;text-transform:uppercase;font-weight:700}
+.next .t{font-size:22px;font-weight:700;margin-top:6px;line-height:1.25}
+.next .s{font-size:13px;color:#cfcfcf;margin-top:6px;line-height:1.45}
+.next .btn{display:block;width:100%;margin-top:14px;background:var(--y);color:#111;border:0;border-radius:12px;padding:15px;font-size:17px;font-weight:700}
+.next.done{background:var(--okb);color:var(--k)}
+.next.done .lbl{color:var(--ok)}
+.next.done .s{color:#3c4043}
+.card{margin:0 14px 12px;background:#fff;border-radius:16px;padding:14px 16px;border:1px solid var(--line)}
+.card h3{font-size:13px;color:var(--g);font-weight:600;margin-bottom:10px}
+.steps{display:flex;justify-content:space-between;position:relative}
+.steps:before{content:"";position:absolute;left:18px;right:18px;top:13px;height:2px;background:var(--line)}
+.st{position:relative;text-align:center;flex:1;font-size:11px;color:var(--g)}
+.dot{width:28px;height:28px;border-radius:50%;margin:0 auto 6px;background:#fff;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#bbb}
+.st.ok .dot{background:var(--k);border-color:var(--k);color:var(--y)}
+.st.now .dot{border-color:var(--k);color:var(--k)}
+.st.now{color:var(--k);font-weight:700}
+.st .tm{display:block;font-size:10px;margin-top:2px;color:var(--g);font-weight:400}
+.pts{display:flex;align-items:center;justify-content:space-between}
+.pts .big{font-size:30px;font-weight:800}
+.pts .big small{font-size:13px;font-weight:600;color:var(--g);margin-left:4px}
+.pts .gap{font-size:13px;text-align:right;color:var(--k)}
+.pts .gap b{display:block;font-size:15px}
+.today{font-size:12px;color:var(--g);margin-top:8px;border-top:1px dashed var(--line);padding-top:8px}
+.more{display:flex;gap:10px;margin:0 14px 12px}
+.more a{flex:1;background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 6px;text-align:center;font-size:12px;color:var(--k);text-decoration:none}
+.more a i{display:block;font-style:normal;font-size:20px;margin-bottom:4px}
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:420px;background:#fff;border-top:1px solid var(--line);display:flex;padding:8px 0 calc(8px + env(safe-area-inset-bottom))}
+.nav a{flex:1;text-align:center;font-size:11px;color:var(--g);text-decoration:none}
+.nav a i{display:block;font-style:normal;font-size:20px}
+.nav a.on{color:var(--k);font-weight:700}
+.nav a.on i{background:var(--y);border-radius:12px;width:44px;margin:0 auto}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="demo" id="demo"><b>DEMO</b></div>
+  <div class="top">
+    <div class="row">
+      <div>
+        <div class="hi" id="hi"></div>
+        <div class="name">David Wijoyo</div>
+        <div class="store" id="store"></div>
+      </div>
+      <button class="lang" id="lang">中文</button>
+    </div>
+  </div>
+  <div id="alert"></div>
+  <div class="next" id="next"></div>
+  <div class="card">
+    <h3 id="progT"></h3>
+    <div class="steps" id="steps"></div>
+  </div>
+  <div class="card">
+    <h3 id="ptsT"></h3>
+    <div class="pts">
+      <div class="big">47.5<small id="ptsU"></small></div>
+      <div class="gap" id="gap"></div>
+    </div>
+    <div class="today" id="todayPts"></div>
+  </div>
+  <div class="more" id="more"></div>
+  <div class="nav" id="nav"></div>
+</div>
+<script>
+const T = {
+  id: {
+    hi: 'Rabu, 19 Nov', store: 'LK Jakarta Pik Cordoba · Shift Full 10:00–22:00',
+    lbl: 'Langkah berikutnya', prog: 'Hari ini', pts: 'Poin bulan ini', u: 'poin',
+    gap: '<b>0.5 poin lagi</b>masuk Top 10 ›', tp: 'Hari ini: +2 tepat waktu',
+    steps: ['Absen', 'Cek Buka', 'Kerja', 'Laporan'],
+    more: [['🛠️', 'Perbaikan & Laporan'], ['📚', 'LK School'], ['📦', 'Barang']],
+    nav: [['🏠', 'Hari Ini'], ['⭐', 'Poin'], ['👤', 'Saya']],
+    alert: '<b>Promo hari ini:</b> ELFBAR liquid beli 1 gratis 1',
+    s: {
+      absen: ['Absen Masuk', 'Shift mulai 10:00. Datang 20 menit lebih awal = +3 poin.', 'Absen sekarang'],
+      cek: ['Cek Buka Toko', 'Kamu orang pertama hari ini. Cek alat, kebersihan, display + foto toko.', 'Mulai cek'],
+      kerja: ['Selamat bekerja', 'Toko sudah READY 09:52. Laporan Akhir Shift dibuka jam 21:30.', 'Lihat tugas toko'],
+      lapor: ['Laporan Akhir Shift', 'Kamu tutup toko hari ini: penjualan, pelanggan, kondisi toko, SO + foto kunci.', 'Isi laporan'],
+      done: ['Selesai hari ini ✓', 'Laporan terkirim 23:01. Hari ini +4 poin. Hati-hati di jalan.', 'Bagikan ke grup WhatsApp']
+    },
+    demo: ['Belum absen', 'Cek buka', 'Kerja', 'Laporan', 'Selesai']
+  },
+  zh: {
+    hi: '11 月 19 日 周三', store: 'LK Jakarta Pik Cordoba · 全天班 10:00–22:00',
+    lbl: '下一步', prog: '今天', pts: '本月积分', u: '分',
+    gap: '<b>还差 0.5 分</b>进前 10 ›', tp: '今天：准时 +2',
+    steps: ['打卡', '开店检查', '上班', '下班卡'],
+    more: [['🛠️', '报修与反馈'], ['📚', 'LK School'], ['📦', '货品']],
+    nav: [['🏠', '今天'], ['⭐', '积分'], ['👤', '我的']],
+    alert: '<b>今日活动：</b>ELFBAR liquid 买一送一',
+    s: {
+      absen: ['上班打卡', '10:00 上班。提前 20 分钟到 = +3 分。', '现在打卡'],
+      cek: ['开店检查', '你是今天第一个到的。检查设备、卫生、陈列 + 拍门店照。', '开始检查'],
+      kerja: ['上班中', '门店 09:52 已 READY。下班卡 21:30 开放。', '看门店任务'],
+      lapor: ['下班卡', '今天你关店：销售、顾客、门店情况、盘点 + 锁门照。', '开始填写'],
+      done: ['今天完成了 ✓', '下班卡 23:01 已提交，今天 +4 分。路上小心。', '分享到 WhatsApp 群']
+    },
+    demo: ['未打卡', '开店检查', '上班中', '下班卡', '完成']
+  }
+};
+const STATES = ['absen', 'cek', 'kerja', 'lapor', 'done'];
+const TIMES = ['09:41', '09:52', '', '23:01'];
+let lang = 'id', state = 'absen';
+const $ = id => document.getElementById(id);
+function render() {
+  const L = T[lang], i = STATES.indexOf(state), s = L.s[state];
+  document.documentElement.lang = lang;
+  $('hi').textContent = L.hi; $('store').textContent = L.store; $('lang').textContent = lang === 'id' ? '中文' : 'ID';
+  $('alert').innerHTML = state === 'done' ? '' : '<div class="alert">📣<div>' + L.alert + '</div></div>';
+  const nx = $('next'); nx.className = 'next' + (state === 'done' ? ' done' : '');
+  nx.innerHTML = '<div class="lbl">' + L.lbl + '</div><div class="t">' + s[0] + '</div><div class="s">' + s[1] + '</div><button class="btn">' + s[2] + '</button>';
+  $('progT').textContent = L.prog;
+  // 进度：打卡 → 开店检查 → 上班 → 下班卡；第几步完成看当前状态
+  const doneN = [0, 1, 2, 3, 4][i];
+  $('steps').innerHTML = L.steps.map((n, k) => {
+    const cls = k < doneN ? 'ok' : (k === doneN ? 'now' : '');
+    const tm = k < doneN && TIMES[k] ? '<span class="tm">' + TIMES[k] + '</span>' : '';
+    return '<div class="st ' + cls + '"><div class="dot">' + (k < doneN ? '✓' : k + 1) + '</div>' + n + tm + '</div>';
+  }).join('');
+  $('ptsT').textContent = L.pts; $('ptsU').textContent = L.u; $('gap').innerHTML = L.gap;
+  $('todayPts').textContent = i === 0 ? '' : L.tp; $('todayPts').style.display = i === 0 ? 'none' : '';
+  $('more').innerHTML = L.more.map(m => '<a href="#"><i>' + m[0] + '</i>' + m[1] + '</a>').join('');
+  $('nav').innerHTML = L.nav.map((m, k) => '<a href="#" class="' + (k === 0 ? 'on' : '') + '"><i>' + m[0] + '</i>' + m[1] + '</a>').join('');
+  $('demo').innerHTML = '<b>DEMO</b>' + L.demo.map((d, k) => '<button data-s="' + STATES[k] + '" class="' + (STATES[k] === state ? 'on' : '') + '">' + d + '</button>').join('');
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-s]'); if (b) { state = b.dataset.s; render(); return; }
+  if (e.target.id === 'lang') { lang = lang === 'id' ? 'zh' : 'id'; render(); }
+});
+render();
+</script>
+</body>
+</html>
