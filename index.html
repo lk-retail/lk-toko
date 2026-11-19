@@ -104,7 +104,7 @@ table.r{width:100%;border-collapse:collapse;font-size:14px}table.r td{padding:8p
 <div class="app" id="app"></div>
 <script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261119150025';
+var APP_VER = '20261119150431';
 function chkVer() { fetch('version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
@@ -482,7 +482,13 @@ function vPoin() {
       if (!list) body += '<div class="card">…</div>';
       else if (!list.length) body += '<div class="card">' + t('noData') + '</div>';
       else { var g = {}, order = []; list.forEach(function (m) { var d = String(m.date).slice(0, 10); if (!g[d]) { g[d] = []; order.push(d); } g[d].push(m); });
-        body += order.map(function (d) { return '<div class="card"><h3>' + d + ' · ' + (L === 'zh' ? '周' + '日一二三四五六'.charAt(new Date(d + 'T00:00:00Z').getUTCDay()) : ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'][new Date(d + 'T00:00:00Z').getUTCDay()]) + '</h3><table class="r">' + g[d].map(function (m) { return '<tr><td>' + esc(rsn(m.reason)) + '</td><td>' + fmtP(m.points) + '</td></tr>'; }).join('') + '</table></div>'; }).join(''); }
+        S.pOpen = S.pOpen || {};
+        body += '<div class="card" style="padding:0;overflow:hidden">' + order.map(function (d, k) {
+          var wd = L === 'zh' ? '周' + '日一二三四五六'.charAt(new Date(d + 'T00:00:00Z').getUTCDay()) : ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'][new Date(d + 'T00:00:00Z').getUTCDay()];
+          var tot = Math.round(g[d].reduce(function (a, m) { return a + Number(m.points || 0); }, 0) * 10) / 10, on = !!S.pOpen[d];
+          return '<div style="' + (k ? 'border-top:1px solid var(--line)' : '') + '"><div onclick="S.pOpen[\'' + d + '\']=!S.pOpen[\'' + d + '\'];render()" style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;cursor:pointer"><span style="font-size:15px">' + d + ' · ' + wd + '</span><span style="display:flex;align-items:center;gap:10px"><b style="font-size:16px;color:' + (tot < 0 ? 'var(--r)' : tot > 0 ? 'var(--ok)' : '#000') + '">' + fmtP(tot) + '</b><span style="color:#6b6b6b;font-size:12px">' + (on ? '▲' : '▼') + '</span></span></div>' +
+            (on ? '<div style="padding:0 16px 10px">' + g[d].map(function (m) { return '<div style="display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-top:1px dashed var(--line);font-size:14px"><span style="color:#3c4043">' + esc(rsn(m.reason)) + '</span><b style="white-space:nowrap">' + fmtP(m.points) + '</b></div>'; }).join('') + '</div>' : '') + '</div>';
+        }).join('') + '</div>'; }
     }
   } else if (tab === 1) {
     var title = N && N.boardMonth && N.boardMonth !== (S.home && S.home.local.date.slice(0, 7)) ? t('lastMonth') : t('board');
@@ -597,7 +603,7 @@ function poinChart(N, sel) {
   var c = M.filter(function (x) { return x.m === sel; })[0] || M[M.length - 1];
   var tag = c.live ? t('pLive') : !c.settled ? t('pSettling') : '';
   var sum = '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:10px"><b style="font-size:16px">' + monLbl(c.m, 1) + (tag ? ' <span style="font-size:12px;font-weight:600;color:#b06000">' + tag + '</span>' : '') + '</b><b style="font-size:20px">' + totP(c.total) + ' <small style="font-size:12px;color:var(--g)">' + t('u') + '</small></b></div>' +
-    '<div style="font-size:13px;color:var(--g);margin-top:4px">' + (c.rank ? '<b style="color:#000">' + t('rankN')(c.rank) + '</b> · ' : '') + t('attLine')(c) + '</div>';
+    (c.rank ? '<div style="font-size:13px;margin-top:4px"><b>' + t('rankN')(c.rank) + '</b></div>' : '');
   return '<div class="card"><h3>' + t('p12') + '</h3><svg viewBox="0 0 ' + W + ' ' + H + '" style="width:100%;display:block">' + g + '</svg><div style="font-size:12px;color:var(--g);margin-top:2px">' + t('pTap') + '</div>' + sum + '</div>';
 }
 function vTugas() {
