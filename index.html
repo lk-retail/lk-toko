@@ -108,7 +108,7 @@ textarea.in{min-height:72px;resize:vertical}
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.chips button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 12px;font-size:13px;color:#000}.chips button.on{background:#000;color:var(--y);border-color:#000;font-weight:700}
 .lnk{display:block;margin-top:14px;background:none;border:0;color:var(--y);font-size:14px;font-weight:600;padding:0;text-decoration:underline}
 .stsel{margin-top:6px;background:rgba(0,0,0,.08);border:0;border-radius:10px;padding:7px 10px;font-size:14px;font-weight:700;color:#000;text-align:left}
-.stmenu{position:absolute;top:100%;left:0;margin-top:6px;background:#fff;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.18);z-index:30;min-width:250px;overflow:hidden}
+.stmenu{position:absolute;top:100%;left:0;margin-top:6px;background:#fff;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.18);z-index:30;min-width:250px;max-width:calc(100vw - 60px);max-height:55vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .stmenu button{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid var(--line);background:#fff;padding:13px 14px;font-size:15px;color:#000}
 .stmenu button.on{font-weight:700}.stmenu small{color:var(--ok);font-weight:600;font-size:12px}
 .res{text-align:center;padding:30px 14px 30px}
@@ -124,7 +124,7 @@ table.r{width:100%;border-collapse:collapse;font-size:14px}table.r td{padding:8p
 <div class="app" id="app"></div>
 <script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261119154438';
+var APP_VER = '20261119155501';
 function chkVer() { fetch('version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
