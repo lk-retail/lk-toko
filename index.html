@@ -80,7 +80,7 @@ table.r{width:100%;border-collapse:collapse;font-size:14px}table.r td{padding:8p
 <div class="app" id="app"></div>
 <script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261119124805';
+var APP_VER = '20261119125129';
 function chkVer() { fetch('version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
@@ -119,7 +119,7 @@ var TX = {
     opsIssue: 'Kendala operasional', competitor: 'Info kompetitor', defect: 'Barang rusak / cacat', idea: 'Ide / masukan', writeHere: 'Tulis di sini…',
     soDone: 'SO harian sudah dilakukan', soBrands: 'Brand yang di-SO', soDiff: 'Selisih (tulis 0 kalau tidak ada)', lock: 'Foto toko terkunci', nextStep: 'Lanjut', prev: 'Kembali', submit: 'Kirim laporan',
     needLock: 'Foto toko terkunci wajib', records: 'Kehadiran saya', calSum: ['Masuk', 'Tepat waktu', 'Terlambat', 'Pulang awal', 'Tanpa laporan'], calLeg: { green: 'Tepat waktu', yellow: 'Terlambat / pulang awal', red: 'Tanpa laporan pulang', live: 'Sedang kerja', grey: 'Tidak ada catatan', plan: 'Jadwal shift' }, wk: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'], calIn: 'Absen masuk', calBuka: 'Cek buka toko', calOut: 'Laporan pulang', calNote: 'Masukan yang saya kirim', calNone: 'Belum ada', calLate: function (m) { return 'terlambat ' + m + ' mnt'; }, calEarly: function (m) { return m + ' mnt lebih awal'; }, calOnTime: 'tepat waktu', calOutEarly: function (m) { return 'pulang ' + m + ' mnt lebih awal'; }, calPlan: 'Jadwal', calSales: 'Penjualan toko', calNoRec: 'Tidak ada catatan absen hari ini.', calClose: 'Tutup', calHint: 'Ketuk tanggal untuk lihat detail.', recT: { ABSEN: 'Absen', BUKA: 'Cek Buka Toko', FULL: 'Laporan Akhir Shift', KONDISI: 'Kondisi Toko' },
-    board: 'Peringkat Top 10', boardWait: function (d) { return 'Peringkat mulai tampil ' + d + '.'; }, history: 'Rincian poin', noData: 'Belum ada data.',
+    board: 'Peringkat Top 10', boardWait: function (d) { return 'Peringkat mulai tampil ' + d + '.'; }, history: 'Rincian poin saya', pTabs: ['Rincian poin saya', 'Top 10', 'Aturan poin'], noData: 'Belum ada data.',
     lastMonth: 'Peringkat final bulan lalu'
   },
   zh: {
@@ -150,7 +150,7 @@ var TX = {
     opsIssue: '运营问题', competitor: '竞争对手情况', defect: '坏货 / 次品', idea: '想法 / 建议', writeHere: '写在这里…',
     soDone: '今天的盘点做了', soBrands: '盘点了哪些品牌', soDiff: '差异（没有就写 0）', lock: '锁门照', nextStep: '下一步', prev: '上一步', submit: '提交',
     needLock: '锁门照必须拍', records: '我的考勤', calSum: ['上班', '准时', '迟到', '早退', '缺下班卡'], calLeg: { green: '准时', yellow: '迟到 / 早退', red: '没交下班卡', live: '上班中', grey: '没有记录', plan: '排班' }, wk: ['一', '二', '三', '四', '五', '六', '日'], calIn: '上班打卡', calBuka: '开店检查', calOut: '下班卡', calNote: '我提交的反馈', calNone: '没有', calLate: function (m) { return '迟到 ' + m + ' 分钟'; }, calEarly: function (m) { return '提前 ' + m + ' 分钟'; }, calOnTime: '准时', calOutEarly: function (m) { return '提前 ' + m + ' 分钟下班'; }, calPlan: '排班', calSales: '门店销售', calNoRec: '这一天没有打卡记录。', calClose: '关闭', calHint: '点日期看当天明细。', recT: { ABSEN: '打卡', BUKA: '开店检查', FULL: '下班卡', KONDISI: '门店情况' },
-    board: '前 10 排行榜', boardWait: function (d) { return '排行榜 ' + d + ' 开始显示。'; }, history: '积分明细', noData: '还没有记录。',
+    board: '前 10 排行榜', boardWait: function (d) { return '排行榜 ' + d + ' 开始显示。'; }, history: '我的积分明细', pTabs: ['我的积分明细', '前 10 排行榜', '积分规则'], noData: '还没有记录。',
     lastMonth: '上个月最终排名'
   }
 };
@@ -364,15 +364,28 @@ function rsn(r) {
     .replace(/, \+(\d+) mnt\)/g, '，迟到 $1 分钟)').replace(/, -(\d+) mnt\)/g, '，提前 $1 分钟)').replace(/^Absen /, '上班打卡 ').replace(/^Laporan Akhir Shift /, '下班卡 ').replace(/^Kondisi Toko /, '门店情况 ').replace(/shift /, '班次 ').replace(/, /g, '，');
 }
 function vPoin() {
-  var P = S.home ? S.home.points : { total: 0 }, N = S.pn;
+  var P = S.home ? S.home.points : { total: 0 }, N = S.pn, tab = S.pTab || 0;
   var gap = (S.home && S.home.local && S.home.local.date < '2026-12-08') ? t('boardSoon') : P.inTop10 ? t('in10')(P.rank) : (P.gap == null ? t('gapNone') : t('gap')(P.gap));
-  var board = !N ? '…' : !N.board ? t('boardWait')(N.boardFrom) : !N.board.length ? t('noData') :
-    '<table class="r">' + N.board.map(function (b) { return '<tr style="' + (b.me ? 'background:#fff8d6' : '') + '"><td>' + b.rank + '. ' + esc(b.name) + '<br><small style="color:#6b6b6b">' + esc(b.store) + '</small></td><td>' + b.total + '</td></tr>'; }).join('') + '</table>';
-  var hist = !N ? '…' : !N.mine.length ? t('noData') : '<table class="r">' + N.mine.map(function (m) { return '<tr><td>' + String(m.date).slice(0, 10) + ' · ' + esc(rsn(m.reason)) + '</td><td>' + fmtP(m.points) + '</td></tr>'; }).join('') + '</table>';
-  return '<div class="top"><div class="name">' + t('pts') + '</div><div style="font-size:40px;font-weight:800;margin-top:6px">' + P.total + ' <small style="font-size:14px">' + t('u') + '</small></div><div style="font-size:14px;margin-top:4px">' + gap.replace(/<b>|<\/b>/g, ' ') + '</div></div>' +
-    '<div class="card" style="margin-top:14px"><h3>' + (N && N.boardMonth && N.boardMonth !== (S.home && S.home.local.date.slice(0, 7)) ? t('lastMonth') : t('board')) + '</h3>' + board + '</div>' +
-    '<div class="card"><h3>' + t('history') + '</h3>' + hist + '</div>' +
-    '<div class="card" style="margin-top:14px"><h3>' + t('rules') + '</h3><table class="r">' + t('rule').map(function (r) { return ['ABSEN MASUK', 'PULANG', 'LAINNYA', 'PERINGKAT', '上班打卡', '下班', '其他', '排名'].indexOf(r[0]) >= 0 ? '<tr><td colspan=2 style="font-weight:700;padding-top:14px;color:#000">' + r[0] + '</td></tr>' : '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td></tr>'; }).join('') + '</table></div>';
+  var head = '<div class="top"><div class="name">' + t('pts') + '</div><div style="font-size:40px;font-weight:800;margin-top:6px">' + P.total + ' <small style="font-size:14px">' + t('u') + '</small></div><div style="font-size:14px;margin-top:4px">' + gap.replace(/<b>|<\/b>/g, ' ') + '</div></div>';
+  var tabs = '<div style="position:sticky;top:env(safe-area-inset-top);z-index:5;background:#f3f3f1;padding:12px 14px 8px"><div style="display:flex;background:#e6e4df;border-radius:12px;padding:3px">' + t('pTabs').map(function (n, k) { return '<button onclick="S.pTab=' + k + ';S.rOpen=null;render();window.scrollTo(0,0)" style="flex:1;border:0;border-radius:10px;padding:9px 2px;font-size:13px;font-weight:' + (k === tab ? '700;background:#fff;color:#000;box-shadow:0 1px 3px rgba(0,0,0,.12)' : '500;background:transparent;color:#6b6b6b') + '">' + n + '</button>'; }).join('') + '</div></div>';
+  var body = '';
+  if (tab === 0) {
+    if (!N) body = '<div class="card">…</div>';
+    else if (!N.mine.length) body = '<div class="card">' + t('noData') + '</div>';
+    else { var g = {}, order = []; N.mine.forEach(function (m) { var d = String(m.date).slice(0, 10); if (!g[d]) { g[d] = []; order.push(d); } g[d].push(m); });
+      body = order.map(function (d) { return '<div class="card"><h3>' + d + ' · ' + (L === 'zh' ? '周' + '日一二三四五六'.charAt(new Date(d + 'T00:00:00Z').getUTCDay()) : ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'][new Date(d + 'T00:00:00Z').getUTCDay()]) + '</h3><table class="r">' + g[d].map(function (m) { return '<tr><td>' + esc(rsn(m.reason)) + '</td><td>' + fmtP(m.points) + '</td></tr>'; }).join('') + '</table></div>'; }).join(''); }
+  } else if (tab === 1) {
+    var title = N && N.boardMonth && N.boardMonth !== (S.home && S.home.local.date.slice(0, 7)) ? t('lastMonth') : t('board');
+    body = '<div class="card"><h3>' + title + '</h3>' + (!N ? '…' : !N.board ? t('boardWait')(N.boardFrom) : !N.board.length ? t('noData') :
+      '<table class="r">' + N.board.map(function (b) { return '<tr style="' + (b.me ? 'background:#fff8d6' : '') + '"><td>' + b.rank + '. ' + esc(b.name) + '<br><small style="color:#6b6b6b">' + esc(b.store) + '</small></td><td>' + b.total + '</td></tr>'; }).join('') + '</table>') + '</div>';
+  } else {
+    var groups = []; var HD = ['ABSEN MASUK', 'PULANG', 'LAINNYA', 'PERINGKAT', '上班打卡', '下班', '其他', '排名']; t('rule').forEach(function (r) { if (HD.indexOf(r[0]) >= 0) groups.push({ n: r[0], items: [] }); else if (groups.length) groups[groups.length - 1].items.push(r); });
+    var open = S.rOpen == null ? 0 : S.rOpen;
+    body = groups.map(function (gp, k) { var on = k === open;
+      return '<div class="card" style="padding:0;overflow:hidden"><div onclick="S.rOpen=' + (on ? -1 : k) + ';render()" style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;cursor:pointer"><b style="font-size:15px">' + gp.n + '</b><span style="color:#6b6b6b;font-size:13px">' + gp.items.length + ' ' + (on ? '▴' : '▾') + '</span></div>' +
+        (on ? '<table class="r" style="margin:0 16px 10px;width:calc(100% - 32px)">' + gp.items.map(function (r) { return '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td></tr>'; }).join('') + '</table>' : '') + '</div>'; }).join('');
+  }
+  return head + tabs + body;
 }
 function vSaya() {
   var u = S.sess.user, H = S.home;
