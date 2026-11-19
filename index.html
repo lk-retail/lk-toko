@@ -102,7 +102,7 @@ table.r{width:100%;border-collapse:collapse;font-size:14px}table.r td{padding:8p
 <div class="app" id="app"></div>
 <script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261119140039';
+var APP_VER = '20261119140432';
 function chkVer() { fetch('version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
@@ -330,7 +330,8 @@ function vHome() {
   if (u.test) top += '<div class="info">' + t('test') + '</div>';
   if (!H) return top + '<div class="next"><div class="lbl">' + t('next') + '</div><div class="t" style="opacity:.35">· · ·</div><div class="s">&nbsp;</div><button class="btn" disabled>&nbsp;</button></div><div class="card"><h3>' + t('today') + '</h3><div class="steps">' + t('steps').map(function (n, k) { return '<div class="st"><div class="dot">' + (k + 1) + '</div>' + n + '</div>'; }).join('') + '</div></div><div class="card"><h3>' + t('pts') + '</h3><div class="pts"><div class="big" style="opacity:.3">–</div></div></div>';
   if (!H.store) return top + '<div class="alert">' + t('noStore') + '</div>';
-  if (!H.store.shifts.length) return top + '<div class="alert">' + t('noShift') + '</div>';
+  if (!H.store.shifts.length && !multi) return top + '<div class="alert">' + t('noShift') + '</div>';
+  if (!H.store.shifts.length) top += '<div class="alert">' + esc(H.store.name) + ': ' + t('noShift') + '</div>';
   var O = H.out, nxc = function (ti, sub, onc, b) { return '<div class="next"><div class="lbl">' + t('next') + '</div><div class="t">' + ti + '</div><div class="s">' + sub + '</div><button class="btn" onclick="' + onc + '">' + b + '</button></div>'; };
   var other = H.inToday && H.store && H.inToday !== H.store.id;
   var stage = !H.absen ? 0 : !H.buka ? 1 : !O || !O.survey || O.needStore ? 2 : !O.done ? 3 : 4, nx = '';
@@ -428,7 +429,7 @@ function vRes() {
   var rs = function (ti, sub, btns) { return '<div class="res"><div class="big">✓</div><div style="font-size:18px;font-weight:700">' + ti + '</div><div style="color:var(--g);margin-bottom:6px">' + sub + '</div>' + btns + '<button class="btn ghost" onclick="go(\'home\')">' + t('nav')[0] + '</button></div>'; };
   if (R.kind === 'survey') { S.sv = null; return rs(t('svDone'), R.time, R.needStore ? '<button class="btn" onclick="go(\'storedata\')">' + t('sdT') + '</button>' : '<button class="btn" onclick="go(\'pulang\')">' + t('poT') + '</button>'); }
   if (R.kind === 'store') { S.cd = null; return rs(t('sdDone'), R.time + (R.by ? ' · ' + esc(R.by) : ''), (S.lastShare ? '<button class="btn" onclick="share()">' + t('share') + '</button>' : '') + '<button class="btn' + (S.lastShare ? ' ghost' : '') + '" onclick="go(\'pulang\')">' + t('poT') + '</button>'); }
-  if (R.kind === 'pulang') return '<div class="res"><div class="big" style="color:var(--ok)">✓</div><div style="font-size:20px;font-weight:700">' + t('doneT') + '</div><div style="color:var(--g);margin:6px 0">' + t('doneS')(R.time) + '</div><button class="btn ghost" onclick="go(\'home\')">' + t('nav')[0] + '</button></div>';
+  if (R.kind === 'pulang') return '<div class="res"><div class="big" style="color:var(--ok)">✓</div><div style="font-size:20px;font-weight:700">' + t('doneT').replace(' ✓', '') + '</div><div style="color:var(--g);margin:6px 0">' + t('doneS')(R.time) + '</div><button class="btn ghost" onclick="go(\'home\')">' + t('nav')[0] + '</button></div>';
   return '<div class="res"><div class="big">✓</div><div style="font-size:18px;font-weight:700">' + t('doneBuka') + '</div><div style="color:var(--g)">' + R.time + '</div><button class="btn ghost" onclick="go(\'home\')">' + t('nav')[0] + '</button></div>';
 }
 // 开店检查：3 个打勾 + 门店正面照，每店每天一次
@@ -592,7 +593,7 @@ function sendSurvey() {
   if (a.q3 === 'yes' && (!a.factors.length || !has(a.n3))) bad.q3 = 1;
   if (a.q4 === 'yes' && !a.quality.some(function (r) { return has(r.product); })) bad.q4 = 1;
   S.sv.bad = bad;
-  if (Object.keys(bad).length) { render(); var el = document.getElementById(Object.keys(bad)[0]); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
+  if (Object.keys(bad).length) { render(); var el = document.getElementById(['q1', 'q2', 'q3', 'q4'].filter(function (q) { return bad[q]; })[0]); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
   busy(t('sending'));
   api('submitSurvey', [S.sess.token, { storeId: S.home.store.id, early: !!S.svEarly, a: a }], 2).then(function (r) {
     busy(); if (!r.ok) return toast(r.err === 'NOT_OPEN' ? t('workS2')(S.home.out.openAt) : r.err === 'INCOMPLETE' ? t('svErr') : t('err'));
@@ -602,7 +603,7 @@ function sendSurvey() {
 }
 // 门店数据（关店班）：照 POS 日报填，POS 日报截图必须
 function fld(obj, k, lbl, isMoney) {
-  return '<label class="f">' + lbl + '</label><input class="in" inputmode="numeric" placeholder="0" value="' + esc(S.cd[obj][k] !== undefined && S.cd[obj][k] !== '' ? (isMoney ? num(S.cd[obj][k]).toLocaleString('en-US') : S.cd[obj][k]) : '') + '" oninput="S.cd.' + obj + '.' + k + '=this.value' + (isMoney ? ';document.getElementById(\'tot\').textContent=money(num(S.cd.sales.cash)+num(S.cd.sales.qris)+num(S.cd.sales.grab))' : '') + '">';
+  return '<label class="f">' + lbl + '</label><input class="in" inputmode="numeric" value="' + esc(S.cd[obj][k] !== undefined && S.cd[obj][k] !== '' ? (isMoney ? num(S.cd[obj][k]).toLocaleString('en-US') : S.cd[obj][k]) : '') + '" oninput="S.cd.' + obj + '.' + k + '=this.value' + (isMoney ? ';document.getElementById(\'tot\').textContent=money(num(S.cd.sales.cash)+num(S.cd.sales.qris)+num(S.cd.sales.grab))' : '') + '">';
 }
 function vStoreData() {
   var c = S.cd;
@@ -636,8 +637,8 @@ function sendStoreData() {
 function vPulang() {
   var O = S.home.out || {}, c = S.po;
   return '<div class="page"><button class="back" onclick="go(\'home\')">' + t('back') + '</button><h2>' + t('poT') + '</h2><div class="guide">' + t('poIntro')(O.end || '') + '</div>' +
-    '<label class="f">' + t('selfieOut') + '</label><label class="photo" for="cam" style="aspect-ratio:3/4">' + (c.selfie ? '<img src="' + c.selfie + '">' : '<span>' + t('selfieHint') + '</span>') + '</label><input id="cam" type="file" accept="image/*" capture="user" style="display:none" onchange="pick(this,\'selfie\')">' +
-    (O.closing ? '<label class="f">' + t('lock') + '</label><label class="photo" for="lk" style="aspect-ratio:4/3">' + (c.lock ? '<img src="' + c.lock + '">' : '<span>' + t('lockHint') + '</span>') + '</label><input id="lk" type="file" accept="image/*" capture="environment" style="display:none" onchange="pick(this,\'lock\')">' : '') +
+    '<label class="f">' + t('selfieOut') + '</label><label class="photo" for="cam" style="aspect-ratio:1">' + (c.selfie ? '<img src="' + c.selfie + '">' : '<span style="padding:0 24px;text-align:center">' + t('selfieHint') + '</span>') + '</label><input id="cam" type="file" accept="image/*" capture="user" style="display:none" onchange="pick(this,\'selfie\')">' +
+    (O.closing ? '<label class="f">' + t('lock') + '</label><label class="photo" for="lk" style="aspect-ratio:4/3">' + (c.lock ? '<img src="' + c.lock + '">' : '<span style="padding:0 24px;text-align:center">' + t('lockHint') + '</span>') + '</label><input id="lk" type="file" accept="image/*" capture="environment" style="display:none" onchange="pick(this,\'lock\')">' : '') +
     '<button class="btn" onclick="sendPulang()"' + (c.selfie && (!O.closing || c.lock) ? '' : ' disabled') + '>' + t('poSend') + '</button></div>';
 }
 function sendPulang() {
