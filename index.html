@@ -124,7 +124,7 @@ table.r{width:100%;border-collapse:collapse;font-size:14px}table.r td{padding:8p
 <div class="app" id="app"></div>
 <script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261119161252';
+var APP_VER = '20261119161954';
 function chkVer() { fetch('version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
@@ -374,7 +374,8 @@ function homeKey() { return 'tk_home_' + (S.sess && S.sess.user.nick || '').toLo
 function cachedHome() { try { var c = JSON.parse(localStorage.getItem(homeKey()) || 'null'); return c && c.local && c.local.date === todayStr() ? c : null; } catch (e) { return null; } }
 function loadHome() {
   if (!S.home) { S.home = cachedHome(); if (S.home && (S.view === 'home' || S.view === 'poin' || S.view === 'saya')) render(); }
-  return api('home', [S.sess.token, S.selSt || null, prefSt()]).then(function (r) { S.home = r; S.swLoading = 0; if (r.store) loadSales(r.store.id); try { localStorage.setItem(homeKey(), JSON.stringify(r)); } catch (e) {} if (S.view === 'home' || S.view === 'poin' || S.view === 'saya') render(); }).catch(function () { if (!S.home) toast(t('err')); });
+  var tok = S.sess.token;
+  return api('home', [tok, S.selSt || null, prefSt()]).then(function (r) { if (!S.sess || S.sess.token !== tok) return; S.home = r; S.swLoading = 0; if (r.store) loadSales(r.store.id); try { localStorage.setItem(homeKey(), JSON.stringify(r)); } catch (e) {} if (S.view === 'home' || S.view === 'poin' || S.view === 'saya') render(); }).catch(function () { if (!S.home) toast(t('err')); });
 }
 function shiftLbl(s) { return s ? t('shiftN')[s.code] + ' ' + s.start + '–' + s.end : ''; }
 function hmAdd(hm, d) { var p = hm.split(':'), m = +p[0] * 60 + +p[1] + d; return ('0' + Math.floor(m / 60)).slice(-2) + ':' + ('0' + m % 60).slice(-2); }
