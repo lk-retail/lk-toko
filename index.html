@@ -104,7 +104,7 @@ table.r{width:100%;border-collapse:collapse;font-size:14px}table.r td{padding:8p
 <div class="app" id="app"></div>
 <script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261119142851';
+var APP_VER = '20261119145301';
 function chkVer() { fetch('version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
@@ -163,6 +163,11 @@ var TX = {
     sdErr: 'Isi semua angka penjualan, pengunjung dan pembeli (tulis 0 kalau tidak ada), dan foto laporan POS.', buyersErr: 'Pembeli tidak boleh lebih banyak dari pengunjung.', soErr: 'Isi brand dan selisih stock opname.', sdSend: 'Kirim data toko', sdDone: 'Data toko terkirim', sdNeed: 'Isi data toko dulu.',
     poIntro: function (x) { return 'Jam absen pulang = jam pulang kamu. Lakukan saat kamu benar-benar mau pulang (shift selesai ' + x + ').'; }, selfieOut: 'Selfie pulang', selfieHint: 'Ketuk untuk selfie · wajah kamu dan toko harus kelihatan', lockHint: 'Kunci pintu / rolling door dulu, lalu ketuk untuk foto gemboknya', poSend: 'Absen pulang sekarang', fotoTokoH: 'Ketuk untuk foto depan toko · konter dan display harus kelihatan',
     p12: 'Poin 12 bulan terakhir', pTap: 'Ketuk bulan untuk lihat rinciannya.', pLive: 'berjalan', pSettling: 'belum final (final tgl 8)', rankN: function (r) { return 'Peringkat ' + r; }, attLine: function (a) { return 'masuk ' + a.days + ' hari · tepat waktu ' + a.onTime + ' · terlambat ' + a.late + ' · pulang awal ' + a.early + ' · tanpa absen pulang ' + a.noCard; },
+    ssT: 'Penjualan toko bulan ini', ssT2: 'Penjualan toko', ssAsOf: function (d) { return 'Data s/d ' + d; }, ssTarget: 'target', ssPct: function (p, tp) { return 'Tercapai ' + p + '%' + (tp != null ? ' · waktu berjalan ' + tp + '%' : ''); },
+    ssNeed: function (a, d, x) { return 'Kurang Rp ' + a + ' · sisa ' + d + ' hari, rata-rata Rp ' + x + ' per hari'; }, ssShort: function (a) { return 'Kurang Rp ' + a + ' dari target'; }, ssDone: function (a) { return 'Target tercapai, lebih Rp ' + a; },
+    ssVsPrev: 'Dibanding periode sama bulan lalu', ssYday: function (d) { return d; }, ssCur: 'Bulan ini', ssPrev: 'Bulan lalu', ssDaily: 'Penjualan per hari', ssStoreOnly: 'Toko', ssSales: 'Penjualan', ssAvg: function (x) { return 'rata-rata harian target Rp ' + x; }, ssTap: 'Ketuk batang untuk lihat angka per hari.',
+    ssGrabShare: function (p) { return p + '% dari penjualan toko'; }, ssGrabDays: function (n, m) { return 'Ada pesanan ' + n + ' dari ' + m + ' hari'; },
+    msT: 'Penjualan saya', msSoon: 'Segera hadir', msDesc: 'Di sini nanti tampil produk tertentu yang kamu jual (misalnya device RELX) dan perkiraan komisinya.',
     lastMonth: 'Peringkat final bulan lalu'
   },
   zh: {
@@ -213,6 +218,11 @@ var TX = {
     sdErr: '销售、进店人数、购买人数都要填（没有写 0），并拍 POS 日报截图。', buyersErr: '购买人数不能比进店人数多。', soErr: '请填盘点的品牌和差异。', sdSend: '提交门店数据', sdDone: '门店数据已提交', sdNeed: '请先填门店数据。',
     poIntro: function (x) { return '下班打卡的时间就是你的下班时间，真正要走的时候再打（班次 ' + x + ' 结束）。'; }, selfieOut: '下班自拍', selfieHint: '点这里拍自拍 · 要拍到你的脸和门店', lockHint: '先锁好门或卷帘门，再点这里拍门锁', poSend: '现在下班打卡', fotoTokoH: '点这里拍门店正面 · 柜台和陈列都要拍进去',
     p12: '近 12 个月积分', pTap: '点月份看那个月的明细。', pLive: '进行中', pSettling: '结算中（8 号定）', rankN: function (r) { return '第 ' + r + ' 名'; }, attLine: function (a) { return '上班 ' + a.days + ' 天 · 准时 ' + a.onTime + ' · 迟到 ' + a.late + ' · 早退 ' + a.early + ' · 缺下班卡 ' + a.noCard; },
+    ssT: '本月门店销售', ssT2: '门店销售', ssAsOf: function (d) { return '数据到 ' + d; }, ssTarget: '目标', ssPct: function (p, tp) { return '完成 ' + p + '%' + (tp != null ? ' · 时间过了 ' + tp + '%' : ''); },
+    ssNeed: function (a, d, x) { return '还差 Rp ' + a + '，剩 ' + d + ' 天，每天要卖 Rp ' + x; }, ssShort: function (a) { return '离目标差 Rp ' + a; }, ssDone: function (a) { return '目标完成了，超出 Rp ' + a; },
+    ssVsPrev: '比上月同期', ssYday: function (d) { return d; }, ssCur: '本月', ssPrev: '上月', ssDaily: '每天销售', ssStoreOnly: '门店', ssSales: '销售', ssAvg: function (x) { return '完成目标平均每天 Rp ' + x; }, ssTap: '点柱子看当天金额。',
+    ssGrabShare: function (p) { return '占门店销售 ' + p + '%'; }, ssGrabDays: function (n, m) { return m + ' 天里有 ' + n + ' 天有单'; },
+    msT: '我的销售', msSoon: '即将上线', msDesc: '这里以后会显示你卖出的指定产品（例如 RELX device）和预估提成。',
     lastMonth: '上个月最终排名'
   }
 };
@@ -230,6 +240,7 @@ var IC = {
   shop: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 9l1.5-5h13L20 9"/><path d="M4 9h16v2a3 3 0 0 1-5.3 1.9A3 3 0 0 1 12 14a3 3 0 0 1-2.7-1.1A3 3 0 0 1 4 11z"/><path d="M5 13v7h14v-7"/><path d="M10 20v-4h4v4"/></svg>',
   wallet: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="6" width="18" height="14" rx="2"/><path d="M3 10h18"/><circle cx="16.5" cy="14.5" r="1.2"/><path d="M6 6l9-3 1.5 3"/></svg>',
   cal: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>',
+  chart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>',
   user: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4.5-6 8-6s7 2 8 6"/></svg>'
 };
 
@@ -273,7 +284,7 @@ function render() {
   if (!S.sess) { a.innerHTML = vLogin(); return; }
   if (S.sess.mustChange) { a.innerHTML = vNewPw(); return; }
   var v = S.view, h = '';
-  if (v === 'home') h = vHome(); else if (v === 'absen') h = vAbsen(); else if (v === 'buka') h = vBuka(); else if (v === 'poin') h = vPoin(); else if (v === 'saya') h = vSaya(); else if (v === 'res') h = vRes(); else if (v === 'survey') h = vSurvey(); else if (v === 'storedata') h = vStoreData(); else if (v === 'pulang') h = vPulang(); else if (v === 'rec') h = vRec(); else if (v === 'tugas') h = vTugas(); else if (v === 'mystore') h = vMyStore(); else if (v === 'mypc') h = vMyPc();
+  if (v === 'home') h = vHome(); else if (v === 'absen') h = vAbsen(); else if (v === 'buka') h = vBuka(); else if (v === 'poin') h = vPoin(); else if (v === 'saya') h = vSaya(); else if (v === 'res') h = vRes(); else if (v === 'survey') h = vSurvey(); else if (v === 'storedata') h = vStoreData(); else if (v === 'pulang') h = vPulang(); else if (v === 'sales') h = vSales(); else if (v === 'mysales') h = vMySales(); else if (v === 'rec') h = vRec(); else if (v === 'tugas') h = vTugas(); else if (v === 'mystore') h = vMyStore(); else if (v === 'mypc') h = vMyPc();
   if (v === 'home' || v === 'poin' || v === 'saya' || v === 'tugas') h += vNav();
   a.innerHTML = h;
 }
@@ -313,7 +324,7 @@ function homeKey() { return 'tk_home_' + (S.sess && S.sess.user.nick || '').toLo
 function cachedHome() { try { var c = JSON.parse(localStorage.getItem(homeKey()) || 'null'); return c && c.local && c.local.date === todayStr() ? c : null; } catch (e) { return null; } }
 function loadHome() {
   if (!S.home) { S.home = cachedHome(); if (S.home && (S.view === 'home' || S.view === 'poin' || S.view === 'saya')) render(); }
-  return api('home', [S.sess.token, S.selSt || null, prefSt()]).then(function (r) { S.home = r; S.swLoading = 0; try { localStorage.setItem(homeKey(), JSON.stringify(r)); } catch (e) {} if (S.view === 'home' || S.view === 'poin' || S.view === 'saya') render(); }).catch(function () { if (!S.home) toast(t('err')); });
+  return api('home', [S.sess.token, S.selSt || null, prefSt()]).then(function (r) { S.home = r; S.swLoading = 0; if (r.store) loadSales(r.store.id); try { localStorage.setItem(homeKey(), JSON.stringify(r)); } catch (e) {} if (S.view === 'home' || S.view === 'poin' || S.view === 'saya') render(); }).catch(function () { if (!S.home) toast(t('err')); });
 }
 function shiftLbl(s) { return s ? t('shiftN')[s.code] + ' ' + s.start + '–' + s.end : ''; }
 function hmAdd(hm, d) { var p = hm.split(':'), m = +p[0] * 60 + +p[1] + d; return ('0' + Math.floor(m / 60)).slice(-2) + ':' + ('0' + m % 60).slice(-2); }
@@ -364,7 +375,7 @@ function vHome() {
   var pts = '<div class="card" style="cursor:pointer" onclick="go(\'poin\')"><h3>' + t('pts') + '</h3><div class="pts"><div class="big">' + totP(P.total) + '<small>' + t('u') + '</small></div><div class="gap" onclick="go(\'poin\')">' + gap + ' ›</div></div>' +
     '</div>';
   var more = '<div class="more">' + [IC.box, IC.wrench, IC.book].map(function (ic, k) { return '<div class="soon">' + ic + t('more')[k] + '<br><small>' + t('soon') + '</small></div>'; }).join('') + '</div>';
-  return top + nx + todayCard + pts + more;
+  return top + nx + todayCard + salesCard(H) + pts + more;
 }
 function vNav() {
   var items = [['home', IC.home], ['tugas', IC.task], ['poin', IC.star], ['saya', IC.user]];
@@ -377,6 +388,7 @@ function go(v) {
   if (v === 'survey') { if (!S.sv) S.sv = svNew(); if (S.home.out && S.home.out.open) S.svEarly = 0; }
   if (v === 'storedata' && !S.cd) S.cd = { sales: {}, shots: [], cust: {}, so: { done: false } };
   if (v === 'pulang') S.po = { selfie: null, lock: null };
+  if (v === 'sales') { S.ssM = 'cur'; S.ssDay = null; }
   S.stOpen = false;
   if (v === 'rec') { S.calSel = null; S.calYm = null; calLoad(null); }
   if (v === 'saya' && S.sess) { var pk = 'tk_pc_' + (S.sess.user.nick || '').toLowerCase(); try { S.pc = S.pc || JSON.parse(localStorage.getItem(pk) || 'null'); } catch (e) {} api('myPetty', [S.sess.token]).then(function (r) { S.pc = r; try { localStorage.setItem(pk, JSON.stringify(r)); } catch (e) {} if (S.view === 'saya') render(); }).catch(function () {}); }
@@ -485,6 +497,81 @@ function vPoin() {
   }
   return head + tabs + body;
 }
+// ---------- 门店销售（和 LK Hub 同口径；只看顶部选中的那家店）----------
+// 金额格式（R231）：≥10jt 不带小数，1–10jt 一位小数，<1jt 两位小数
+function jt(n) { n = Number(n) || 0; var a = Math.abs(n) / 1e6, s = a >= 10 ? Math.round(a).toLocaleString('en-US') : a >= 1 ? (Math.round(a * 10) / 10).toFixed(1) : (Math.round(a * 100) / 100).toFixed(2); return (n < 0 ? '-' : '') + s + 'jt'; }
+function ssKey(id) { return 'tk_ss_' + id; }
+function loadSales(id) {
+  S.ss = S.ss || {};
+  if (!S.ss[id]) { try { S.ss[id] = JSON.parse(localStorage.getItem(ssKey(id)) || 'null'); } catch (e) {} }
+  api('storeSales', [S.sess.token, id], 1).then(function (r) { if (!r || !r.ok) return; S.ss[id] = r; try { localStorage.setItem(ssKey(id), JSON.stringify(r)); } catch (e) {} if (S.view === 'home' || S.view === 'sales') render(); }).catch(function () {});
+}
+function mdShort(d) { var m = /\d{4}-(\d{2})-(\d{2})/.exec(d || ''), mn = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des']; return !m ? '' : L === 'zh' ? +m[1] + '/' + +m[2] : +m[2] + ' ' + mn[+m[1] - 1]; }
+// 进度条：黑色细线 = 时间过了多少
+function ssBar(M) {
+  var pct = M.target ? M.total / M.target : 0, tp = M.e / M.dim, ok = pct >= tp;
+  return '<div style="position:relative;height:12px;background:#eeece6;border-radius:6px;margin:10px 0 6px;overflow:visible"><div style="height:100%;width:' + Math.min(100, pct * 100) + '%;background:' + (pct >= 1 ? 'var(--ok)' : ok ? '#FDCD17' : '#f29900') + ';border-radius:6px"></div>' +
+    (M.e < M.dim ? '<div style="position:absolute;top:-4px;bottom:-4px;left:' + (tp * 100) + '%;width:2px;background:#000"></div>' : '') + '</div>';
+}
+function ssLines(M, isCur) {
+  var o = '';
+  if (M.target) {
+    var pct = M.total / M.target, tp = M.e / M.dim, left = M.target - M.total, rd = M.dim - M.e;
+    o += ssBar(M) + '<div style="font-size:13px;color:' + (pct >= tp ? 'var(--ok)' : '#b06000') + ';font-weight:600">' + t('ssPct')(Math.round(pct * 100), isCur ? Math.round(tp * 100) : null) + '</div>';
+    if (left > 0 && isCur && rd > 0) o += '<div style="font-size:14px;margin-top:4px">' + t('ssNeed')(jt(left), rd, jt(left / rd)) + '</div>';
+    else if (left > 0) o += '<div style="font-size:14px;margin-top:4px">' + t('ssShort')(jt(left)) + '</div>';
+    else o += '<div style="font-size:14px;margin-top:4px;color:var(--ok);font-weight:700">' + t('ssDone')(jt(-left)) + '</div>';
+  } else if (isCur && M.prevSame) {
+    var ch = Math.round((M.total / M.prevSame - 1) * 100);
+    o += '<div style="font-size:14px;margin-top:8px">' + t('ssVsPrev') + ' <b style="color:' + (ch >= 0 ? 'var(--ok)' : 'var(--r)') + '">' + (ch >= 0 ? '+' : '') + ch + '%</b></div>';
+  }
+  return o;
+}
+function salesCard(H) {
+  if (!H || !H.store) return '';
+  var R = S.ss && S.ss[H.store.id];
+  if (!R) return '<div class="card"><h3>' + t('ssT') + '</h3><div style="opacity:.35;font-size:24px;font-weight:800">–</div></div>';
+  var M = R.cur, y = M.days.length ? M.days[M.days.length - 1] : [0, 0];
+  return '<div class="card" style="cursor:pointer" onclick="go(\'sales\')"><div style="display:flex;justify-content:space-between;align-items:baseline"><h3 style="margin:0">' + t('ssT') + '</h3><span style="font-size:12px;color:var(--g)">' + t('ssAsOf')(mdShort(R.asOf)) + '</span></div>' +
+    '<div style="display:flex;align-items:baseline;gap:8px;margin-top:8px"><b style="font-size:28px">Rp ' + jt(M.total) + '</b>' + (M.target ? '<span style="font-size:14px;color:var(--g)">/ ' + t('ssTarget') + ' ' + jt(M.target) + '</span>' : '') + '</div>' +
+    ssLines(M, true) +
+    '<div style="display:flex;justify-content:space-between;font-size:13px;color:var(--g);margin-top:8px;border-top:1px dashed var(--line);padding-top:8px"><span>' + t('ssYday')(mdShort(R.asOf)) + ' <b style="color:#000">Rp ' + jt(y[0]) + '</b>' + (M.grab ? ' · GrabMart <b style="color:#000">' + jt(M.grab) + '</b>' : '') + '</span><span>›</span></div></div>';
+}
+function vSales() {
+  var H = S.home, R = H && H.store && S.ss && S.ss[H.store.id], h = '<div class="page"><button class="back" onclick="go(\'home\')">' + t('back') + '</button><h2>' + t('ssT2') + '</h2><div style="font-size:13px;color:var(--g);margin:-8px 0 12px">' + esc(H && H.store ? H.store.name : '') + (R ? ' · ' + t('ssAsOf')(mdShort(R.asOf)) : '') + '</div>';
+  if (!R) return h + '<div class="card" style="margin:0">…</div></div>';
+  var isCur = S.ssM !== 'prev', M = isCur ? R.cur : R.prev, mon = monLbl(M.ym, 1);
+  h += '<div class="seg" style="margin-bottom:12px"><button class="' + (isCur ? 'on' : '') + '" onclick="S.ssM=\'cur\';S.ssDay=null;render()">' + t('ssCur') + '</button><button class="' + (!isCur ? 'on' : '') + '" onclick="S.ssM=\'prev\';S.ssDay=null;render()">' + t('ssPrev') + '</button></div></div>';
+  // 汇总
+  var c1 = '<div class="card"><h3>' + mon + '</h3><div style="display:flex;align-items:baseline;gap:8px"><b style="font-size:30px">Rp ' + jt(M.total) + '</b>' + (M.target ? '<span style="font-size:14px;color:var(--g)">/ ' + t('ssTarget') + ' ' + jt(M.target) + '</span>' : '') + '</div>' + ssLines(M, isCur) +
+    (isCur && M.target && M.prevSame ? '<div style="font-size:13px;color:var(--g);margin-top:6px">' + t('ssVsPrev') + ' ' + (function () { var ch = Math.round((M.total / M.prevSame - 1) * 100); return '<b style="color:' + (ch >= 0 ? 'var(--ok)' : 'var(--r)') + '">' + (ch >= 0 ? '+' : '') + ch + '%</b>'; })() + '</div>' : '') + '</div>';
+  // 每天柱子：黄色 = 店里卖的，黑色 = GrabMart；虚线 = 每天平均要卖多少才能完成目标
+  var D = M.days, n = M.dim, W = 320, Hh = 150, pl = 4, pr = 4, top = 10, bot = 22, bw = (W - pl - pr) / n, avg = M.target ? M.target / M.dim : 0;
+  var mx = Math.max(avg * 1.15, Math.max.apply(null, D.map(function (x) { return x[0]; }).concat([1])));
+  var Y = function (v) { return top + (1 - v / mx) * (Hh - top - bot); }, g = '';
+  for (var i = 0; i < n; i++) {
+    var x = pl + i * bw, v = D[i] || null, sel = S.ssDay === i;
+    if (sel) g += '<rect x="' + x + '" y="0" width="' + bw + '" height="' + Hh + '" fill="#fff8d6"/>';
+    if (v && v[0] > 0) { var off = v[0] - v[1]; g += '<rect x="' + (x + bw * 0.15) + '" y="' + Y(v[0]) + '" width="' + (bw * 0.7) + '" height="' + (Y(0) - Y(v[0])) + '" rx="1.5" fill="#FDCD17"/>'; if (v[1] > 0) g += '<rect x="' + (x + bw * 0.15) + '" y="' + Y(v[0]) + '" width="' + (bw * 0.7) + '" height="' + (Y(off) - Y(v[0])) + '" fill="#000"/>'; }
+    if ((i + 1) % 5 === 0 || i === 0) g += '<text x="' + (x + bw / 2) + '" y="' + (Hh - 6) + '" text-anchor="middle" font-size="9" fill="#6b6b6b">' + (i + 1) + '</text>';
+    if (i < D.length) g += '<rect x="' + x + '" y="0" width="' + bw + '" height="' + Hh + '" fill="transparent" onclick="S.ssDay=' + i + ';render()"/>';
+  }
+  g += '<line x1="' + pl + '" x2="' + (W - pr) + '" y1="' + Y(0) + '" y2="' + Y(0) + '" stroke="#ddd"/>';
+  if (avg) g += '<line x1="' + pl + '" x2="' + (W - pr) + '" y1="' + Y(avg) + '" y2="' + Y(avg) + '" stroke="#000" stroke-dasharray="4 3" stroke-width="1"/>';
+  var hasG = M.grab > 0, dsel = S.ssDay != null && D[S.ssDay] ? D[S.ssDay] : null, dd = M.ym + '-' + ('0' + ((S.ssDay || 0) + 1)).slice(-2);
+  var c2 = '<div class="card"><h3>' + t('ssDaily') + '</h3><svg viewBox="0 0 ' + W + ' ' + Hh + '" style="width:100%;display:block">' + g + '</svg>' +
+    '<div style="display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:#3c4043;margin-top:6px"><span><i style="display:inline-block;width:10px;height:10px;background:#FDCD17;border-radius:2px"></i> ' + (hasG ? t('ssStoreOnly') : t('ssSales')) + '</span>' + (hasG ? '<span><i style="display:inline-block;width:10px;height:10px;background:#000;border-radius:2px"></i> GrabMart</span>' : '') + (avg ? '<span>┄ ' + t('ssAvg')(jt(avg)) + '</span>' : '') + '</div>' +
+    '<div style="margin-top:10px;padding-top:8px;border-top:1px dashed var(--line);font-size:14px">' + (dsel ? '<b>' + mdShort(dd) + '</b> · Rp ' + jt(dsel[0]) + (dsel[1] ? ' <span style="color:var(--g)">(GrabMart ' + jt(dsel[1]) + ')</span>' : '') : '<span style="color:var(--g)">' + t('ssTap') + '</span>') + '</div></div>';
+  // GrabMart（这个月没有 GrabMart 的店不显示）
+  var gd = D.filter(function (x) { return x && x[1] > 0; }).length;
+  var c3 = hasG ? '<div class="card"><h3>GrabMart</h3><div style="display:flex;justify-content:space-between;align-items:baseline"><b style="font-size:22px">Rp ' + jt(M.grab) + '</b><span style="font-size:13px;color:var(--g)">' + t('ssGrabShare')(Math.round(M.grab / (M.total || 1) * 100)) + '</span></div><div style="font-size:13px;color:var(--g);margin-top:4px">' + t('ssGrabDays')(gd, D.length) + '</div></div>' : '';
+  return h + c1 + c2 + c3 + '<div class="card" style="cursor:pointer" onclick="go(\'mysales\')"><div style="display:flex;justify-content:space-between;align-items:center"><b>' + t('msT') + '</b><span style="color:var(--g)">›</span></div></div>';
+}
+// 我的销售：先放入口，等区分「谁卖的」的方式定了再接数据（提成也放在这里）
+function vMySales() {
+  return '<div class="page"><button class="back" onclick="go(\'saya\')">' + t('back') + '</button><h2>' + t('msT') + '</h2></div>' +
+    '<div class="card" style="text-align:center;padding:28px 18px"><div style="width:52px;height:52px;margin:0 auto 10px;color:#b0b0ab">' + IC.chart + '</div><div style="font-size:17px;font-weight:700">' + t('msSoon') + '</div><div style="font-size:14px;color:var(--g);margin-top:8px;line-height:1.5">' + t('msDesc') + '</div></div>';
+}
 // 近 12 个月积分曲线：点哪个月，下面显示那个月的总分、名次、考勤和明细
 function monLbl(m, full) { var y = +m.slice(0, 4), n = +m.slice(5, 7), mn = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des']; return L === 'zh' ? (full ? y + '年' : '') + n + '月' : mn[n - 1] + (full ? ' ' + y : ''); }
 function selMon(m) {
@@ -528,6 +615,7 @@ function sayaRows(H) {
   return '<div class="card" style="padding:0;overflow:hidden;margin-top:14px">' +
     entryRow(IC.shop, t('myStores'), stSub, 'mystore') +
     entryRow(IC.cal, t('records'), t('attSub')((H && H.att) || { days: 0 }), 'rec') +
+    entryRow(IC.chart, t('msT'), t('msSoon'), 'mysales') +
     entryRow(IC.wallet, t('pcT'), pcSub, P && P.has ? 'mypc' : null, true) + '</div>';
 }
 function vMyStore() {
