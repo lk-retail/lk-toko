@@ -16,6 +16,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .app{max-width:440px;margin:0 auto;min-height:100vh;background:var(--l);position:relative;padding-bottom:90px}
 button{font-family:inherit}
 .top{background:var(--y);padding:calc(14px + env(safe-area-inset-top)) 18px 18px}
+body::before{content:'';position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top);background:#000;z-index:100;pointer-events:none}
 .top .row{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
 .top .hi{font-size:13px;font-weight:600}
 .top .store{cursor:pointer}
