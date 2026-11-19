@@ -80,7 +80,7 @@ table.r{width:100%;border-collapse:collapse;font-size:14px}table.r td{padding:8p
 <div class="app" id="app"></div>
 <script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261119130642';
+var APP_VER = '20261119131044';
 function chkVer() { fetch('version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
@@ -96,7 +96,7 @@ var TX = {
     useHub: 'Akun ini untuk LK Hub. Mengalihkan…', notFound: 'ID tidak ditemukan. Cek lagi ID Karyawan kamu (contoh: ID-2026-08096).', err: 'Koneksi gagal, coba lagi', newpw: 'Buat password baru', newpw1: 'Password baru (min. 6 karakter)', newpw2: 'Ulangi password baru',
     pwdiff: 'Password tidak sama / terlalu pendek', save: 'Simpan', next: 'Langkah berikutnya', today: 'Hari ini', pts: 'Poin bulan ini', u: 'poin',
     steps: ['Absen', 'Cek Buka', 'Kerja', 'Laporan'], stepsM: ['Absen', 'Cek Buka', 'Kerja', 'Kondisi Toko'],
-    pickS: 'Pilih shift kamu hari ini, lalu ambil selfie.', hours: 'Buka', pickFirst: 'Pilih shift dulu', notOpen: 'Shift ini belum bisa dipilih (paling cepat 90 menit sebelum mulai).',
+    pickS: 'Pilih shift kamu hari ini, lalu ambil selfie.', hours: 'Buka', pickFirst: 'Pilih shift dulu', storePick: 'Absen di toko mana?', pickStore: 'Pilih toko dulu', sendAt: function (n) { return 'Absen di ' + n; }, already: function (n) { return 'Hari ini kamu sudah absen di ' + n + '.'; }, myStores: 'Toko saya', supL: 'Area Supervisor', omL: 'Operations Manager', moreStores: function (n) { return ' +' + n + ' toko'; }, notOpen: 'Shift ini belum bisa dipilih (paling cepat 90 menit sebelum mulai).',
     absenT: 'Absen Masuk', absenS: function (s) { return 'Shift ' + s + '. Foto selfie lalu kirim.'; }, absenB: 'Absen sekarang',
     lateT: function () { return 'Belum absen'; }, lateS: function () { return 'Shift sudah mulai. Segera absen sekarang.'; },
     bukaT: 'Cek Buka Toko', bukaS: 'Cek alat, kebersihan, display + foto depan toko. Sekali sehari per toko.', bukaB: 'Mulai cek',
@@ -127,7 +127,7 @@ var TX = {
     useHub: '这个账号用 LK Hub，正在跳转…', notFound: '找不到这个工号，请检查一下（例如 ID-2026-08096）。核心团队请用 LK Hub。', err: '网络失败，请再试一次', newpw: '设置新密码', newpw1: '新密码（至少 6 位）', newpw2: '再输一次新密码',
     pwdiff: '两次不一样或太短', save: '保存', next: '下一步', today: '今天', pts: '本月积分', u: '分',
     steps: ['打卡', '开店检查', '上班', '下班卡'], stepsM: ['打卡', '开店检查', '上班', '门店情况'],
-    pickS: '先选你今天上的班次，再拍自拍。', hours: '营业', pickFirst: '请先选班次', notOpen: '这个班次现在还不能选（最早开始前 90 分钟）。',
+    pickS: '先选你今天上的班次，再拍自拍。', hours: '营业', pickFirst: '请先选班次', storePick: '在哪家店打卡？', pickStore: '请先选门店', sendAt: function (n) { return '在 ' + n + ' 打卡'; }, already: function (n) { return '你今天已经在 ' + n + ' 打过卡了。'; }, myStores: '我的门店', supL: '区域主管', omL: '运营经理', moreStores: function (n) { return ' 等 ' + (n + 1) + ' 家店'; }, notOpen: '这个班次现在还不能选（最早开始前 90 分钟）。',
     absenT: '上班打卡', absenS: function (s) { return '班次 ' + s + '。拍一张自拍就能提交。'; }, absenB: '现在打卡',
     lateT: function () { return '还没打卡'; }, lateS: function () { return '班次已经开始，请马上打卡。'; },
     bukaT: '开店检查', bukaS: '设备、卫生、陈列 + 门店正面照。每店每天一次。', bukaB: '开始检查',
@@ -243,13 +243,12 @@ function doNewPw() {
     .catch(function () { busy(); toast(t('err')); });
 }
 function swLang() { L = L === 'id' ? 'zh' : 'id'; localStorage.setItem('tk_lang', L); if (S.sess && !S.sess.mustChange) api('setLang', [S.sess.token, L], 0).catch(function () {}); render(); }
-function swStore(id) { S.storeId = id; S.ov = false; S.home = null; render(); loadHome(); }
 function todayStr() { var d = new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
 function homeKey() { return 'tk_home_' + (S.sess && S.sess.user.nick || '').toLowerCase(); }
 function cachedHome() { try { var c = JSON.parse(localStorage.getItem(homeKey()) || 'null'); return c && c.local && c.local.date === todayStr() ? c : null; } catch (e) { return null; } }
 function loadHome() {
   if (!S.home) { S.home = cachedHome(); if (S.home && (S.view === 'home' || S.view === 'poin' || S.view === 'saya')) render(); }
-  return api('home', [S.sess.token, S.storeId]).then(function (r) { S.home = r; try { localStorage.setItem(homeKey(), JSON.stringify(r)); } catch (e) {} S.storeId = r.store && r.store.id; if (S.view === 'home' || S.view === 'poin' || S.view === 'saya') render(); }).catch(function () { if (!S.home) toast(t('err')); });
+  return api('home', [S.sess.token, null]).then(function (r) { S.home = r; try { localStorage.setItem(homeKey(), JSON.stringify(r)); } catch (e) {} if (S.view === 'home' || S.view === 'poin' || S.view === 'saya') render(); }).catch(function () { if (!S.home) toast(t('err')); });
 }
 function shiftLbl(s) { return s ? t('shiftN')[s.code] + ' ' + s.start + '–' + s.end : ''; }
 function hmAdd(hm, d) { var p = hm.split(':'), m = +p[0] * 60 + +p[1] + d; return ('0' + Math.floor(m / 60)).slice(-2) + ':' + ('0' + m % 60).slice(-2); }
@@ -264,13 +263,8 @@ function vHome() {
   var H = S.home, u = S.sess.user;
   var multi = H && H.stores && H.stores.length > 1;
   var ov = '';
-  if (H && H.store && S.ov) {
-    ov = '<div class="ov">' + (H.hours ? t('hours') + ' ' + H.hours.open + '–' + H.hours.close + ' (' + H.store.tzName + ')<br>' : '') +
-      H.store.shifts.map(function (s) { return shiftLbl(s); }).join('<br>') +
-      (multi ? '<div style="margin-top:6px">' + H.stores.map(function (s) { return '<button class="chip" style="margin:4px 4px 0 0;' + (s.id === H.store.id ? 'background:#000;color:#FDCD17' : '') + '" onclick="swStore(\'' + s.id + '\')">' + esc(s.name) + '</button>'; }).join('') + '</div>' : '') + '</div>';
-  }
   var top = '<div class="top"><div class="row"><div><div class="hi">' + (H ? dayLbl(H.local.date) : '') + '</div><div class="name">' + esc(u.fullName) + '</div>' +
-    '<div class="store" onclick="S.ov=!S.ov;render()">' + (H && H.store ? esc(H.store.name) + (H.shift ? ' · ' + shiftLbl(H.shift) : (H.hours ? ' · ' + t('hours') + ' ' + H.hours.open + '–' + H.hours.close : '')) + (multi ? ' ⇅' : '') + ' ▾' : '') + '</div></div>' +
+    (multi ? stChips(H, H.inToday) + (H.absen && H.shift ? '<div class="store">' + shiftLbl(H.shift) + '</div>' : '') : '<div class="store">' + (H && H.store ? esc(H.store.name) + (H.absen && H.shift ? ' · ' + shiftLbl(H.shift) : '') : '') + '</div>') + '</div></div>' +
     '</div>' + ov + '</div>';
   if (u.test) top += '<div class="info">' + t('test') + '</div>';
   if (!H) return top + '<div class="next"><div class="lbl">' + t('next') + '</div><div class="t" style="opacity:.35">· · ·</div><div class="s">&nbsp;</div><button class="btn" disabled>&nbsp;</button></div><div class="card"><h3>' + t('today') + '</h3><div class="steps">' + t('steps').map(function (n, k) { return '<div class="st"><div class="dot">' + (k + 1) + '</div>' + n + '</div>'; }).join('') + '</div></div><div class="card"><h3>' + t('pts') + '</h3><div class="pts"><div class="big" style="opacity:.3">–</div></div></div>';
@@ -303,9 +297,8 @@ function vHome() {
   var gap = (H.local && H.local.date < '2026-12-08') ? t('boardSoon') : P.inTop10 ? t('in10')(P.rank) : (P.gap == null ? t('gapNone') : t('gap')(P.gap));
   var pts = '<div class="card" style="cursor:pointer" onclick="go(\'poin\')"><h3>' + t('pts') + '</h3><div class="pts"><div class="big">' + P.total + '<small>' + t('u') + '</small></div><div class="gap" onclick="go(\'poin\')">' + gap + ' ›</div></div>' +
     '</div>';
-  var att = '<div class="card" style="cursor:pointer;display:flex;align-items:center;gap:14px" onclick="go(\'rec\')"><div style="width:44px;height:44px;border-radius:12px;background:var(--y);display:flex;align-items:center;justify-content:center;flex:none"><span style="width:24px;height:24px;display:block">' + IC.cal + '</span></div><div style="flex:1"><div style="font-size:16px;font-weight:700">' + t('records') + '</div><div style="font-size:13px;color:var(--g);margin-top:2px">' + t('attSub')(H.att || { days: 0 }) + '</div></div><div style="font-size:22px;color:var(--g)">›</div></div>';
   var more = '<div class="more">' + [IC.box, IC.wrench, IC.book].map(function (ic, k) { return '<div class="soon">' + ic + t('more')[k] + '<br><small>' + t('soon') + '</small></div>'; }).join('') + '</div>';
-  return top + nx + '<div class="card"><h3>' + t('today') + '</h3><div class="steps">' + steps + '</div></div>' + att + pts + more;
+  return top + nx + '<div class="card"><h3>' + t('today') + '</h3><div class="steps">' + steps + '</div></div>' + pts + more;
 }
 function vNav() {
   var items = [['home', IC.home], ['tugas', IC.task], ['poin', IC.star], ['saya', IC.user]];
@@ -313,7 +306,7 @@ function vNav() {
 }
 function go(v) {
   S.view = v;
-  if (v === 'absen') { S.photo = null; var ok = (S.home.opts || []).filter(function (o) { return o.ok; }); S.shift = S.home.shift ? S.home.shift.code : (ok.length === 1 ? ok[0].code : null); }
+  if (v === 'absen') { S.ckStore = null; S.ck = null; S.photo = null; var ok = (S.home.opts || []).filter(function (o) { return o.ok; }); S.shift = S.home.shift ? S.home.shift.code : (ok.length === 1 ? ok[0].code : null); }
   if (v === 'buka') { S.photo = null; S.ck = { alat: false, bersih: false, display: false }; }
   if (v === 'card') { S.cd = { step: S.home.card.kind === 'FULL' ? 1 : 3, full: S.home.card.kind === 'FULL', sales: {}, shots: [], cust: {}, cond: {}, has: {}, so: { done: false }, lock: null }; }
   if (v === 'rec') { S.calSel = null; S.calYm = null; calLoad(null); }
@@ -322,22 +315,33 @@ function go(v) {
   render(); window.scrollTo(0, 0); if (v === 'home') loadHome();
 }
 // 上班打卡：班次自动选好，可以改 → 自拍 → 提交；时间以服务器为准
+function shortSt(n) { var w = String(n || '').split(' '); return w.length > 2 ? w.slice(2).join(' ') : n; }
+function stChips(H, cur) {
+  return '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">' + H.stores.map(function (x) { var on = cur && x.id === cur; return '<span style="font-size:12px;font-weight:' + (on ? '700;background:#000;color:#FDCD17' : '600;background:rgba(0,0,0,.08);color:#000') + ';padding:4px 10px;border-radius:999px">' + (on ? '✓ ' : '') + esc(shortSt(x.name)) + '</span>'; }).join('') + '</div>';
+}
+function ckMulti() { return S.home.stores && S.home.stores.length > 1; }
+function ckPick(id) { S.ckStore = id; S.ck = null; S.shift = null; render(); api('home', [S.sess.token, id]).then(function (r) { if (S.ckStore !== id) return; S.ck = r; var ok = (r.opts || []).filter(function (o) { return o.ok; }); S.shift = ok.length === 1 ? ok[0].code : null; render(); }).catch(function () { toast(t('err')); }); }
 function vAbsen() {
-  var sh = S.home.store.shifts;
-  return '<div class="page"><button class="back" onclick="go(\'home\')">' + t('back') + '</button><h2>' + t('absenT') + '</h2>' +
-    '<label class="f">' + t('shift') + '</label><div class="seg">' + (S.home.opts || sh).map(function (s) { var dis = s.ok === false; return '<button ' + (dis ? 'disabled style="opacity:.4" ' : '') + 'class="' + (S.shift === s.code ? 'on' : '') + '" onclick="S.shift=\'' + s.code + '\';render()">' + shiftLbl(s) + '' + '</button>'; }).join('') + '</div>' +
+  var M = ckMulti(), C = M ? S.ck : S.home, sh = C ? C.store.shifts : [], back = '<div class="page"><button class="back" onclick="go(\'home\')">' + t('back') + '</button><h2>' + t('absenT') + '</h2>';
+  var pickH = M ? '<label class="f">' + t('storePick') + '</label><div style="display:flex;flex-direction:column;gap:8px;margin-bottom:6px">' + S.home.stores.map(function (s) { var on = S.ckStore === s.id; return '<button onclick="ckPick(\'' + s.id + '\')" style="text-align:left;padding:14px 16px;border-radius:12px;font-size:15px;font-weight:700;border:2px solid ' + (on ? '#000;background:#000;color:#FDCD17' : '#e6e4df;background:#fff;color:#000') + '">' + (on ? '✓ ' : '') + esc(s.name) + '</button>'; }).join('') + '</div>' : '';
+  if (M && !S.ckStore) return back + pickH + '</div>';
+  if (M && !C) return back + pickH + '<div class="card" style="margin:10px 0">…</div></div>';
+  var stName = C.store.name;
+  return back + pickH +
+    '<label class="f">' + t('shift') + '</label><div class="seg">' + (C.opts || sh).map(function (s) { var dis = s.ok === false; return '<button ' + (dis ? 'disabled style="opacity:.4" ' : '') + 'class="' + (S.shift === s.code ? 'on' : '') + '" onclick="S.shift=\'' + s.code + '\';render()">' + shiftLbl(s) + '' + '</button>'; }).join('') + '</div>' +
     '<label class="photo" for="cam">' + (S.photo ? '<img src="' + S.photo + '">' : t('selfie')) + '</label>' +
     '<input id="cam" type="file" accept="image/*" capture="user" style="display:none" onchange="pick(this)">' +
-    '<button class="btn" onclick="sendAbsen()"' + (S.photo ? '' : ' disabled') + '>' + t('send') + '</button>' +
+    '<button class="btn" onclick="sendAbsen()"' + (S.photo ? '' : ' disabled') + '>' + (M ? t('sendAt')(esc(stName)) : t('send')) + '</button>' +
     (S.photo ? '<button class="btn ghost" onclick="document.getElementById(\'cam\').click()">' + t('retake') + '</button>' : '') + '</div>';
 }
 function pick(inp, to) { var f = inp.files && inp.files[0]; if (!f) return; busy('…'); compress(f).then(function (d) { busy(); if (to === 'shot') { if (S.cd.shots.length < 2) S.cd.shots.push(d); } else if (to === 'lock') S.cd.lock = d; else S.photo = d; render(); }).catch(function () { busy(); toast(t('err')); }); }
 function sendAbsen() {
-  if (!S.shift && (S.home.opts || []).length > 1) return toast(t('pickFirst'));
+  var C = ckMulti() ? S.ck : S.home; if (!C) return toast(t('pickStore'));
+  if (!S.shift && (C.opts || []).length > 1) return toast(t('pickFirst'));
   if (!S.photo) return toast(t('needPhoto'));
   busy(t('upl'));
-  upload(S.photo, 'absen').then(function (pid) { busy(t('sending')); return api('checkIn', [S.sess.token, { storeId: S.home.store.id, shift: S.shift, photo: pid }], 2); })
-    .then(function (r) { busy(); if (!r.ok) return toast(r.err === 'PICK_SHIFT' ? t('pickFirst') : r.err === 'SHIFT_NOT_OPEN' ? t('notOpen') : t('err')); S.res = { kind: 'absen', time: r.time, points: r.points, needBuka: r.needBuka }; if (S.home) { S.home.absen = { time: r.time, points: r.points, shift: S.shift }; S.home.shift = (S.home.store.shifts || []).filter(function (x) { return x.code === S.shift; })[0] || S.home.shift; } S.view = 'res'; render(); loadHome(); })
+  upload(S.photo, 'absen').then(function (pid) { busy(t('sending')); return api('checkIn', [S.sess.token, { storeId: C.store.id, shift: S.shift, photo: pid }], 2); })
+    .then(function (r) { busy(); if (!r.ok) return toast(r.err === 'PICK_SHIFT' ? t('pickFirst') : r.err === 'SHIFT_NOT_OPEN' ? t('notOpen') : r.err === 'ALREADY_IN' ? t('already')(r.store || '') : t('err')); S.res = { kind: 'absen', time: r.time, points: r.points, needBuka: r.needBuka }; if (S.home) { S.home.absen = { time: r.time, points: r.points, shift: S.shift }; S.home.shift = (S.home.store.shifts || []).filter(function (x) { return x.code === S.shift; })[0] || S.home.shift; } S.view = 'res'; render(); loadHome(); })
     .catch(function () { busy(); toast(t('err')); });
 }
 function vRes() {
@@ -396,9 +400,19 @@ function vTugas() {
     '<div style="padding:12px 14px 8px"><div style="display:flex;background:#e6e4df;border-radius:12px;padding:3px">' + t('taskTabs').map(function (n, k) { return '<button style="flex:1;border:0;border-radius:10px;padding:9px 2px;font-size:13px;font-weight:' + (k === 0 ? '700;background:#fff;color:#000;box-shadow:0 1px 3px rgba(0,0,0,.12)' : '500;background:transparent;color:#6b6b6b') + '">' + n + '</button>'; }).join('') + '</div></div>' +
     '<div class="card" style="text-align:center;padding:28px 18px"><div style="width:52px;height:52px;margin:0 auto 10px;color:#b0b0ab">' + IC.task + '</div><div style="font-size:17px;font-weight:700">' + t('taskSoonT') + '</div><div style="font-size:14px;color:var(--g);margin-top:8px;line-height:1.5">' + t('taskSoonS') + '</div></div>';
 }
+function attCard(H) {
+  return '<div class="card" style="cursor:pointer;display:flex;align-items:center;gap:14px" onclick="go(\'rec\')"><div style="width:44px;height:44px;border-radius:12px;background:var(--y);display:flex;align-items:center;justify-content:center;flex:none"><span style="width:24px;height:24px;display:block">' + IC.cal + '</span></div><div style="flex:1"><div style="font-size:16px;font-weight:700">' + t('records') + '</div><div style="font-size:13px;color:var(--g);margin-top:2px">' + t('attSub')((H && H.att) || { days: 0 }) + '</div></div><div style="font-size:22px;color:var(--g)">›</div></div>';
+}
+function storeCards(H) {
+  if (!H || !H.stores) return '';
+  return '<div class="card"><h3>' + t('myStores') + '</h3>' + H.stores.map(function (x, k) { var sh = x.shifts || [], op = sh.map(function (z) { return z.start; }).sort()[0], cl = sh.map(function (z) { return z.end; }).sort().slice(-1)[0];
+    return '<div style="padding:10px 0;' + (k ? 'border-top:1px solid var(--line)' : '') + '"><div style="font-size:15px;font-weight:700">' + esc(x.name) + '</div>' +
+      (sh.length ? '<div style="font-size:13px;margin-top:4px">' + t('hours') + ' ' + op + '–' + cl + ' (' + esc(x.tzName || '') + ')</div><div style="font-size:13px;color:var(--g);margin-top:2px">' + sh.map(function (z) { return shiftLbl(z); }).join(' · ') + '</div>' : '<div style="font-size:13px;color:var(--g);margin-top:4px">' + t('noShift') + '</div>') +
+      (x.sup ? '<div style="font-size:13px;margin-top:4px">' + t('supL') + ': <b>' + esc(x.sup) + '</b></div>' : x.om ? '<div style="font-size:13px;margin-top:4px">' + t('omL') + ': <b>' + esc(x.om) + '</b></div>' : '') + '</div>'; }).join('') + '</div>';
+}
 function pcCard() {
   var m2 = function (n, raw) { n = Number(n) || 0; var x = money(Math.abs(n)); return (n < 0 ? '-' : '') + (raw ? x.replace('Rp ', '') : x); };
-  var P = S.pc, h = '<div class="card" style="margin-top:14px"><h3>' + t('pcT') + '</h3>';
+  var P = S.pc, h = '<div class="card"><h3>' + t('pcT') + '</h3>';
   if (!P) return h + '<div style="opacity:.35;font-size:26px;font-weight:800">–</div></div>';
   if (!P.has) return h + '<div style="font-size:16px;color:var(--g)">' + t('pcNone') + '</div></div>';
   var c = t('pcCols');
@@ -410,9 +424,9 @@ function pcCard() {
 function vSaya() {
   var u = S.sess.user, H = S.home;
   var ss = H && H.stores ? H.stores : [], cur = H && H.store ? H.store.name : (ss[0] ? ss[0].name : '');
-  var stl = ss.length > 1 ? (L === 'zh' ? esc(cur) + ' 等 ' + ss.length + ' 家店' : esc(cur) + ' +' + (ss.length - 1) + ' toko') : esc(cur);
-  return '<div class="top"><div class="row"><div><div class="hi">' + esc(u.nick) + ' · ' + esc(u.role) + '</div><div class="name">' + esc(u.fullName) + '</div><div class="store">' + stl + '</div></div></div></div>' +
-    pcCard() + '<div class="page"><button class="btn ghost" onclick="swLang()">' + t('lang') + ': ' + (L === 'id' ? 'Bahasa Indonesia → 中文' : '中文 → Bahasa Indonesia') + '</button>' +
+  var stl = ss.length > 1 ? stChips(H, H.inToday) : '<div class="store">' + esc(cur) + '</div>';
+  return '<div class="top"><div class="row"><div><div class="hi">' + esc(u.nick) + ' · ' + esc(u.role) + '</div><div class="name">' + esc(u.fullName) + '</div>' + stl + '</div></div></div>' +
+    '<div style="height:14px"></div>' + storeCards(H) + attCard(H) + pcCard() + '<div class="page"><button class="btn ghost" onclick="swLang()">' + t('lang') + ': ' + (L === 'id' ? 'Bahasa Indonesia → 中文' : '中文 → Bahasa Indonesia') + '</button>' +
     '<button class="btn ghost" onclick="logout()">' + t('logout') + '</button></div>';
 }
 
