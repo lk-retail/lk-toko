@@ -15,9 +15,11 @@
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:#e9e7e2;color:var(--k);-webkit-font-smoothing:antialiased}
 .app{max-width:440px;margin:0 auto;min-height:100vh;background:var(--l);position:relative;padding-bottom:90px}
 button{font-family:inherit}
-.top{background:var(--y);padding:16px 18px 18px}
+.top{background:var(--y);padding:calc(14px + env(safe-area-inset-top)) 18px 18px}
 .top .row{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
-.top .hi{font-size:13px;opacity:.75}
+.top .hi{font-size:13px;font-weight:600}
+.top .store{cursor:pointer}
+.ov{margin-top:10px;background:rgba(0,0,0,.07);border-radius:10px;padding:8px 10px;font-size:13px;line-height:1.6}
 .top .name{font-size:20px;font-weight:700;margin-top:2px}
 .top .store{font-size:13px;margin-top:4px}
 .chip{background:rgba(0,0,0,.08);border:0;border-radius:14px;padding:6px 10px;font-size:12px;font-weight:600}
@@ -95,7 +97,7 @@ var TX = {
     workT: 'Selamat bekerja', workS: function (x) { return 'Laporan Akhir Shift dibuka 30 menit sebelum shift selesai (' + x + ').'; },
     noShift: 'Jam shift toko ini belum diisi. Hubungi Operation Manager.', noStore: 'Kamu belum terdaftar di toko mana pun. Hubungi HR.',
     in10: function (r) { return '<b>Top 10</b>peringkat ' + r; }, gap: function (g) { return '<b>' + fmtP(g).replace('+', '') + ' poin lagi</b>masuk Top 10'; }, gapNone: '<b>Absen tepat waktu</b>untuk masuk Top 10',
-    todayP: function (p) { return 'Hari ini: ' + fmtP(p) + ' poin'; }, more: ['Perbaikan & Laporan', 'LK School', 'Barang'], soon: 'Segera',
+    todayP: function (p) { return 'Hari ini: ' + fmtP(p) + ' poin'; }, more: ['Barang', 'Perbaikan & Laporan', 'LK School'], soon: 'Segera',
     nav: ['Hari Ini', 'Poin', 'Saya'], back: '‹ Kembali', shift: 'Shift', selfie: 'Ambil selfie', retake: 'Foto ulang', send: 'Kirim absen',
     sending: 'Mengirim…', upl: 'Mengunggah foto…', needPhoto: 'Ambil foto dulu', got: 'Absen tercatat', ptsGot: 'poin', doneBuka: 'Toko READY ✓',
     alat: 'HP, tablet/POS, EDC, lampu & AC menyala', bersih: 'Toko bersih: lantai, rak & etalase', display: 'Display rapi & siap', fotoToko: 'Foto depan toko',
@@ -115,7 +117,7 @@ var TX = {
     workT: '上班中', workS: function (x) { return '下班卡在下班前 30 分钟开放（' + x + '）。'; },
     noShift: '这家店的班次时间还没填，请联系运营经理。', noStore: '你还没有分配门店，请联系 HR。',
     in10: function (r) { return '<b>前 10</b>第 ' + r + ' 名'; }, gap: function (g) { return '<b>还差 ' + fmtP(g).replace('+', '') + ' 分</b>进前 10'; }, gapNone: '<b>准时打卡</b>就能进前 10',
-    todayP: function (p) { return '今天：' + fmtP(p) + ' 分'; }, more: ['报修与反馈', 'LK School', '货品'], soon: '即将上线',
+    todayP: function (p) { return '今天：' + fmtP(p) + ' 分'; }, more: ['货品', '报修与反馈', 'LK School'], soon: '即将上线',
     nav: ['今天', '积分', '我的'], back: '‹ 返回', shift: '班次', selfie: '拍自拍', retake: '重拍', send: '提交打卡',
     sending: '提交中…', upl: '正在上传照片…', needPhoto: '请先拍照', got: '打卡成功', ptsGot: '分', doneBuka: '门店已 READY ✓',
     alat: '手机、平板/POS、EDC、灯和空调都已打开', bersih: '店内干净：地面、货架、柜台', display: '陈列整齐，可以营业', fotoToko: '门店正面照',
@@ -211,18 +213,31 @@ function doNewPw() {
     .catch(function () { busy(); toast(t('err')); });
 }
 function swLang() { L = L === 'id' ? 'zh' : 'id'; localStorage.setItem('tk_lang', L); if (S.sess && !S.sess.mustChange) api('setLang', [S.sess.token, L], 0).catch(function () {}); render(); }
+function swStore(id) { S.storeId = id; S.ov = false; S.home = null; render(); loadHome(); }
 function loadHome() {
   return api('home', [S.sess.token, S.storeId]).then(function (r) { S.home = r; S.storeId = r.store && r.store.id; if (S.view === 'home' || S.view === 'poin' || S.view === 'saya') render(); }).catch(function () { if (!S.home) toast(t('err')); });
 }
 function shiftLbl(s) { return s ? t('shiftN')[s.code] + ' ' + s.start + '–' + s.end : ''; }
 function hmAdd(hm, d) { var p = hm.split(':'), m = +p[0] * 60 + +p[1] + d; return ('0' + Math.floor(m / 60)).slice(-2) + ':' + ('0' + m % 60).slice(-2); }
+function dayLbl(d) {
+  var x = new Date(d + 'T00:00:00'), dn = L === 'id' ? ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'] : ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+  var mn = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+  return L === 'id' ? dn[x.getDay()] + ', ' + x.getDate() + ' ' + mn[x.getMonth()] : (x.getMonth() + 1) + ' 月 ' + x.getDate() + ' 日 ' + dn[x.getDay()];
+}
 function firstName(n) { return String(n || '').split(' ')[0]; }
 // 首页：最上面只放「下一步」；门店的事写清是谁做的；迟到时按钮变红；早班最后一步是「门店情况」
 function vHome() {
   var H = S.home, u = S.sess.user;
-  var top = '<div class="top"><div class="row"><div><div class="hi">' + (H ? H.local.date : '') + '</div><div class="name">' + esc(u.fullName) + '</div>' +
-    '<div class="store">' + (H && H.store ? esc(H.store.name) + (H.shift ? ' · ' + shiftLbl(H.shift) : (H.hours ? ' · ' + t('hours') + ' ' + H.hours.open + '–' + H.hours.close : '')) : '') + '</div></div>' +
-    '<button class="chip" onclick="swLang()">' + (L === 'id' ? '中文' : 'ID') + '</button></div></div>';
+  var multi = H && H.stores && H.stores.length > 1;
+  var ov = '';
+  if (H && H.store && S.ov) {
+    ov = '<div class="ov">' + (H.hours ? t('hours') + ' ' + H.hours.open + '–' + H.hours.close + ' (' + H.store.tzName + ')<br>' : '') +
+      H.store.shifts.map(function (s) { return shiftLbl(s); }).join('<br>') +
+      (multi ? '<div style="margin-top:6px">' + H.stores.map(function (s) { return '<button class="chip" style="margin:4px 4px 0 0;' + (s.id === H.store.id ? 'background:#000;color:#FDCD17' : '') + '" onclick="swStore(\'' + s.id + '\')">' + esc(s.name) + '</button>'; }).join('') + '</div>' : '') + '</div>';
+  }
+  var top = '<div class="top"><div class="row"><div><div class="hi">' + (H ? dayLbl(H.local.date) : '') + '</div><div class="name">' + esc(u.fullName) + '</div>' +
+    '<div class="store" onclick="S.ov=!S.ov;render()">' + (H && H.store ? esc(H.store.name) + (H.shift ? ' · ' + shiftLbl(H.shift) : (H.hours ? ' · ' + t('hours') + ' ' + H.hours.open + '–' + H.hours.close : '')) + (multi ? ' ⇅' : '') + ' ▾' : '') + '</div></div>' +
+    '<button class="chip" onclick="swLang()">' + (L === 'id' ? '中文' : 'ID') + '</button></div>' + ov + '</div>';
   if (u.test) top += '<div class="info">' + t('test') + '</div>';
   if (!H) return top + '<div class="card" style="margin-top:14px">…</div>';
   if (!H.store) return top + '<div class="alert">' + t('noStore') + '</div>';
@@ -249,7 +264,7 @@ function vHome() {
   var gap = P.inTop10 ? t('in10')(P.rank) : (P.gap == null ? t('gapNone') : t('gap')(P.gap));
   var pts = '<div class="card"><h3>' + t('pts') + '</h3><div class="pts"><div class="big">' + P.total + '<small>' + t('u') + '</small></div><div class="gap" onclick="go(\'poin\')">' + gap + ' ›</div></div>' +
     (P.today ? '<div class="sub">' + t('todayP')(P.today) + '</div>' : '') + '</div>';
-  var more = '<div class="more">' + [IC.wrench, IC.book, IC.box].map(function (ic, k) { return '<div class="soon">' + ic + t('more')[k] + '<br><small>' + t('soon') + '</small></div>'; }).join('') + '</div>';
+  var more = '<div class="more">' + [IC.box, IC.wrench, IC.book].map(function (ic, k) { return '<div class="soon">' + ic + t('more')[k] + '<br><small>' + t('soon') + '</small></div>'; }).join('') + '</div>';
   return top + nx + '<div class="card"><h3>' + t('today') + '</h3><div class="steps">' + steps + '</div></div>' + pts + more;
 }
 function vNav() {
