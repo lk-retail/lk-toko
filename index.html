@@ -124,15 +124,15 @@ table.r{width:100%;border-collapse:collapse;font-size:14px}table.r td{padding:8p
 <div class="app" id="app"></div>
 <script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261119205643';
+var APP_VER = '20261119212610';
 function chkVer() { fetch('version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
 var API = 'https://script.google.com/macros/s/AKfycbwRYWoMhFeSce8cyDNQm_9GozZMjE4DoU8zTDCij8V_fX_2Rvpef-CUK8OAjWrJO9M_/exec';
-// 数据库版测试开关（2026-11-19）：链接加 ?db=1 切到数据库版，?db=0 切回；左下角显示 DB 表示正在用数据库版
-(function(){try{var q=location.search;if(/[?&]db=1/.test(q))localStorage.setItem('lk_db','1');if(/[?&]db=0/.test(q))localStorage.removeItem('lk_db');
-if(localStorage.getItem('lk_db')==='1'){API='https://okzfaepdfeolsmurwtft.supabase.co/functions/v1/lk-api/toko';
-var mk=function(){if(!document.body)return setTimeout(mk,50);var b=document.createElement('div');b.textContent='DB';b.style.cssText='position:fixed;left:6px;bottom:6px;z-index:99999;background:#FDCD17;color:#000;font:bold 10px Arial;padding:2px 6px;border-radius:6px;opacity:.85;pointer-events:none';document.body.appendChild(b);};mk();}}catch(e){}})();
+// 2026-11-19 起正式用数据库版接口（Supabase）。万一要临时切回旧后台：链接加 ?db=0（左下角显示 OLD），加 ?db=1 切回数据库版
+(function(){try{var q=location.search;if(/[?&]db=0/.test(q))localStorage.setItem('lk_db','0');if(/[?&]db=1/.test(q))localStorage.removeItem('lk_db');
+if(localStorage.getItem('lk_db')!=='0'){API='https://okzfaepdfeolsmurwtft.supabase.co/functions/v1/lk-api/toko';}
+else{var mk=function(){if(!document.body)return setTimeout(mk,50);var b=document.createElement('div');b.textContent='OLD';b.style.cssText='position:fixed;left:6px;bottom:6px;z-index:99999;background:#b3261e;color:#fff;font:bold 10px Arial;padding:2px 6px;border-radius:6px;opacity:.85;pointer-events:none';document.body.appendChild(b);};mk();}}catch(e){}})();
 
 var L = localStorage.getItem('tk_lang') || 'id';
 var S = { view: 'home' };
