@@ -124,7 +124,7 @@ table.r{width:100%;border-collapse:collapse;font-size:14px}table.r td{padding:8p
 <div class="app" id="app"></div>
 <script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261119170713';
+var APP_VER = '20261119170837';
 function chkVer() { fetch('version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
@@ -464,7 +464,8 @@ function vHome() {
   var pts = '<div class="card" style="cursor:pointer" onclick="go(\'poin\')"><h3>' + t('pts') + '</h3><div class="pts"><div class="big">' + totP(P.total) + '<small>' + t('u') + '</small></div><div class="gap" onclick="go(\'poin\')">' + gap + ' ›</div></div>' +
     '</div>';
   var more = '<div class="more">' + [IC.box, IC.wrench, IC.book].map(function (ic, k) { return '<div class="soon">' + ic + t('more')[k] + '<br><small>' + t('soon') + '</small></div>'; }).join('') + '</div>';
-  return top + nx + todayCard + salesCard(H) + pts + more;
+  // 2026-11-19：还没上线的功能（货品、报修与反馈、LK School）不在首页显示「即将上线」，上线了再加
+  return top + nx + todayCard + salesCard(H) + pts;
 }
 function vNav() {
   var items = [['home', IC.home], ['tugas', IC.task], ['poin', IC.star], ['saya', IC.user]];
