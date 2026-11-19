@@ -307,7 +307,7 @@ function go(v) {
   if (v === 'absen') { S.photo = null; var ok = (S.home.opts || []).filter(function (o) { return o.ok; }); S.shift = S.home.shift ? S.home.shift.code : (ok.length === 1 ? ok[0].code : null); }
   if (v === 'buka') { S.photo = null; S.ck = { alat: false, bersih: false, display: false }; }
   if (v === 'card') { S.cd = { step: S.home.card.kind === 'FULL' ? 1 : 3, full: S.home.card.kind === 'FULL', sales: {}, shots: [], cust: {}, cond: {}, has: {}, so: { done: false }, lock: null }; }
-  if (v === 'rec') { S.calSel = null; calLoad(S.calYm || null); }
+  if (v === 'rec') { S.calSel = null; S.calYm = null; calLoad(null); }
   if (v === 'poin') { api('poin', [S.sess.token]).then(function (r) { S.pn = r; if (S.view === 'poin') render(); }).catch(function () {}); }
   render(); window.scrollTo(0, 0); if (v === 'home') loadHome();
 }
@@ -458,7 +458,8 @@ function vRec() {
   if (!C) return h + '<div class="card" style="margin:0">…</div></div>';
   var y = +C.ym.slice(0, 4), m = +C.ym.slice(5, 7), first = new Date(Date.UTC(y, m - 1, 1)), nd = new Date(Date.UTC(y, m, 0)).getUTCDate(), lead = (first.getUTCDay() + 6) % 7;
   var sum = [0, 0, 0, 0, 0], cells = '';
-  for (var k = 0; k < lead; k++) cells += '<div></div>';
+  var prevN = new Date(Date.UTC(y, m - 1, 0)).getUTCDate();
+  for (var k = 0; k < lead; k++) cells += '<div style="aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:14px;color:#cfcfcb">' + (prevN - lead + 1 + k) + '</div>';
   for (var d = 1; d <= nd; d++) {
     var dt = C.ym + '-' + ('0' + d).slice(-2), D = C.days[dt], st = calStat(dt, D, C);
     if (D && D.absen) { sum[0]++; if (D.absen.diff > 0) sum[2]++; if (D.card && D.card.early > 10) sum[3]++; if (D.card && D.absen.diff <= 0 && D.card.early <= 10) sum[1]++; if (!D.card && dt < C.today) sum[4]++; }
@@ -466,6 +467,8 @@ function vRec() {
     cells += '<div onclick="S.calSel=\'' + dt + '\';render()" style="aspect-ratio:1;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;cursor:pointer;background:' + CAL_BG[st] + ';color:' + (dark ? '#fff' : st === 'none' && dt > C.today ? '#b0b0b0' : '#000') +
       ';border:' + (dt === C.today ? '2.5px solid #000' : st === 'plan' ? '1.5px dashed #9aa0a6' : st === 'none' ? '1px solid #eee' : '0') + '">' + d + '</div>';
   }
+  var tail = (7 - (lead + nd) % 7) % 7;
+  for (var k2 = 1; k2 <= tail; k2++) cells += '<div style="aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:14px;color:#cfcfcb">' + k2 + '</div>';
   var nav = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><button class="back" style="margin:0;font-size:26px;padding:0 14px" onclick="calMove(-1)">‹</button><b style="font-size:17px">' + (L === 'id' ? ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'][m - 1] + ' ' + y : y + '年' + m + '月') + '</b><button class="back" style="margin:0' + (C.ym >= C.today.slice(0, 7) ? ';visibility:hidden' : '') + ';font-size:26px;padding:0 14px" onclick="calMove(1)">›</button></div>';
   var sumH = '<div style="display:flex;gap:6px;margin-bottom:12px">' + t('calSum').map(function (n, k) { return '<div style="flex:1;text-align:center;background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 0"><div style="font-size:18px;font-weight:800' + (k >= 2 && sum[k] ? ';color:' + (k === 4 ? '#ea4335' : '#b06000') : '') + '">' + sum[k] + '</div><div style="font-size:11px;color:var(--g)">' + n + '</div></div>'; }).join('') + '</div>';
   var grid = '<div class="card" style="margin:0 0 10px"><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;text-align:center;font-size:12px;color:var(--g);margin-bottom:6px">' + t('wk').map(function (w) { return '<div>' + w + '</div>'; }).join('') + '</div><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px">' + cells + '</div></div>';
