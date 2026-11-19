@@ -85,7 +85,7 @@ try { S.sess = JSON.parse(localStorage.getItem('tk_sess') || 'null'); } catch (e
 var TX = {
   id: {
     login: 'Masuk', eid: 'ID Karyawan', pw: 'Password', wrong: 'ID atau password salah', locked: 'Terlalu banyak salah. Coba lagi 15 menit lagi',
-    useHub: 'Akun ini untuk LK Hub. Mengalihkan…', err: 'Koneksi gagal, coba lagi', newpw: 'Buat password baru', newpw1: 'Password baru (min. 6 karakter)', newpw2: 'Ulangi password baru',
+    useHub: 'Akun ini untuk LK Hub. Mengalihkan…', notFound: 'ID tidak ditemukan. Cek lagi ID Karyawan kamu (contoh: ID-2026-08096).', err: 'Koneksi gagal, coba lagi', newpw: 'Buat password baru', newpw1: 'Password baru (min. 6 karakter)', newpw2: 'Ulangi password baru',
     pwdiff: 'Password tidak sama / terlalu pendek', save: 'Simpan', next: 'Langkah berikutnya', today: 'Hari ini', pts: 'Poin bulan ini', u: 'poin',
     steps: ['Absen', 'Cek Buka', 'Kerja', 'Laporan'], stepsM: ['Absen', 'Cek Buka', 'Kerja', 'Kondisi Toko'],
     absenT: 'Absen Masuk', absenS: function (s, p) { return 'Shift ' + s + '. Absen sekarang: ' + fmtP(p) + ' poin.'; }, absenB: 'Absen sekarang',
@@ -104,7 +104,7 @@ var TX = {
   },
   zh: {
     login: '登录', eid: '工号', pw: '密码', wrong: '工号或密码不对', locked: '错误次数太多，15 分钟后再试',
-    useHub: '这个账号用 LK Hub，正在跳转…', err: '网络失败，请再试一次', newpw: '设置新密码', newpw1: '新密码（至少 6 位）', newpw2: '再输一次新密码',
+    useHub: '这个账号用 LK Hub，正在跳转…', notFound: '找不到这个工号，请检查一下（例如 ID-2026-08096）。核心团队请用 LK Hub。', err: '网络失败，请再试一次', newpw: '设置新密码', newpw1: '新密码（至少 6 位）', newpw2: '再输一次新密码',
     pwdiff: '两次不一样或太短', save: '保存', next: '下一步', today: '今天', pts: '本月积分', u: '分',
     steps: ['打卡', '开店检查', '上班', '下班卡'], stepsM: ['打卡', '开店检查', '上班', '门店情况'],
     absenT: '上班打卡', absenS: function (s, p) { return '班次 ' + s + '。现在打卡：' + fmtP(p) + ' 分。'; }, absenB: '现在打卡',
@@ -191,7 +191,7 @@ function doLogin() {
   busy('…');
   api('login', [id, pw]).then(function (r) {
     busy();
-    if (!r.ok) { if (r.err === 'USE_HUB') { toast(t('useHub')); setTimeout(function () { location.href = r.url; }, 1500); return; } return toast(r.err === 'LOCKED' ? t('locked') : t('wrong')); }
+    if (!r.ok) { if (r.err === 'USE_HUB') { toast(t('useHub')); setTimeout(function () { location.href = r.url; }, 1500); return; } if (r.err === 'NOT_FOUND') return toast(t('notFound')); return toast(r.err === 'LOCKED' ? t('locked') : t('wrong')); }
     S.sess = { token: r.token, user: r.user, mustChange: r.mustChange }; localStorage.setItem('tk_sess', JSON.stringify(S.sess));
     if (!localStorage.getItem('tk_lang') && r.lang) L = r.lang;
     S.view = 'home'; render(); if (!r.mustChange) loadHome();
