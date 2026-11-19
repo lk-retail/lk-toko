@@ -96,7 +96,7 @@ var TX = {
     bukaT: 'Cek Buka Toko', bukaS: 'Cek alat, kebersihan, display + foto depan toko. Sekali sehari per toko.', bukaB: 'Mulai cek',
     workT: 'Selamat bekerja', workS: function (x) { return 'Laporan Akhir Shift dibuka 30 menit sebelum shift selesai (' + x + ').'; },
     noShift: 'Jam shift toko ini belum diisi. Hubungi Operation Manager.', noStore: 'Kamu belum terdaftar di toko mana pun. Hubungi HR.',
-    in10: function (r) { return '<b>Top 10</b>peringkat ' + r; }, gap: function (g) { return '<b>' + fmtP(g).replace('+', '') + ' poin lagi</b>masuk Top 10'; }, gapNone: '<b>Absen tepat waktu</b>untuk masuk Top 10',
+    in10: function (r) { return '<b>Top 10</b>peringkat ' + r; }, gap: function (g) { return '<b>' + fmtP(g).replace('+', '') + ' poin lagi</b>masuk Top 10'; }, gapNone: '<b>Absen tepat waktu</b>untuk masuk Top 10', boardSoon: '<b>Peringkat Top 10</b>mulai 8 Des',
     todayP: function (p) { return 'Hari ini: ' + fmtP(p) + ' poin'; }, more: ['Barang', 'Perbaikan & Laporan', 'LK School'], soon: 'Segera',
     nav: ['Hari Ini', 'Poin', 'Saya'], back: '‹ Kembali', shift: 'Shift', selfie: 'Ambil selfie', retake: 'Foto ulang', send: 'Kirim absen',
     sending: 'Mengirim…', upl: 'Mengunggah foto…', needPhoto: 'Ambil foto dulu', got: 'Absen tercatat', ptsGot: 'poin', doneBuka: 'Toko READY ✓',
@@ -127,7 +127,7 @@ var TX = {
     bukaT: '开店检查', bukaS: '设备、卫生、陈列 + 门店正面照。每店每天一次。', bukaB: '开始检查',
     workT: '上班中', workS: function (x) { return '下班卡在下班前 30 分钟开放（' + x + '）。'; },
     noShift: '这家店的班次时间还没填，请联系运营经理。', noStore: '你还没有分配门店，请联系 HR。',
-    in10: function (r) { return '<b>前 10</b>第 ' + r + ' 名'; }, gap: function (g) { return '<b>还差 ' + fmtP(g).replace('+', '') + ' 分</b>进前 10'; }, gapNone: '<b>准时打卡</b>就能进前 10',
+    in10: function (r) { return '<b>前 10</b>第 ' + r + ' 名'; }, gap: function (g) { return '<b>还差 ' + fmtP(g).replace('+', '') + ' 分</b>进前 10'; }, gapNone: '<b>准时打卡</b>就能进前 10', boardSoon: '<b>前 10 排行榜</b>12/8 开始',
     todayP: function (p) { return '今天：' + fmtP(p) + ' 分'; }, more: ['货品', '报修与反馈', 'LK School'], soon: '即将上线',
     nav: ['今天', '积分', '我的'], back: '‹ 返回', shift: '班次', selfie: '拍自拍', retake: '重拍', send: '提交打卡',
     sending: '提交中…', upl: '正在上传照片…', needPhoto: '请先拍照', got: '打卡成功', ptsGot: '分', doneBuka: '门店已 READY ✓',
@@ -292,9 +292,9 @@ function vHome() {
     return '<div class="st ' + cls + '"><div class="dot">' + (k < stage ? '✓' : k + 1) + '</div>' + n + (tms[k] && k < stage ? '<span class="tm">' + esc(tms[k]) + '</span>' : '') + '</div>';
   }).join('');
   var P = H.points;
-  var gap = P.inTop10 ? t('in10')(P.rank) : (P.gap == null ? t('gapNone') : t('gap')(P.gap));
-  var pts = '<div class="card"><h3>' + t('pts') + '</h3><div class="pts"><div class="big">' + P.total + '<small>' + t('u') + '</small></div><div class="gap" onclick="go(\'poin\')">' + gap + ' ›</div></div>' +
-    (P.today ? '<div class="sub">' + t('todayP')(P.today) + '</div>' : '') + '</div>';
+  var gap = (H.local && H.local.date < '2026-12-08') ? t('boardSoon') : P.inTop10 ? t('in10')(P.rank) : (P.gap == null ? t('gapNone') : t('gap')(P.gap));
+  var pts = '<div class="card" style="cursor:pointer" onclick="go(\'poin\')"><h3>' + t('pts') + '</h3><div class="pts"><div class="big">' + P.total + '<small>' + t('u') + '</small></div><div class="gap" onclick="go(\'poin\')">' + gap + ' ›</div></div>' +
+    '</div>';
   var more = '<div class="more">' + [IC.box, IC.wrench, IC.book].map(function (ic, k) { return '<div class="soon">' + ic + t('more')[k] + '<br><small>' + t('soon') + '</small></div>'; }).join('') + '</div>';
   return top + nx + '<div class="card"><h3>' + t('today') + '</h3><div class="steps">' + steps + '</div><div class="sub" style="cursor:pointer" onclick="go(\'rec\')">' + t('records') + ' ›</div></div>' + pts + more;
 }
