@@ -124,7 +124,7 @@ table.r{width:100%;border-collapse:collapse;font-size:14px}table.r td{padding:8p
 <div class="app" id="app"></div>
 <script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261120105634';
+var APP_VER = '20261120110707';
 function chkVer() { fetch('version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
@@ -140,8 +140,8 @@ try { S.sess = JSON.parse(localStorage.getItem('tk_sess') || 'null'); } catch (e
 var TX = {
   id: {
     login: 'Masuk', eid: 'ID Karyawan', pw: 'Password', wrong: 'ID atau password salah', locked: 'Terlalu banyak salah. Coba lagi 15 menit lagi',
-    useHub: 'Akun ini untuk LK Hub. Mengalihkan…', notFound: 'ID tidak ditemukan. Cek lagi ID Karyawan kamu (contoh: ID-2026-08096).', err: 'Koneksi gagal, coba lagi', newpw: 'Buat password baru', newpw1: 'Password baru (min. 6 karakter)', newpw2: 'Ulangi password baru',
-    pwdiff: 'Password tidak sama / terlalu pendek', save: 'Simpan', next: 'Langkah berikutnya', today: 'Hari ini', pts: 'Poin bulan ini', u: 'poin',
+    useHub: 'Akun ini untuk LK Hub. Mengalihkan…', notFound: 'ID tidak ditemukan. Cek lagi ID Karyawan kamu (contoh: ID-2026-08096).', err: 'Koneksi gagal, coba lagi', newpw: 'Buat password baru', newpw1: 'Password baru (min. 8 karakter: huruf besar, huruf kecil, angka)', newpw2: 'Ulangi password baru',
+    pwdiff: 'Password tidak sama, atau belum memenuhi syarat (min. 8 karakter, huruf besar, huruf kecil, angka)', save: 'Simpan', next: 'Langkah berikutnya', today: 'Hari ini', pts: 'Poin bulan ini', u: 'poin',
     steps: ['Absen Masuk', 'Cek Buka', 'Laporan', 'Absen Pulang'],
     pickS: 'Pilih shift kamu hari ini, lalu ambil selfie.', pickSM: 'Pilih toko dan shift kamu hari ini, lalu ambil selfie.', hours: 'Buka', pickFirst: 'Pilih shift dulu', storePick: 'Absen di toko mana?', pickStore: 'Pilih toko dulu', sendAt: function (n) { return 'Absen di ' + n; }, already: function (n) { return 'Hari ini kamu sudah absen di ' + n + '.'; }, myStores: 'Toko saya', supL: 'Area Supervisor', omL: 'Operations Manager', moreStores: function (n) { return ' +' + n + ' toko'; }, notOpen: 'Shift ini belum bisa dipilih (paling cepat 90 menit sebelum mulai).',
     absenT: 'Absen Masuk', absenS: function (s) { return 'Shift ' + s + '. Foto selfie lalu kirim.'; }, absenB: 'Absen sekarang',
@@ -195,8 +195,8 @@ var TX = {
   },
   zh: {
     login: '登录', eid: '工号', pw: '密码', wrong: '工号或密码不对', locked: '错误次数太多，15 分钟后再试',
-    useHub: '这个账号用 LK Hub，正在跳转…', notFound: '找不到这个工号，请检查一下（例如 ID-2026-08096）。核心团队请用 LK Hub。', err: '网络失败，请再试一次', newpw: '设置新密码', newpw1: '新密码（至少 6 位）', newpw2: '再输一次新密码',
-    pwdiff: '两次不一样或太短', save: '保存', next: '下一步', today: '今天', pts: '本月积分', u: '分',
+    useHub: '这个账号用 LK Hub，正在跳转…', notFound: '找不到这个工号，请检查一下（例如 ID-2026-08096）。核心团队请用 LK Hub。', err: '网络失败，请再试一次', newpw: '设置新密码', newpw1: '新密码（至少 8 位，要有大写字母、小写字母和数字）', newpw2: '再输一次新密码',
+    pwdiff: '两次不一样，或者不符合要求（至少 8 位，要有大写字母、小写字母和数字）', save: '保存', next: '下一步', today: '今天', pts: '本月积分', u: '分',
     steps: ['上班打卡', '开店检查', '下班问卷', '下班打卡'],
     pickS: '先选你今天上的班次，再拍自拍。', pickSM: '先选今天在哪家店、上哪个班次，再拍自拍。', hours: '营业', pickFirst: '请先选班次', storePick: '在哪家店打卡？', pickStore: '请先选门店', sendAt: function (n) { return '在 ' + n + ' 打卡'; }, already: function (n) { return '你今天已经在 ' + n + ' 打过卡了。'; }, myStores: '我的门店', supL: '区域主管', omL: '运营经理', moreStores: function (n) { return ' 等 ' + (n + 1) + ' 家店'; }, notOpen: '这个班次现在还不能选（最早开始前 90 分钟）。',
     absenT: '上班打卡', absenS: function (s) { return '班次 ' + s + '。拍一张自拍就能提交。'; }, absenB: '现在打卡',
@@ -269,6 +269,7 @@ var IC = {
 };
 
 // ---------- 后台调用：网络失败自动重试 ----------
+function pwOk(p) { return p.length >= 8 && /[0-9]/.test(p) && /[a-z]/.test(p) && /[A-Z]/.test(p); }
 function api(fn, args, tries) {
   tries = tries == null ? 2 : tries;
   return fetch(API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ fn: fn, args: args || [] }) })
@@ -387,7 +388,7 @@ function vNewPw() {
 }
 function doNewPw() {
   var a = document.getElementById('p1').value, b = document.getElementById('p2').value;
-  if (a !== b || a.length < 6) return toast(t('pwdiff'));
+  if (a !== b || !pwOk(a)) return toast(t('pwdiff'));
   busy('…');
   api('changePassword', [S.sess.token, a]).then(function (r) { busy(); if (!r.ok) return toast(t('pwdiff')); S.sess.mustChange = false; localStorage.setItem('tk_sess', JSON.stringify(S.sess)); render(); loadHome(); })
     .catch(function () { busy(); toast(t('err')); });
@@ -447,9 +448,9 @@ function vMyPw() {
 function doMyPw() {
   var zh = L === 'zh', o = document.getElementById('p0').value, a = document.getElementById('p1').value, b = document.getElementById('p2').value;
   if (!o) return toast(zh ? '请填当前密码' : 'Isi password saat ini');
-  if (a !== b || a.length < 6) return toast(t('pwdiff'));
+  if (a !== b || !pwOk(a)) return toast(t('pwdiff'));
   busy('…');
-  api('changePassword', [S.sess.token, a, o]).then(function (r) { busy(); if (!r.ok) return toast(r.err === 'BAD_PW' ? (zh ? '当前密码不对' : 'Password saat ini salah') : r.err === 'WEAK_PW' ? (zh ? '新密码太短，或者和初始密码一样' : 'Password baru terlalu pendek atau sama dengan password awal') : t('err')); toast(zh ? '密码已修改' : 'Password sudah diganti'); go('saya'); })
+  api('changePassword', [S.sess.token, a, o]).then(function (r) { busy(); if (!r.ok) return toast(r.err === 'BAD_PW' ? (zh ? '当前密码不对' : 'Password saat ini salah') : r.err === 'WEAK_PW' ? (zh ? '新密码不符合要求：至少 8 位，要有大写字母、小写字母和数字，不能用初始密码' : 'Password baru belum memenuhi syarat: min. 8 karakter, ada huruf besar, huruf kecil dan angka, bukan password awal') : t('err')); toast(zh ? '密码已修改' : 'Password sudah diganti'); go('saya'); })
     .catch(function () { busy(); toast(t('err')); });
 }
 function avMenu() {
