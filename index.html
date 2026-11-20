@@ -124,7 +124,7 @@ table.r{width:100%;border-collapse:collapse;font-size:14px}table.r td{padding:8p
 <div class="app" id="app"></div>
 <script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261120113034';
+var APP_VER = '20261120121644';
 function chkVer() { fetch('version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
@@ -297,6 +297,17 @@ function getGeo(cb) {
   try { navigator.geolocation.getCurrentPosition(function (p) { fin({ lat: p.coords.latitude, lng: p.coords.longitude, acc: Math.round(p.coords.accuracy), at: Date.now() }); }, function () { fin(null); }, { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 }); } catch (e) { fin(null); }
   setTimeout(function () { fin(null); }, 9000);
 }
+// 2026-11-20：上班打卡、开店检查、下班打卡必须拿到手机定位才能提交（离门店多远只记录，不限制）
+function geoOk() { return !!(S.geo && Date.now() - S.geo.at < 120000); }
+function needGeo(retry) { busy(L === 'zh' ? '正在定位…' : 'Mencari lokasi…'); getGeo(function (g) { busy(); if (!g) return geoFail(retry); retry(); }); }
+function geoFail(retry) {
+  var zh = L === 'zh', d = document.createElement('div'); d.className = 'busy'; d.id = 'geoFail';
+  d.innerHTML = '<div style="background:#fff;border-radius:14px;padding:18px;max-width:320px;margin:auto;text-align:left;color:#111"><b style="font-size:16px">' + (zh ? '没拿到定位，不能继续' : 'Lokasi belum terbaca') + '</b><div style="font-size:14px;margin:8px 0 14px;line-height:1.5">' +
+    (zh ? '请打开手机的定位（GPS），并允许浏览器 / App 使用位置，然后点「再试一次」。' : 'Nyalakan lokasi (GPS) di HP dan izinkan browser / aplikasi memakai lokasi, lalu tekan "Coba lagi".') + '</div>' +
+    '<button class="btn" id="geoRetry">' + (zh ? '再试一次' : 'Coba lagi') + '</button><button class="btn" style="background:#eee;color:#111;margin-top:8px" onclick="document.getElementById(\'geoFail\').remove()">' + (zh ? '关闭' : 'Tutup') + '</button></div>';
+  document.body.appendChild(d); document.getElementById('geoRetry').onclick = function () { d.remove(); S.geo = null; needGeo(retry); };
+}
+function geoArg() { return S.geo ? { lat: S.geo.lat, lng: S.geo.lng, acc: S.geo.acc } : null; }
 function compress(file, to) {
   return new Promise(function (ok, no) {
     var img = new Image(), url = URL.createObjectURL(file), geo, gotGeo = false, loaded = false;
@@ -578,9 +589,10 @@ function sendAbsen() {
   var C = ckMulti() ? S.ckH : S.home; if (!C) return toast(t('pickStore'));
   if (!S.shift && (C.opts || []).length > 1) return toast(t('pickFirst'));
   if (!S.photo) return toast(t('needPhoto'));
+  if (!geoOk()) return needGeo(sendAbsen);
   busy(t('upl'));
-  upload(S.photo, 'absen').then(function (pid) { busy(t('sending')); return api('checkIn', [S.sess.token, { storeId: C.store.id, shift: S.shift, photo: pid }], 2); })
-    .then(function (r) { busy(); if (!r.ok) return toast(r.err === 'PICK_SHIFT' ? t('pickFirst') : r.err === 'SHIFT_NOT_OPEN' ? t('notOpen') : r.err === 'ALREADY_IN' ? t('already')(r.store || '') : t('err')); S.selSt = null; try { localStorage.setItem(prefKey(), C.store.id); } catch (e) {} S.res = { kind: 'absen', time: r.time, points: r.points, needBuka: r.needBuka }; if (S.home) { S.home.absen = { time: r.time, points: r.points, shift: S.shift }; S.home.shift = (S.home.store.shifts || []).filter(function (x) { return x.code === S.shift; })[0] || S.home.shift; } S.view = 'res'; render(); loadHome(); })
+  upload(S.photo, 'absen').then(function (pid) { busy(t('sending')); return api('checkIn', [S.sess.token, { storeId: C.store.id, shift: S.shift, photo: pid, geo: geoArg() }], 2); })
+    .then(function (r) { busy(); if (!r.ok && r.err === 'NO_GEO') { S.geo = null; return geoFail(sendAbsen); } if (!r.ok) return toast(r.err === 'PICK_SHIFT' ? t('pickFirst') : r.err === 'SHIFT_NOT_OPEN' ? t('notOpen') : r.err === 'ALREADY_IN' ? t('already')(r.store || '') : t('err')); S.selSt = null; try { localStorage.setItem(prefKey(), C.store.id); } catch (e) {} S.res = { kind: 'absen', time: r.time, points: r.points, needBuka: r.needBuka }; if (S.home) { S.home.absen = { time: r.time, points: r.points, shift: S.shift }; S.home.shift = (S.home.store.shifts || []).filter(function (x) { return x.code === S.shift; })[0] || S.home.shift; } S.view = 'res'; render(); loadHome(); })
     .catch(function () { busy(); toast(t('err')); });
 }
 function vRes() {
@@ -603,9 +615,10 @@ function vBuka() {
     '<button class="btn" onclick="sendBuka()"' + (ok ? '' : ' disabled') + '>' + t('sendBuka') + '</button></div>';
 }
 function sendBuka() {
+  if (!geoOk()) return needGeo(sendBuka);
   busy(t('upl'));
-  upload(S.photo, 'buka').then(function (pid) { busy(t('sending')); return api('openCheck', [S.sess.token, { storeId: S.home.store.id, alat: S.ck.alat, bersih: S.ck.bersih, display: S.ck.display, photo: pid }], 2); })
-    .then(function (r) { busy(); if (!r.ok) return toast(t('err')); S.res = { kind: 'buka', time: r.time || '' }; if (S.home) S.home.buka = { nick: S.sess.user.nick, name: S.sess.user.fullName, time: r.time || '' }; S.view = 'res'; render(); loadHome(); })
+  upload(S.photo, 'buka').then(function (pid) { busy(t('sending')); return api('openCheck', [S.sess.token, { storeId: S.home.store.id, alat: S.ck.alat, bersih: S.ck.bersih, display: S.ck.display, photo: pid, geo: geoArg() }], 2); })
+    .then(function (r) { busy(); if (!r.ok && r.err === 'NO_GEO') { S.geo = null; return geoFail(sendBuka); } if (!r.ok) return toast(t('err')); S.res = { kind: 'buka', time: r.time || '' }; if (S.home) S.home.buka = { nick: S.sess.user.nick, name: S.sess.user.fullName, time: r.time || '' }; S.view = 'res'; render(); loadHome(); })
     .catch(function () { busy(); toast(t('err')); });
 }
 function rsn(r) {
@@ -993,11 +1006,12 @@ function vPulang() {
 function sendPulang() {
   var c = S.po, O = S.home.out || {};
   if (!c.selfie) return toast(t('needPhoto')); if (O.closing && !c.lock) return toast(t('needLock'));
+  if (!geoOk()) return needGeo(sendPulang);
   busy(t('upl'));
   var ups = [upload(c.selfie, 'pulang')]; if (O.closing) ups.push(upload(c.lock, 'kunci'));
-  Promise.all(ups).then(function (ids) { busy(t('sending')); return api('checkOut', [S.sess.token, { storeId: S.home.store.id, photo: ids[0], lockPhoto: ids[1] || '' }], 2); })
+  Promise.all(ups).then(function (ids) { busy(t('sending')); return api('checkOut', [S.sess.token, { storeId: S.home.store.id, photo: ids[0], lockPhoto: ids[1] || '', geo: geoArg() }], 2); })
     .then(function (r) {
-      busy(); if (!r.ok) return toast(r.err === 'NEED_STORE' ? t('sdNeed') : r.err === 'NO_SURVEY' ? t('svNeed') : t('err'));
+      busy(); if (!r.ok && r.err === 'NO_GEO') { S.geo = null; return geoFail(sendPulang); } if (!r.ok) return toast(r.err === 'NEED_STORE' ? t('sdNeed') : r.err === 'NO_SURVEY' ? t('svNeed') : t('err'));
       if (S.home.out) S.home.out.done = { time: r.time };
       S.res = { kind: 'pulang', time: r.time }; S.view = 'res'; render(); window.scrollTo(0, 0); loadHome();
     }).catch(function () { busy(); toast(t('err')); });
