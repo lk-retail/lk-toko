@@ -125,7 +125,7 @@ table.r{width:100%;border-collapse:collapse;font-size:14px}table.r td{padding:8p
 <div class="app" id="app"></div>
 <script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261120130757';
+var APP_VER = '20261120131220';
 function chkVer() { fetch('version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
@@ -150,7 +150,7 @@ var TX = {
     bukaT: 'Cek Buka Toko', bukaS: 'Cek alat, kebersihan, display + foto depan toko. Sekali sehari per toko.', bukaB: 'Mulai cek',
     workT: 'Selamat bekerja', workS: function (x) { return 'Laporan Akhir Shift dibuka 30 menit sebelum shift selesai (' + x + ').'; },
     noShift: 'Jam shift toko ini belum diisi. Hubungi Operation Manager.', noStore: 'Kamu belum terdaftar di toko mana pun. Hubungi HR.',
-    in10: function (r) { return '<b>Peringkat Poin</b>ke-' + r; }, gap: function (g) { return '<b>' + fmtP(g).replace('+', '') + ' poin lagi</b>masuk peringkat'; }, gapNone: '<b>Absen tepat waktu</b>untuk masuk peringkat', boardSoon: '<b>Peringkat Poin</b>mulai 3 Des',
+    in10: function (r) { return '<b>Peringkat Poin</b>ke-' + r; }, gap: function (g) { return '<b>' + fmtP(g).replace('+', '') + ' poin lagi</b>masuk peringkat'; }, gapNone: '<b>Absen tepat waktu</b>untuk masuk peringkat', boardSoon: '<b>Peringkat Poin</b>mulai 8 Des',
     todayP: function (p) { return 'Hari ini: ' + fmtP(p) + ' poin'; }, more: ['Barang', 'Perbaikan & Laporan', 'LK School'], soon: 'Segera',
     nav: ['Hari Ini', 'Tugas', 'Poin', 'Saya'], attSub: function (a) { return a.days ? 'Bulan ini: masuk ' + a.days + ' hari · tepat waktu ' + a.onTime + (a.late ? ' · terlambat ' + a.late : '') + (a.early ? ' · pulang awal ' + a.early : '') + (a.noCard ? ' · tanpa absen pulang ' + a.noCard : '') : 'Kalender kehadiran bulan ini'; }, taskT: 'Tugas', pcT: 'Kas kecil saya', pcNone: 'Belum ada kas kecil', pcBal: 'Saldo', pcAsOf: 'Data per', pcCols: ['Ambil', 'Dipakai', 'Kembali', 'Saldo'], nStores: function (n) { return n + ' toko'; }, stInfo: 'jam buka · shift · supervisor', taskTabs: ['Belum selesai', 'Riwayat'], taskSoonT: 'Belum ada tugas', taskSoonS: 'Tugas dari tim operasional akan tampil di sini, misalnya pasang materi promo, rapikan display rak, unggah foto perbaikan, perbarui konten media sosial, atau pelajari info promo. Tiap tugas harus selesai sebelum batas waktu dan tidak memengaruhi absen masuk/pulang harian.', taskLogT: 'Belum ada riwayat', taskLogS: 'Tugas yang sudah kamu selesaikan akan tersimpan di sini.', back: '‹ Kembali', shift: 'Shift', selfie: 'Ketuk untuk selfie · wajah kamu dan toko harus kelihatan', retake: 'Foto ulang', send: 'Kirim absen',
     sending: 'Mengirim…', upl: 'Mengunggah foto…', needPhoto: 'Ambil foto dulu', got: 'Absen tercatat', ptsGot: 'poin', doneBuka: 'Toko READY ✓',
@@ -205,7 +205,7 @@ var TX = {
     bukaT: '开店检查', bukaS: '设备、卫生、陈列 + 门店正面照。每店每天一次。', bukaB: '开始检查',
     workT: '上班中', workS: function (x) { return '下班卡在下班前 30 分钟开放（' + x + '）。'; },
     noShift: '这家店的班次时间还没填，请联系运营经理。', noStore: '你还没有分配门店，请联系 HR。',
-    in10: function (r) { return '<b>积分排行榜</b>第 ' + r + ' 名'; }, gap: function (g) { return '<b>还差 ' + fmtP(g).replace('+', '') + ' 分</b>上榜'; }, gapNone: '<b>准时打卡</b>就能上榜', boardSoon: '<b>积分排行榜</b>12/3 开始',
+    in10: function (r) { return '<b>积分排行榜</b>第 ' + r + ' 名'; }, gap: function (g) { return '<b>还差 ' + fmtP(g).replace('+', '') + ' 分</b>上榜'; }, gapNone: '<b>准时打卡</b>就能上榜', boardSoon: '<b>积分排行榜</b>12/8 开始',
     todayP: function (p) { return '今天：' + fmtP(p) + ' 分'; }, more: ['货品', '报修与反馈', 'LK School'], soon: '即将上线',
     nav: ['今天', '任务', '积分', '我的'], attSub: function (a) { return a.days ? '本月上班 ' + a.days + ' 天 · 准时 ' + a.onTime + ' 天' + (a.late ? ' · 迟到 ' + a.late + ' 次' : '') + (a.early ? ' · 早退 ' + a.early + ' 次' : '') + (a.noCard ? ' · 缺下班卡 ' + a.noCard + ' 次' : '') : '查看本月考勤日历'; }, taskT: '任务', pcT: '我的备用金', pcNone: '暂无备用金', pcBal: '余额', pcAsOf: '数据更新于', pcCols: ['申请', '核销', '归还', '余额'], nStores: function (n) { return n + ' 家店'; }, stInfo: '营业时间 · 班次 · 区域主管', taskTabs: ['待完成', '记录'], taskSoonT: '暂时没有任务', taskSoonS: '运营团队发布的任务会显示在这里，比如陈列促销物料、完善货架陈列、上传整改照片、更新社媒素材、学习促销知识等。每个任务需在期限内完成，不影响每天的上下班打卡。', taskLogT: '还没有记录', taskLogS: '你完成的任务会保存在这里。', back: '‹ 返回', shift: '班次', selfie: '点这里拍自拍 · 要拍到你的脸和门店', retake: '重拍', send: '提交打卡',
     sending: '提交中…', upl: '正在上传照片…', needPhoto: '请先拍照', got: '打卡成功', ptsGot: '分', doneBuka: '门店已 READY ✓',
@@ -528,7 +528,7 @@ function vHome() {
   }).join('');
   var todayCard = other ? '<div class="card"><h3>' + t('today') + ' · ' + esc(H.store.name) + '</h3><div style="font-size:15px">' + t('bukaT') + ': <b>' + (H.buka ? esc(firstName(H.buka.name)) + ' ' + H.buka.time : t('bukaNone')) + '</b></div></div>' : '<div class="card"><h3>' + t('today') + '</h3><div class="steps">' + steps + '</div></div>';
   var P = H.points;
-  var gap = (H.local && H.local.date < '2026-12-03') ? t('boardSoon') : P.inTop10 ? t('in10')(P.rank) : (P.gap == null ? t('gapNone') : t('gap')(P.gap));
+  var gap = (H.local && H.local.date < '2026-12-08') ? t('boardSoon') : P.inTop10 ? t('in10')(P.rank) : (P.gap == null ? t('gapNone') : t('gap')(P.gap));
   var pts = '<div class="card" style="cursor:pointer" onclick="go(\'poin\')"><h3>' + t('pts') + '</h3><div class="pts"><div class="big">' + totP(P.total) + '<small>' + t('u') + '</small></div><div class="gap" onclick="go(\'poin\')">' + gap + ' ›</div></div>' +
     '</div>';
   var more = '<div class="more">' + [IC.box, IC.wrench, IC.book].map(function (ic, k) { return '<div class="soon">' + ic + t('more')[k] + '<br><small>' + t('soon') + '</small></div>'; }).join('') + '</div>';
@@ -633,7 +633,7 @@ function rsn(r) {
 }
 function vPoin() {
   var P = S.home ? S.home.points : { total: 0 }, N = S.pn, tab = S.pTab || 0;
-  var gap = (S.home && S.home.local && S.home.local.date < '2026-12-03') ? t('boardSoon') : P.inTop10 ? t('in10')(P.rank) : (P.gap == null ? t('gapNone') : t('gap')(P.gap));
+  var gap = (S.home && S.home.local && S.home.local.date < '2026-12-08') ? t('boardSoon') : P.inTop10 ? t('in10')(P.rank) : (P.gap == null ? t('gapNone') : t('gap')(P.gap));
   var head = '<div class="top"><div class="name">' + t('pts') + '</div><div style="font-size:40px;font-weight:800;margin-top:6px">' + totP(P.total) + ' <small style="font-size:14px">' + t('u') + '</small></div><div style="font-size:14px;margin-top:4px">' + gap.replace(/<b>|<\/b>/g, ' ') + '</div></div>';
   var tabs = '<div style="position:sticky;top:calc(50px + env(safe-area-inset-top));z-index:5;background:#f3f3f1;padding:12px 14px 8px"><div style="display:flex;background:#e6e4df;border-radius:12px;padding:3px">' + t('pTabs').map(function (n, k) { return '<button onclick="S.pTab=' + k + ';S.rOpen=null;render();window.scrollTo(0,0)" style="flex:1;border:0;border-radius:10px;padding:9px 2px;font-size:13px;font-weight:' + (k === tab ? '700;background:#fff;color:#000;box-shadow:0 1px 3px rgba(0,0,0,.12)' : '500;background:transparent;color:#6b6b6b') + '">' + n + '</button>'; }).join('') + '</div></div>';
   var body = '';
