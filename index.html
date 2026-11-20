@@ -127,7 +127,7 @@ table.r{width:100%;border-collapse:collapse;font-size:14px}table.r td{padding:8p
 <div class="app" id="app"></div>
 <script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261121023430';
+var APP_VER = '20261121030519';
 function chkVer() { fetch('version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
@@ -292,7 +292,7 @@ function logout() { if (S.sess) api('logout', [S.sess.token], 0).catch(function 
 // 时间用服务器给的门店当地时间校正，改手机时间没用
 function wmNow() { var d = new Date(Date.now() + (S.off || 0)); if (S.off == null) d = new Date(Date.now() - new Date().getTimezoneOffset() * 60000); return d.toISOString().slice(0, 19).replace('T', ' ') + ' ' + ((S.home && S.home.store && S.home.store.tzName) || ''); }
 function wmStore() { var C = (typeof ckMulti === 'function' && S.view === 'absen' && ckMulti()) ? S.ckH : S.home; var st = C && C.store; return st ? st.id + ' ' + (st.name || '') : ''; }
-function wmLabel(to) { var zh = L === 'zh', m = { shot: zh ? 'POS 截图' : 'Screenshot POS', lock: zh ? '锁门照' : 'Foto kunci toko', selfie: zh ? '下班自拍' : 'Selfie pulang', reject: zh ? '拒收照片' : 'Foto penolakan barang' }; if (m[to]) return m[to]; return S.view === 'buka' ? (zh ? '门店正面' : 'Foto depan toko') : (zh ? '上班自拍' : 'Selfie absen'); }
+function wmLabel(to) { var zh = L === 'zh', m = { shot: zh ? 'POS 截图' : 'Screenshot POS', lock: zh ? '锁门照' : 'Foto kunci toko', selfie: zh ? '下班自拍' : 'Selfie pulang', reject: zh ? '拒收照片' : 'Foto penolakan barang', lapor: zh ? '报修与反馈' : 'Foto laporan' }; if (m[to]) return m[to]; return S.view === 'buka' ? (zh ? '门店正面' : 'Foto depan toko') : (zh ? '上班自拍' : 'Selfie absen'); }
 function getGeo(cb) {
   if (S.geo && Date.now() - S.geo.at < 120000) return cb(S.geo);
   if (!navigator.geolocation) return cb(null);
@@ -368,6 +368,7 @@ function render() {
   if (S.sess.mustChange) { a.innerHTML = vHb() + vNewPw(); return; }
   var v = S.view, h = '';
   if (v === 'home') h = vHome(); else if (v === 'notices') h = vNotices(); else if (v === 'absen') h = vAbsen(); else if (v === 'buka') h = vBuka(); else if (v === 'poin') h = vPoin(); else if (v === 'saya') h = vSaya(); else if (v === 'pw') h = vMyPw(); else if (v === 'res') h = vRes(); else if (v === 'survey') h = vSurvey(); else if (v === 'storedata') h = vStoreData(); else if (v === 'pulang') h = vPulang(); else if (v === 'sales') h = vSales(); else if (v === 'mysales') h = vMySales(); else if (v === 'rec') h = vRec(); else if (v === 'tugas') h = vTugas(); else if (v === 'mystore') h = vMyStore(); else if (v === 'mypc') h = vMyPc(); else if (v === 'goods') h = vGoods();
+  else if ((window.XV || {})[v]) h = XV[v]();
   if (v === 'home' || v === 'poin' || v === 'saya' || v === 'tugas') h += vNav();
   a.innerHTML = vHb() + h;
 }
@@ -560,9 +561,11 @@ function vHome() {
     '</div>';
   var more = '<div class="more">' + [IC.box, IC.wrench, IC.book].map(function (ic, k) {
     if (k === 0) return '<div class="live" onclick="S.gd=null;go(\'goods\')">' + ic + t('more')[k] + '<br><small>' + (L === 'zh' ? '补货 · 收货 · 库存' : 'Kiriman · stok') + '</small></div>';
-    return '<div class="soon">' + ic + t('more')[k] + '<br><small>' + t('soon') + '</small></div>'; }).join('') + '</div>';
-  // 首页三个入口：「货品」已上线，点开就是本店货品（补货单 / 断货 / 快卖完 / 调拨退仓）；报修与反馈、LK School 仍是灰色「即将上线」（2026-11-21 Victory 定：本店货品只从首页「货品」进，「我的」里不再放）
-  return top + nx + todayCard + salesCard(H) + pts + more;
+    if (k === 1) return '<div class="live" onclick="lpGo()">' + ic + t('more')[k] + '<br><small>' + (L === 'zh' ? '报修 · 反馈' : 'Perbaikan · masukan') + '</small></div>';
+    var nt = ((S.scp && S.scp.todo) || []).length;
+    return '<div class="live" onclick="scGo(0)">' + ic + t('more')[k] + '<br><small' + (nt ? ' style="color:var(--r);font-weight:700"' : '') + '>' + (nt ? (L === 'zh' ? nt + ' 份必学' : nt + ' wajib') : (L === 'zh' ? '学习 · 考试' : 'Belajar · ujian')) + '</small></div>'; }).join('') + '</div>';
+  // 首页三个入口都已上线：货品（本店货品）、报修与反馈、LK School（2026-11-21）
+  return top + nx + todayCard + scTodoCard() + salesCard(H) + pts + more;
 }
 function vNav() {
   var items = [['home', IC.home], ['tugas', IC.task], ['poin', IC.star], ['saya', IC.user]];
@@ -835,11 +838,15 @@ function poinChart(N, sel) {
   return '<div class="card"><h3>' + t('p12') + '</h3><svg viewBox="0 0 ' + W + ' ' + H + '" style="width:100%;display:block">' + g + '</svg>' + (M.length > 1 ? '<div style="font-size:12px;color:var(--g);margin-top:2px">' + t('pTap') + '</div>' : '') + sum + '</div>';
 }
 function vTugas() {
-  // 两个分页都能点；任务还没开始推送，所以里面是空的（2026-11-19 Victory 定：保留分页，显示「暂时没有任务 / 还没有记录」）
-  var k0 = S.tkTab || 0;
-  return '<div class="top" style="padding:8px 18px 10px"><div class="name">' + t('taskT') + '</div></div>' +
-    '<div style="padding:12px 14px 8px"><div style="display:flex;background:#e6e4df;border-radius:12px;padding:3px">' + t('taskTabs').map(function (n, k) { return '<button onclick="S.tkTab=' + k + ';render()" style="flex:1;border:0;border-radius:10px;padding:9px 2px;font-size:13px;font-weight:' + (k === k0 ? '700;background:#fff;color:#000;box-shadow:0 1px 3px rgba(0,0,0,.12)' : '500;background:transparent;color:#6b6b6b') + '">' + n + '</button>'; }).join('') + '</div></div>' +
-    '<div class="card" style="text-align:center;padding:28px 18px"><div style="width:52px;height:52px;margin:0 auto 10px;color:#b0b0ab">' + IC.task + '</div><div style="font-size:17px;font-weight:700">' + t(k0 ? 'taskLogT' : 'taskSoonT') + '</div><div style="font-size:14px;color:var(--g);margin-top:8px;line-height:1.5">' + t(k0 ? 'taskLogS' : 'taskSoonS') + '</div></div>';
+  // 「任务」：现在先放 LK School 的必学（新的必学发布后自动出现在这里和首页），门店任务以后再加（2026-11-21）
+  var k0 = S.tkTab || 0; scPeek(); var P = S.scp || {}, list = k0 ? (P.done || []) : (P.todo || []);
+  var h = '<div class="top" style="padding:8px 18px 10px"><div class="name">' + t('taskT') + '</div></div>' +
+    '<div style="padding:12px 14px 8px"><div style="display:flex;background:#e6e4df;border-radius:12px;padding:3px">' + t('taskTabs').map(function (n, k) { return '<button onclick="S.tkTab=' + k + ';render()" style="flex:1;border:0;border-radius:10px;padding:9px 2px;font-size:13px;font-weight:' + (k === k0 ? '700;background:#fff;color:#000;box-shadow:0 1px 3px rgba(0,0,0,.12)' : '500;background:transparent;color:#6b6b6b') + '">' + n + '</button>'; }).join('') + '</div></div>';
+  if (!list.length) return h + '<div class="card" style="text-align:center;padding:28px 18px"><div style="width:52px;height:52px;margin:0 auto 10px;color:#b0b0ab">' + IC.task + '</div><div style="font-size:17px;font-weight:700">' + t(k0 ? 'taskLogT' : 'taskSoonT') + '</div><div style="font-size:14px;color:var(--g);margin-top:8px;line-height:1.5">' + t(k0 ? 'taskLogS' : 'taskSoonS') + '</div></div>';
+  return h + '<div class="card" style="padding:0">' + list.map(function (x, i) {
+    var go_ = x.type === 'mat' ? 'scOpen(' + x.id + ')' : 'scGo(1)';
+    return '<div onclick="' + (k0 ? '' : go_) + '" style="display:flex;gap:12px;align-items:center;padding:14px 16px;' + (k0 ? '' : 'cursor:pointer;') + (i < list.length - 1 ? 'border-bottom:1px solid var(--line)' : '') + '"><div style="width:40px;height:40px;border-radius:10px;background:' + (k0 ? 'var(--okb)' : 'var(--y)') + ';display:flex;align-items:center;justify-content:center;flex:none"><span style="width:22px;height:22px;display:block">' + IC.book + '</span></div><div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:700">' + esc(x.title) + '</div><div style="font-size:12px;color:var(--g);margin-top:2px">LK School · ' + (k0 ? (L === 'zh' ? '已完成 ' : 'Selesai ') + String(x.at || '').slice(5) : (x.viewed ? (L === 'zh' ? '已学，去考试' : 'Sudah dibaca, ikut ujian') : (L === 'zh' ? '必学，学完考过才算完成' : 'Wajib, selesai jika lulus ujian')) + (x.due ? ' · ' + scDue(x.due) : '')) + '</div></div>' + (k0 ? '' : '<span style="font-size:22px;color:var(--g)">›</span>') + '</div>';
+  }).join('') + '</div>';
 }
 function entryRow(ic, title, sub, go_, last) {
   return '<div' + (go_ ? ' onclick="' + (go_.indexOf('fn:') === 0 ? go_.slice(3) : 'go(\'' + go_ + '\')') + '"' : '') + ' style="display:flex;align-items:center;gap:14px;padding:14px 16px;' + (go_ ? 'cursor:pointer;' : '') + (last ? '' : 'border-bottom:1px solid var(--line)') + '"><div style="width:44px;height:44px;border-radius:12px;background:var(--y);display:flex;align-items:center;justify-content:center;flex:none"><span style="width:24px;height:24px;display:block">' + ic + '</span></div><div style="flex:1;min-width:0"><div style="font-size:16px;font-weight:700">' + title + '</div><div style="font-size:13px;color:var(--g);margin-top:2px">' + sub + '</div></div><div style="font-size:22px;color:' + (go_ ? 'var(--g)' : 'transparent') + '">›</div></div>';
@@ -945,6 +952,233 @@ function gdSub() { gdPeek(); var o = S.gdp && S.gdp.o; return o ? gdStg(o.stage)
 function gdBanner() { gdPeek(); var o = S.gdp && S.gdp.o; if (o && o.stage === 'open') return '<div class="card" onclick="S.gd=null;go(\'goods\')" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;border:2px solid var(--y)"><div><b>' + (L === 'zh' ? '这一轮补货单出来了' : 'Daftar kiriman putaran ini sudah keluar') + '</b><div style="font-size:13px;color:#666">' + Number(o.q) + (L === 'zh' ? ' 件 · 周一 12:00 前可以看、写备注' : ' pcs · bisa dicek & diberi catatan s/d Senin 12:00') + '</div></div><span style="font-size:22px">›</span></div>';
   if (!o || (o.stage !== 'shipped' && o.stage !== 'returned')) return '';
   return '<div class="card" onclick="S.gd=null;go(\'goods\')" style="cursor:pointer;background:var(--y);border:0;display:flex;justify-content:space-between;align-items:center"><div><b>' + (L === 'zh' ? '补货到了，请核对后确认收货' : 'Kiriman barang datang — cek & konfirmasi') + '</b><div style="font-size:13px">' + esc(o.to_no || '') + ' · ' + Number(o.q) + (L === 'zh' ? ' 件' : ' pcs') + '</div></div><span style="font-size:22px">›</span></div>'; }
+
+// ---------- 报修与反馈 + LK School（2026-11-21，决策记录 642）----------
+// 报修：大类 → 小类 → 影响营业吗 → 描述 → 照片 1–4 张，交给维修负责人；本店同类单子还没关时先问「是同一个问题吗」
+// 反馈：开放式，交给本区运营经理；违规举报：保密，只有指定的人看得到，可以匿名
+// LK School：学习 / 考试 / 我的记录；必学要考过才算完成，推到「任务」和首页
+var LP_API = 'https://okzfaepdfeolsmurwtft.supabase.co/functions/v1/lk-lapor', SC_API = 'https://okzfaepdfeolsmurwtft.supabase.co/functions/v1/lk-school';
+function zi(zh, id) { return L === 'zh' ? zh : id; }
+function xApi(url, fn, args) {
+  return fetch(url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ fn: fn, app: 'toko', args: [S.sess.token].concat(args || []) }) })
+    .then(function (r) { return r.json(); }).then(function (j) { if (j.err) throw new Error(j.err); return j.data; })
+    .catch(function (e) { if (/SESSION_EXPIRED/.test(e.message)) logout(); throw e; });
+}
+function xErr(e) {
+  var m = String((e && e.message) || e || ''), map = {
+    NEED_PHOTO: zi('至少拍 1 张照片', 'Ambil minimal 1 foto'), NEED_BODY: zi('写几句说明情况', 'Tulis penjelasan singkat'), NEED_CAT: zi('选一下哪一类坏了', 'Pilih kategori'),
+    NEED_IMPACT: zi('选一下影响不影响营业', 'Pilih apakah mengganggu operasional'), NEED_NOTE: zi('写一下原因', 'Tulis alasannya'), BAD_STAGE: zi('单子状态已经变了，刷新一下', 'Status sudah berubah, muat ulang'),
+    NO_ACCESS: zi('没有权限', 'Tidak ada akses'), MAX_TODAY: zi('今天已经考了 3 次，明天再来', 'Sudah 3 kali hari ini, coba lagi besok'), NOT_FOUND: zi('找不到了', 'Tidak ditemukan') };
+  for (var k in map) if (m.indexOf(k) >= 0) return toast(map[k]);
+  toast(t('err'));
+}
+var LP_CAT = {
+  door: ['门窗与门头', 'Pintu, Jendela & Papan Nama'], wall: ['墙面 · 天花 · 地板', 'Dinding, Plafon & Lantai'], shelf: ['柜台与货架', 'Meja & Rak'],
+  power: ['电与灯', 'Listrik & Lampu'], device: ['设备', 'Perangkat'], water: ['卫生间与水', 'Toilet & Air'], other: ['其他', 'Lainnya'] };
+var LP_SUB = {
+  door: [['glass', '玻璃门', 'Pintu kaca'], ['lock', '门锁', 'Kunci pintu'], ['shutter', '卷帘门', 'Rolling door'], ['window', '窗户玻璃', 'Kaca jendela'], ['sign', '门头和侧招', 'Papan nama / signage']],
+  wall: [['ceiling', '天花板', 'Plafon'], ['floor', '地板', 'Lantai'], ['wall', '墙面', 'Dinding'], ['leak', '漏水', 'Bocor']],
+  shelf: [['shelf', '货架', 'Rak'], ['cabinet', '展示柜', 'Etalase'], ['counter', '柜台和收银台', 'Meja kasir'], ['tester', '试吸台', 'Meja tester'], ['storage', '储物柜', 'Lemari penyimpanan']],
+  power: [['light', '灯', 'Lampu'], ['socket', '插座和开关', 'Stopkontak & saklar'], ['trip', '跳闸断电', 'Listrik mati / MCB turun']],
+  device: [['ac', '空调', 'AC'], ['cctv', 'CCTV', 'CCTV'], ['tv', '电视显示屏', 'TV / layar'], ['pos', 'POS 机 / 打印机 / 扫码枪', 'Mesin POS / printer / scanner'], ['wifi', '网络 WiFi', 'Internet / WiFi']],
+  water: [['toilet', '马桶', 'Kloset'], ['tap', '水龙头', 'Keran'], ['sink', '洗手池', 'Wastafel'], ['drain', '下水道堵塞', 'Saluran mampet']], other: [] };
+function lpCatName(c) { var x = LP_CAT[c]; return x ? zi(x[0], x[1]) : ''; }
+function lpSubName(c, s) { var x = (LP_SUB[c] || []).filter(function (y) { return y[0] === s; })[0]; return x ? zi(x[1], x[2]) : ''; }
+function lpKind(k) { return { repair: zi('报修', 'Perbaikan'), feedback: zi('反馈', 'Masukan'), whistle: zi('违规举报', 'Laporan pelanggaran') }[k] || k; }
+function lpStat(r) {
+  var k = r.kind, s = r.status;
+  if (k === 'repair') return s === 'open' ? [zi('待接单', 'Menunggu'), '#fff8d6'] : s === 'doing' ? [zi('处理中', 'Diproses'), '#e3ecf8'] : s === 'fixed' ? [zi('已修好，请确认', 'Sudah diperbaiki, cek'), '#FDCD17'] : [r.close_kind === 'auto' ? zi('自动关闭', 'Tutup otomatis') : zi('已关闭', 'Selesai'), '#e6f4ea'];
+  if (k === 'feedback') return s === 'open' ? [zi('已提交', 'Terkirim'), '#eee'] : s === 'fwd' ? [zi('已转交', 'Diteruskan'), '#e3ecf8'] : [r.close_kind === 'to_repair' ? zi('已转成报修', 'Jadi perbaikan') : zi('已回复', 'Dibalas'), '#e6f4ea'];
+  return s === 'open' ? [zi('已收到', 'Diterima'), '#eee'] : [zi('已处理', 'Sudah ditangani'), '#e6f4ea'];
+}
+function pill2(x) { return '<span style="background:' + x[1] + ';border-radius:6px;padding:2px 8px;font-size:12px;font-weight:700;white-space:nowrap">' + x[0] + '</span>'; }
+function lpHead(title, back) { return '<div class="page"><button class="back" onclick="' + (back || "go('home')") + '">' + t('back') + '</button><h2>' + title + '</h2></div>'; }
+function lpLoad(cb) { xApi(LP_API, 'boot', []).then(function (r) { S.lp = r; if (cb) cb(); render(); }).catch(function (e) { S.lp = { err: 1 }; render(); }); }
+function lpGo() { S.lp = S.lp && !S.lp.err ? S.lp : null; go('lapor'); lpLoad(); }
+function vLapor() {
+  var P = S.lp, h = lpHead(zi('报修与反馈', 'Perbaikan & Laporan'));
+  var mine = P && P.mine ? P.mine : [], open = mine.filter(function (r) { return r.status !== 'closed'; }).length, fix = mine.filter(function (r) { return r.kind === 'repair' && r.status === 'fixed'; }).length;
+  h += '<div class="card" style="background:#f0efeb;cursor:pointer;display:flex;justify-content:space-between;align-items:center" onclick="go(\'lpRec\')"><div><b>' + zi('我的记录', 'Riwayat saya') + '</b><div style="font-size:13px;color:var(--g);margin-top:2px">' +
+    (!P ? t('loading') : fix ? '<span style="color:var(--r);font-weight:700">' + zi(fix + ' 张修好了，等你确认', fix + ' sudah diperbaiki, mohon dicek') + '</span>' : open ? zi(open + ' 张还在处理', open + ' masih diproses') : zi('只能查看，不能修改', 'Hanya bisa dilihat')) + '</div></div><span style="font-size:22px;color:var(--g)">›</span></div>';
+  h += '<div class="card" style="padding:0">' + entryRow(IC.wrench, zi('报修', 'Perbaikan'), zi('店里东西坏了 · 交给维修负责人', 'Ada yang rusak · ke tim maintenance'), "fn:lpNew('repair')") +
+    entryRow('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v11H8l-4 4z"/></svg>', zi('反馈', 'Masukan'), zi('门店问题、顾客意见、好想法 · 交给本区运营经理', 'Masalah toko, kata pelanggan, ide · ke Ops Manager'), "fn:lpNew('feedback')", true) + '</div>';
+  h += '<div style="margin:18px 14px 12px;border-top:1px solid var(--line)"></div>';
+  h += '<div class="card" style="background:#111;color:#fff;cursor:pointer;display:flex;gap:14px;align-items:center" onclick="lpNew(\'whistle\')"><div style="width:44px;height:44px;border-radius:12px;background:#333;display:flex;align-items:center;justify-content:center;flex:none;color:var(--y)"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div><div style="flex:1"><div style="font-size:16px;font-weight:700">' + zi('违规举报（保密）', 'Laporan pelanggaran (rahasia)') + '</div><div style="font-size:13px;color:#bbb;margin-top:2px">' + zi('偷钱偷货、不守规定、骚扰等 · 可以匿名', 'Pencurian, melanggar aturan, pelecehan · bisa anonim') + '</div></div><span style="font-size:22px;color:#888">›</span></div>';
+  return h;
+}
+function lpNew(kind) {
+  var H = S.home || {}, ss = H.stores || [];
+  S.lf = { kind: kind, store: (H.store && H.store.id) || (ss[0] && ss[0].id) || null, cat: null, sub: null, impact: null, body: '', photos: [], anon: false, dup: null, appendTo: null };
+  go('lpForm'); if (kind !== 'repair' || S.lf.store) getGeo(function () {});
+}
+function lpPick(inp) { var f = inp.files && inp.files[0]; if (!f) return; busy('…'); compress(f, 'lapor').then(function (d) { busy(); if (S.lf.photos.length < 4) S.lf.photos.push(d); render(); }).catch(function () { busy(); toast(t('err')); }); }
+function lpSet(k, v) { var F = S.lf; F.body = (document.getElementById('lpb') || {}).value || F.body; F[k] = v; if (k === 'cat') { F.sub = null; F.dup = null; F.appendTo = null; if (v === 'other') lpDup(); } if (k === 'sub' || k === 'store') { F.dup = null; F.appendTo = null; lpDup(); } render(); }
+function lpDup() { var F = S.lf; if (F.kind !== 'repair' || !F.store || !F.sub) return; xApi(LP_API, 'dup', [F.store, F.sub]).then(function (r) { if (S.lf === F) { F.dup = r.open; render(); } }).catch(function () {}); }
+function lpChips(items, cur, fn) { return '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">' + items.map(function (x) { var on = x[0] === cur; return '<button onclick="' + fn + '(\'' + x[0] + '\')" style="border-radius:18px;padding:9px 14px;font-size:14px;border:1px solid ' + (on ? '#000' : '#ccc') + ';background:' + (on ? 'var(--y)' : '#fff') + ';font-weight:' + (on ? 700 : 400) + '">' + x[1] + '</button>'; }).join('') + '</div>'; }
+function vLpForm() {
+  var F = S.lf, H = S.home || {}, ss = H.stores || [], k = F.kind, h = lpHead(lpKind(k) + (k === 'whistle' ? zi('（保密）', ' (rahasia)') : ''), "go('lapor')");
+  var lb = function (n, note) { return '<label class="f" style="margin-top:14px">' + n + (note ? ' <span style="font-weight:400;color:var(--g)">' + note + '</span>' : '') + '</label>'; };
+  h += '<div style="padding:0 16px 24px">';
+  if (k === 'feedback') h += '<div class="info" style="margin:0 0 6px">' + zi('门店遇到的问题、顾客说的话、让门店更好的想法，都可以写在这里。', 'Masalah di toko, apa kata pelanggan, atau ide supaya toko lebih baik — tulis di sini.') + '</div>';
+  if (k === 'whistle') h += '<div class="info" style="margin:0 0 6px;background:#111;color:#fff;border-color:#111">' + zi('只有公司指定的 HR 和管理层看得到，门店、主管、运营经理都看不到。公司保护举报人；故意诬告也会被处理。', 'Hanya HR & manajemen yang ditunjuk yang bisa melihat — toko, supervisor, Ops Manager tidak bisa. Perusahaan melindungi pelapor; laporan palsu yang disengaja juga akan ditindak.') + '</div>';
+  if (ss.length > 1 || k === 'whistle') h += lb(zi('哪家店？', 'Toko mana?'), k === 'whistle' ? zi('可不选', 'opsional') : '') + lpChips((k === 'whistle' ? [['', zi('不选', 'Tidak dipilih')]] : []).concat(ss.map(function (x) { return [x.id, esc(x.name)]; })), F.store || '', 'lpStore');
+  if (k === 'repair') {
+    h += lb('1. ' + zi('哪一类坏了？', 'Bagian mana yang rusak?')) + lpChips(Object.keys(LP_CAT).map(function (c) { return [c, lpCatName(c)]; }), F.cat, 'lpCat');
+    if (F.cat && F.cat !== 'other') h += lb('2. ' + zi('具体是什么？', 'Apa tepatnya?')) + lpChips((LP_SUB[F.cat] || []).map(function (x) { return [x[0], zi(x[1], x[2])]; }), F.sub, 'lpSub');
+    if (F.dup) h += '<div class="info" style="margin:12px 0 0;border:2px solid var(--y)"><b>' + zi('本店已经有一张同类的单子还没关', 'Toko ini sudah punya laporan sejenis yang belum selesai') + '</b><div style="font-size:13px;margin:6px 0">#' + F.dup.id + ' · ' + String(F.dup.at).slice(5, 10) + ' · ' + lpStat(F.dup)[0] + '<br>' + esc(F.dup.body).slice(0, 80) + '</div><div style="font-size:13px;font-weight:700">' + zi('是同一个问题吗？', 'Masalah yang sama?') + '</div>' +
+      lpChips([['y', zi('是，补充到这张单子', 'Ya, tambahkan ke laporan itu')], ['n', zi('不是，新报一张', 'Bukan, laporan baru')]], F.appendTo ? 'y' : F.appendTo === 0 ? 'n' : '', 'lpSame') + '</div>';
+    h += lb('3. ' + zi('影响营业吗？', 'Mengganggu operasional?')) + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">' +
+      [[true, zi('影响营业', 'Mengganggu'), zi('开不了门、断电、不能收银', 'Pintu tak bisa dibuka, listrik mati, tak bisa kasir')], [false, zi('不影响营业', 'Tidak mengganggu'), zi('还能正常开店', 'Toko tetap bisa buka')]].map(function (x) { var on = F.impact === x[0]; return '<button onclick="lpImp(' + x[0] + ')" style="border-radius:12px;padding:10px 6px;font-size:14px;border:1px solid ' + (on ? '#000' : '#ccc') + ';background:' + (on ? (x[0] ? '#fdecea' : 'var(--y)') : '#fff') + ';font-weight:' + (on ? 700 : 400) + '">' + x[1] + '<br><span style="font-size:12px;font-weight:400;color:var(--g)">' + x[2] + '</span></button>'; }).join('') + '</div>';
+  }
+  h += lb((k === 'repair' ? '4. ' : '') + (k === 'repair' ? zi('说一下情况', 'Jelaskan masalahnya') : k === 'feedback' ? zi('想说什么？', 'Mau sampaikan apa?') : zi('发生了什么？', 'Apa yang terjadi?')), k === 'whistle' ? zi('写清楚时间、地点、经过', 'tulis waktu, tempat, kejadian') : '') +
+    '<textarea id="lpb" class="in" style="min-height:110px;margin-top:8px" placeholder="' + (k === 'repair' ? zi('比如：空调一直滴水，滴在收银台旁边，从昨天下午开始', 'Contoh: AC terus menetes di dekat kasir sejak kemarin sore') : k === 'feedback' ? zi('比如：最近很多顾客问某个产品，店里没有货', 'Contoh: banyak pelanggan menanyakan produk X, stok kosong') : '') + '">' + esc(F.body) + '</textarea>';
+  h += lb((k === 'repair' ? '5. ' : '') + zi('照片', 'Foto'), k === 'repair' ? zi('至少 1 张，最多 4 张', 'min. 1, maks. 4') : zi('可不传，最多 4 张', 'opsional, maks. 4')) +
+    '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px">' + F.photos.map(function (p, i) { return '<img src="' + p + '" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px" onclick="if(confirm(\'' + zi('删掉这张？', 'Hapus foto ini?') + '\')){S.lf.photos.splice(' + i + ',1);render()}">'; }).join('') +
+    (F.photos.length < 4 ? '<label style="aspect-ratio:1;border:2px dashed #bbb;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:28px;color:#999">+<input type="file" accept="image/*" capture="environment" style="display:none" onchange="lpPick(this)"></label>' : '') + '</div>' +
+    (k === 'repair' ? '<div style="font-size:12px;color:var(--g);margin-top:6px">' + zi('拍一张全景，再拍坏的地方近照。照片自动加时间和位置水印。', 'Foto keseluruhan + close-up bagian yang rusak. Foto otomatis diberi watermark waktu & lokasi.') + '</div>' : '');
+  if (k === 'whistle') h += '<label style="display:flex;align-items:center;gap:10px;margin-top:16px;font-size:15px"><input type="checkbox" ' + (F.anon ? 'checked' : '') + ' onchange="S.lf.anon=this.checked" style="width:22px;height:22px">' + zi('匿名提交（处理的人看不到你的名字）', 'Kirim anonim (penerima tidak melihat namamu)') + '</label>';
+  h += '<button class="btn" onclick="lpSend()">' + (F.appendTo ? zi('补充到原单子', 'Tambahkan ke laporan') : zi('提交', 'Kirim')) + '</button>';
+  h += '<div style="font-size:12px;color:var(--g);margin-top:10px;line-height:1.5">' + (k === 'repair' ? zi('提交后交给维修负责人处理。进度在「我的记录」里看，修好后请你确认。', 'Laporan dikirim ke tim maintenance. Lihat progres di "Riwayat saya", konfirmasi setelah diperbaiki.') : k === 'feedback' ? zi('反馈先交给你所在区域的运营经理，需要别的团队处理的她会转交。回复在「我的记录」里看。', 'Masukan dikirim ke Ops Manager wilayahmu; bila perlu akan diteruskan. Balasan ada di "Riwayat saya".') : zi('提交后你只能看到「已收到 / 已处理」，看不到处理细节。', 'Kamu hanya melihat status "Diterima / Sudah ditangani".')) + '</div></div>';
+  return h;
+}
+function lpStore(v) { lpSet('store', v || null); }
+function lpCat(v) { lpSet('cat', v); }
+function lpSub(v) { lpSet('sub', v); }
+function lpImp(v) { lpSet('impact', v); }
+function lpSame(v) { var F = S.lf; F.body = (document.getElementById('lpb') || {}).value || F.body; F.appendTo = v === 'y' ? F.dup.id : 0; render(); }
+function lpSend() {
+  var F = S.lf; F.body = ((document.getElementById('lpb') || {}).value || '').trim();
+  if (F.kind === 'repair') {
+    if (!F.store) return toast(zi('选一下哪家店', 'Pilih toko'));
+    if (!F.cat || (F.cat !== 'other' && !F.sub)) return toast(zi('选一下哪一类坏了', 'Pilih kategori'));
+    if (F.dup && F.appendTo == null) return toast(zi('先选「是不是同一个问题」', 'Pilih dulu: masalah yang sama atau bukan?'));
+    if (F.impact == null) return toast(zi('选一下影响不影响营业', 'Pilih apakah mengganggu operasional'));
+    if (!F.photos.length) return toast(zi('至少拍 1 张照片', 'Ambil minimal 1 foto'));
+  }
+  if (F.body.length < 4) return toast(zi('写几句说明情况', 'Tulis penjelasan singkat'));
+  busy(zi('上传中…', 'Mengunggah…'));
+  xApi(LP_API, 'submit', [{ kind: F.kind, storeId: F.store, cat: F.cat, sub: F.cat === 'other' ? null : F.sub, impact: F.impact, body: F.body, anon: F.anon, appendTo: F.appendTo || null, photos: F.photos.map(function (p) { return p.split(',')[1]; }) }])
+    .then(function (r) { busy(); toast(r.appended ? zi('已补充到原来的单子', 'Ditambahkan ke laporan sebelumnya') : zi('已提交', 'Terkirim')); S.lf = null; S.lp = null; go('lpRec'); lpLoad(); })
+    .catch(function (e) { busy(); xErr(e); });
+}
+function vLpRec() {
+  var P = S.lp, h = lpHead(zi('我的记录', 'Riwayat saya'), "go('lapor')");
+  if (!P) { lpLoad(); return h + '<div class="card">' + t('loading') + '</div>'; }
+  var rows = P.mine || [];
+  if (!rows.length) return h + '<div class="card" style="text-align:center;color:var(--g);padding:24px">' + zi('还没有记录', 'Belum ada riwayat') + '</div>';
+  return h + '<div class="card" style="padding:0 14px">' + rows.map(function (r, i) {
+    var st = lpStat(r), title = r.kind === 'repair' ? esc(r.store_name || '') + ' · ' + lpCatName(r.cat) + (r.sub ? ' · ' + lpSubName(r.cat, r.sub) : '') : esc(r.body).slice(0, 40);
+    return '<div onclick="lpOpen(' + r.id + ')" style="cursor:pointer;padding:12px 0;' + (i < rows.length - 1 ? 'border-bottom:1px solid var(--line)' : '') + '"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><span style="font-size:12px;color:var(--g)">' + lpKind(r.kind) + ' · ' + String(r.at).slice(5, 10) + (r.mine ? '' : ' · ' + zi('本店', 'toko ini')) + '</span>' + pill2(st) + '</div><div style="font-size:15px;font-weight:600;margin-top:4px">' + title + '</div></div>';
+  }).join('') + '</div><div style="font-size:12px;color:var(--g);margin:0 16px">' + zi('只能查看，不能修改。显示最近 90 天。', 'Hanya bisa dilihat. 90 hari terakhir.') + '</div>';
+}
+function lpOpen(id) { busy('…'); xApi(LP_API, 'get', [id]).then(function (r) { busy(); S.lpd = r; go('lpDet'); }).catch(function (e) { busy(); xErr(e); }); }
+function vLpDet() {
+  var r = S.lpd, h = lpHead(lpKind(r.kind) + ' #' + r.id, "go('lpRec')"), st = lpStat(r);
+  h += '<div class="card"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><b style="font-size:16px">' + (r.kind === 'repair' ? lpCatName(r.cat) + (r.sub ? ' · ' + lpSubName(r.cat, r.sub) : '') : lpKind(r.kind)) + '</b>' + pill2(st) + '</div>' +
+    '<div style="font-size:13px;color:var(--g);margin-top:6px">' + esc(r.store_name || '') + ' · ' + String(r.at).slice(0, 10) + (r.impact ? ' · <b style="color:var(--r)">' + zi('影响营业', 'Mengganggu') + '</b>' : '') + (r.repeat ? ' · <b>' + zi('重复故障', 'Kerusakan berulang') + '</b>' : '') + '</div>' +
+    '<div style="margin-top:10px;white-space:pre-line;line-height:1.5">' + esc(r.body) + '</div>' +
+    (r.photos && r.photos.length ? '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px">' + r.photos.map(function (p) { return '<a href="' + p + '" target="_blank"><img src="' + p + '" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px"></a>'; }).join('') + '</div>' : '') +
+    (r.reply ? '<div class="info" style="margin:12px 0 0">' + zi('回复：', 'Balasan: ') + esc(r.reply) + '</div>' : '') + (r.eta && r.status === 'doing' ? '<div style="font-size:13px;margin-top:8px">' + zi('预计修好：', 'Perkiraan selesai: ') + r.eta + '</div>' : '') + '</div>';
+  if (r.log && r.log.length) h += '<div class="card"><h3>' + zi('进度', 'Progres') + '</h3>' + r.log.map(function (x) { return '<div style="padding:8px 0;border-top:1px solid var(--line);font-size:14px"><div style="font-size:12px;color:var(--g)">' + x.at + (x.who_name ? ' · ' + esc(x.who_name) : '') + '</div><div style="margin-top:2px;white-space:pre-line">' + esc(x.note || '') + '</div>' + ((x.photos || []).length ? '<div style="display:flex;gap:6px;margin-top:6px">' + x.photos.map(function (p) { return '<a href="' + p + '" target="_blank"><img src="' + p + '" style="width:64px;height:64px;object-fit:cover;border-radius:6px"></a>'; }).join('') + '</div>' : '') + '</div>'; }).join('') + '</div>';
+  if (r.can && r.can.confirm) h += '<div style="padding:0 14px 20px"><div class="info" style="margin:0 0 4px">' + zi('维修的人说已经修好了。请到现场看一下：真的修好了就点确认；没修好就退回并写原因。3 天没人确认会自动关闭。', 'Tim maintenance bilang sudah diperbaiki. Cek di toko: kalau benar sudah, konfirmasi; kalau belum, kembalikan dengan alasan. Tanpa konfirmasi 3 hari akan tutup otomatis.') + '</div>' +
+    '<button class="btn" onclick="lpAct(\'confirm\')">' + zi('确认修好了', 'Konfirmasi sudah beres') + '</button><button class="btn ghost" onclick="lpAct(\'reopen\')">' + zi('还没修好，退回', 'Belum beres, kembalikan') + '</button></div>';
+  return h;
+}
+function lpAct(a) {
+  var note = '';
+  if (a === 'reopen') { note = prompt(zi('哪里还没修好？', 'Bagian mana yang belum beres?')) || ''; if (!note.trim()) return; }
+  else if (!confirm(zi('确认已经修好了？', 'Yakin sudah beres?'))) return;
+  busy('…'); xApi(LP_API, 'act', [S.lpd.id, a, note, [], {}]).then(function () { busy(); toast(zi('已提交', 'Terkirim')); S.lp = null; lpOpen(S.lpd.id); lpLoad(); }).catch(function (e) { busy(); xErr(e); });
+}
+
+// ---------- LK School ----------
+var SC_CAT = { product: ['产品知识', 'Pengetahuan Produk'], promo: ['本月促销', 'Promo Bulan Ini'], sales: ['销售技巧', 'Teknik Penjualan'], sop: ['门店规则与 SOP', 'Aturan Toko & SOP'], system: ['系统操作', 'Sistem (LK Toko, POS)'], onboard: ['新人入职', 'Karyawan Baru'] };
+function scCatName(c) { var x = SC_CAT[c]; return x ? zi(x[0], x[1]) : c; }
+var SC_IC = { video: '<rect x="3" y="6" width="13" height="12" rx="2"/><path d="m16 10 5-3v10l-5-3z"/>', pdf: '<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/>', image: '<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 17-5-5-9 7"/>', text: '<path d="M5 6h14"/><path d="M5 11h14"/><path d="M5 16h9"/>' };
+function scTypeName(m) { return { video: zi('视频', 'Video'), pdf: 'PDF', image: zi('图片', 'Gambar'), text: zi('图文', 'Teks') }[m] || ''; }
+function scLoad() { xApi(SC_API, 'boot', []).then(function (r) { S.sc = r; S.scp = { at: Date.now(), todo: r.todo, done: r.done }; render(); }).catch(function () { S.sc = { err: 1 }; render(); }); }
+function scGo(tab) { S.scTab = tab || 0; S.scCat = ''; S.scSeg = 0; go('school'); scLoad(); }
+// 首页和「任务」用的必学待办：每 10 分钟最多查一次
+function scPeek() { var P = S.scp; if (!S.sess || (P && Date.now() - P.at < 600000)) return; S.scp = { at: Date.now(), todo: P && P.todo, done: P && P.done }; xApi(SC_API, 'todo', []).then(function (r) { S.scp = { at: Date.now(), todo: r.todo, done: r.done }; if (S.view === 'home' || S.view === 'tugas') render(); }).catch(function () {}); }
+function scDue(d) { return d ? zi(String(d).slice(5).replace('-', '/') + ' 截止', 'batas ' + String(d).slice(8) + '/' + String(d).slice(5, 7)) : ''; }
+function scTodoCard() {
+  scPeek(); var td = (S.scp && S.scp.todo) || []; if (!td.length) return '';
+  var first = td.filter(function (x) { return x.due; }).sort(function (a, b) { return a.due < b.due ? -1 : 1; })[0];
+  return '<div class="card" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;border:2px solid var(--y)" onclick="scGo(0)"><div><b>' + zi('LK School：还有 ' + td.length + ' 份必学没完成', 'LK School: ' + td.length + ' materi wajib belum selesai') + '</b><div style="font-size:13px;color:var(--g);margin-top:2px">' + (first ? zi('最早 ', 'Paling awal ') + scDue(first.due) + ' · ' : '') + zi('学完考过才算完成', 'Selesai jika lulus ujian') + '</div></div><span style="font-size:22px">›</span></div>';
+}
+function scTabs() { return '<div style="display:flex;background:#fff;border-bottom:1px solid var(--line);margin:0 0 12px">' + [zi('学习', 'Belajar'), zi('考试', 'Ujian'), zi('我的记录', 'Riwayat')].map(function (n, k) { var on = (S.scTab || 0) === k; return '<button onclick="S.scTab=' + k + ';render()" style="flex:1;border:0;background:none;padding:12px 0;font-size:15px;font-weight:' + (on ? 800 : 400) + ';border-bottom:3px solid ' + (on ? 'var(--y)' : 'transparent') + ';color:' + (on ? '#000' : 'var(--g)') + '">' + n + '</button>'; }).join('') + '</div>'; }
+function scMatCard(m) {
+  var st = m.passed ? [zi('已通过', 'Lulus'), '#e6f4ea'] : m.exam_id && m.viewed ? [zi('已学待考', 'Sudah dibaca, belum ujian'), '#fff8d6'] : m.viewed ? [zi('已学', 'Sudah dibaca'), '#e6f4ea'] : [zi('未学', 'Belum'), '#eee'];
+  return '<div class="card" onclick="scOpen(' + m.id + ')" style="cursor:pointer;display:flex;gap:12px;align-items:center"><div style="width:44px;height:44px;border-radius:10px;background:var(--l);display:flex;align-items:center;justify-content:center;flex:none"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8">' + (SC_IC[m.media_type] || SC_IC.text) + '</svg></div><div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:700">' + esc(m.title) + '</div><div style="font-size:12px;color:var(--g);margin-top:2px">' + scCatName(m.cat) + ' · ' + scTypeName(m.media_type) + '</div><div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">' + (m.req ? pill2([zi('必学', 'Wajib') + (m.due ? ' · ' + scDue(m.due) : ''), '#111;color:#FDCD17']) : pill2([zi('选学', 'Pilihan'), '#eee'])) + pill2(st) + '</div></div><span style="font-size:22px;color:var(--g)">›</span></div>';
+}
+function vSchool() {
+  var D = S.sc, h = lpHead('LK School') + scTabs(), tab = S.scTab || 0;
+  if (!D) return h + '<div class="card">' + t('loading') + '</div>';
+  if (D.err) return h + '<div class="card">' + t('err') + '</div>';
+  if (tab === 0) {
+    var td = D.todo || [];
+    if (td.length) { var f = td.filter(function (x) { return x.due; }).sort(function (a, b) { return a.due < b.due ? -1 : 1; })[0]; h += '<div class="card" style="background:#111;color:#fff"><b style="color:var(--y)">' + zi('还有 ' + td.length + ' 份必学没完成', td.length + ' materi wajib belum selesai') + '</b><div style="font-size:13px;margin-top:4px">' + (f ? zi('最早 ', 'Paling awal ') + scDue(f.due) + ' · ' : '') + zi('学完再去「考试」，考过才算完成', 'Pelajari lalu ikut "Ujian" — selesai jika lulus') + '</div></div>'; }
+    var cats = Object.keys(SC_CAT).filter(function (c) { return D.mats.some(function (m) { return m.cat === c; }); });
+    if (!D.mats.length) return h + '<div class="card" style="text-align:center;color:var(--g);padding:28px">' + zi('还没有学习资料，发布后会出现在这里。', 'Belum ada materi. Materi baru akan muncul di sini.') + '</div>';
+    if (cats.length > 1) h += '<div style="display:flex;gap:8px;overflow-x:auto;padding:0 14px 12px">' + [['', zi('全部', 'Semua')]].concat(cats.map(function (c) { return [c, scCatName(c)]; })).map(function (x) { var on = (S.scCat || '') === x[0]; return '<button onclick="S.scCat=\'' + x[0] + '\';render()" style="white-space:nowrap;border-radius:18px;padding:8px 14px;font-size:14px;border:1px solid ' + (on ? '#000' : '#ccc') + ';background:' + (on ? 'var(--y)' : '#fff') + ';font-weight:' + (on ? 700 : 400) + '">' + x[1] + '</button>'; }).join('') + '</div>';
+    var ms = D.mats.filter(function (m) { return !S.scCat || m.cat === S.scCat; }), a = ms.filter(function (m) { return m.req && !m.done; }), b = ms.filter(function (m) { return !(m.req && !m.done); });
+    if (a.length) h += '<div style="margin:4px 16px 8px;font-weight:800">' + zi('必学', 'Wajib') + '</div>' + a.map(scMatCard).join('');
+    if (b.length) h += '<div style="margin:4px 16px 8px;font-weight:800">' + zi('选学 / 已完成', 'Pilihan / sudah selesai') + '</div>' + b.map(scMatCard).join('');
+    return h;
+  }
+  if (tab === 1) {
+    var ex = D.exams || [], seg = S.scSeg || 0, todo = ex.filter(function (e) { return !e.passed; }), ok = ex.filter(function (e) { return e.passed; });
+    h += '<div style="display:flex;gap:4px;background:#e6e4df;border-radius:12px;padding:3px;margin:0 14px 12px">' + [zi('待考', 'Belum') + '（' + todo.length + '）', zi('已通过', 'Lulus') + '（' + ok.length + '）'].map(function (n, k) { return '<button onclick="S.scSeg=' + k + ';render()" style="flex:1;border:0;border-radius:10px;padding:9px 2px;font-size:14px;font-weight:' + (k === seg ? '700;background:#fff' : '500;background:transparent;color:#6b6b6b') + '">' + n + '</button>'; }).join('') + '</div>';
+    var list = seg ? ok : todo;
+    if (!list.length) return h + '<div class="card" style="text-align:center;color:var(--g);padding:24px">' + (seg ? zi('还没有通过的考试', 'Belum ada ujian yang lulus') : zi('没有要考的', 'Tidak ada ujian')) + '</div>';
+    h += list.map(function (e) {
+      return '<div class="card"><div style="display:flex;justify-content:space-between;gap:8px"><b style="font-size:16px">' + esc(e.title) + '</b>' + (e.passed ? pill2([zi('最高 ', 'Tertinggi ') + e.best, '#e6f4ea']) : e.best != null ? pill2([zi('上次最高 ', 'Tertinggi ') + e.best, '#fdecea']) : e.req ? pill2([zi('必考', 'Wajib'), '#111;color:#FDCD17']) : '') + '</div>' +
+        '<div style="font-size:13px;color:var(--g);margin-top:6px;line-height:1.5">' + zi(e.n + ' 题 · ' + e.pass + ' 分及格', e.n + ' soal · lulus ' + e.pass) + (e.due ? ' · ' + scDue(e.due) : '') + (e.mat_title ? '<br>' + zi('先学：', 'Pelajari dulu: ') + esc(e.mat_title) : '') + '</div>' +
+        (e.passed ? '' : e.left > 0 ? '<button class="btn" style="padding:13px;font-size:16px" onclick="scStart(' + e.id + ')">' + (e.tries ? zi('重考', 'Ulangi ujian') : zi('开始考试', 'Mulai ujian')) + '</button><div style="font-size:12px;color:var(--g);margin-top:6px">' + zi('今天还能考 ' + e.left + ' 次', 'Sisa ' + e.left + ' kali hari ini') + '</div>' : '<div class="info" style="margin:10px 0 0">' + zi('今天已经考了 3 次，明天再来。', 'Sudah 3 kali hari ini, coba lagi besok.') + '</div>') + '</div>';
+    }).join('');
+    return h + '<div style="font-size:12px;color:var(--g);margin:0 16px;line-height:1.5">' + zi('每次题目和选项顺序都不一样；没通过不显示答案；一天最多考 3 次，按最高分算。', 'Urutan soal & pilihan selalu diacak; jawaban tidak ditampilkan jika tidak lulus; maks. 3 kali sehari, nilai tertinggi yang dihitung.') + '</div>';
+  }
+  if (!S.scr) { xApi(SC_API, 'records', []).then(function (r) { S.scr = r; render(); }).catch(function () { S.scr = { attempts: [], views: [] }; render(); }); return h + '<div class="card">' + t('loading') + '</div>'; }
+  var R = S.scr, req = (D.todo || []).length + (D.done || []).length;
+  h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 14px 12px"><div class="card" style="margin:0"><div style="font-size:13px;color:var(--g)">' + zi('必学完成', 'Wajib selesai') + '</div><div style="font-size:26px;font-weight:800">' + (D.done || []).length + ' / ' + req + '</div></div><div class="card" style="margin:0"><div style="font-size:13px;color:var(--g)">' + zi('考试通过', 'Ujian lulus') + '</div><div style="font-size:26px;font-weight:800">' + D.exams.filter(function (e) { return e.passed; }).length + ' / ' + D.exams.length + '</div></div></div>';
+  var row = function (d, ti, r) { return '<div style="display:flex;gap:10px;align-items:center;padding:11px 0;border-top:1px solid var(--line)"><div style="width:44px;font-size:13px;color:var(--g)">' + d + '</div><div style="flex:1;font-size:14px">' + ti + '</div>' + r + '</div>'; };
+  h += '<div class="card"><h3>' + zi('考试记录', 'Riwayat ujian') + '</h3>' + (R.attempts.length ? R.attempts.map(function (a) { return row(String(a.at).slice(5, 10).replace('-', '/'), esc(a.title) + zi(' · 第 ' + a.nth + ' 次', ' · ke-' + a.nth), pill2([a.score + zi(' 分 ', ' ') + (a.passed ? zi('通过', 'lulus') : zi('未通过', 'tidak lulus')), a.passed ? '#e6f4ea' : '#fdecea'])); }).join('') : '<div style="color:var(--g);font-size:14px">' + zi('还没有', 'Belum ada') + '</div>') + '</div>';
+  h += '<div class="card"><h3>' + zi('学习记录', 'Riwayat belajar') + '</h3>' + (R.views.length ? R.views.map(function (v) { return row(String(v.at).slice(5).replace('-', '/'), esc(v.title), pill2([zi('已学', 'Sudah'), '#e6f4ea'])); }).join('') : '<div style="color:var(--g);font-size:14px">' + zi('还没有', 'Belum ada') + '</div>') + '</div>';
+  return h + '<div style="font-size:12px;color:var(--g);margin:0 16px">' + zi('只能查看，不能修改。', 'Hanya bisa dilihat.') + '</div>';
+}
+function scOpen(id) { busy('…'); xApi(SC_API, 'open', [id]).then(function (r) { busy(); S.scm = r; S.scr = null; go('scMat'); }).catch(function (e) { busy(); xErr(e); }); }
+function vScMat() {
+  var m = S.scm, h = lpHead(esc(m.title), 'scGo(0)');
+  h += '<div class="card"><div style="font-size:13px;color:var(--g)">' + scCatName(m.cat) + ' · ' + scTypeName(m.media_type) + (m.req ? ' · <b>' + zi('必学', 'Wajib') + '</b>' + (m.due ? ' · ' + scDue(m.due) : '') : '') + '</div>';
+  if (m.media_type === 'video' && m.url) h += '<video src="' + m.url + '" controls playsinline preload="metadata" style="width:100%;border-radius:10px;margin-top:10px;background:#000"></video>';
+  if (m.media_type === 'image' && m.url) h += '<a href="' + m.url + '" target="_blank"><img src="' + m.url + '" style="width:100%;border-radius:10px;margin-top:10px"></a>';
+  if (m.media_type === 'pdf' && m.url) h += '<a class="btn ghost" style="text-align:center;text-decoration:none" href="' + m.url + '" target="_blank">' + zi('打开 PDF', 'Buka PDF') + (m.media_name ? ' · ' + esc(m.media_name) : '') + '</a>';
+  if (m.body) h += '<div style="margin-top:12px;white-space:pre-line;line-height:1.6;font-size:15px">' + esc(m.body) + '</div>';
+  h += '</div>';
+  var E = m.exam, ex = E && S.sc && S.sc.exams ? S.sc.exams.filter(function (x) { return String(x.id) === String(E.id); })[0] : null;
+  if (E && E.status === 'published') h += '<div style="padding:0 14px 20px">' + (ex && ex.passed ? '<div class="info" style="margin:0;background:var(--okb);border-color:#b7dfc2">' + zi('考试已通过（最高 ' + ex.best + ' 分）', 'Ujian sudah lulus (tertinggi ' + ex.best + ')') + '</div>' : '<button class="btn" onclick="scStart(' + E.id + ')">' + zi('学完了，去考试', 'Sudah belajar, mulai ujian') + '</button><div style="font-size:12px;color:var(--g);margin-top:6px">' + zi(E.n + ' 题 · ' + E.pass + ' 分及格', E.n + ' soal · lulus ' + E.pass) + '</div>') + '</div>';
+  return h;
+}
+function scStart(id) { busy('…'); xApi(SC_API, 'start', [id]).then(function (r) { busy(); S.ex = { d: r, ans: {}, res: null }; go('scExam'); window.scrollTo(0, 0); }).catch(function (e) { busy(); xErr(e); }); }
+function scAns(k, i, multi) { var A = S.ex.ans, cur = A[k] || []; if (multi) { A[k] = cur.indexOf(i) >= 0 ? cur.filter(function (x) { return x !== i; }) : cur.concat([i]); } else A[k] = [i]; var y = window.scrollY; render(); window.scrollTo(0, y); }
+function vScExam() {
+  var X = S.ex, d = X.d, h = lpHead(esc(d.title), 'scGo(1)');
+  if (X.res) { var r = X.res; return h + '<div class="card" style="text-align:center;padding:28px 18px"><div style="font-size:48px;font-weight:800;color:' + (r.passed ? 'var(--ok)' : 'var(--r)') + '">' + r.score + '</div><div style="font-size:18px;font-weight:700;margin-top:6px">' + (r.passed ? zi('通过了！', 'Lulus!') : zi('没通过，' + r.pass + ' 分及格', 'Belum lulus, batas lulus ' + r.pass)) + '</div><div style="font-size:14px;color:var(--g);margin-top:8px;line-height:1.5">' + (r.passed ? zi('这份必学已完成。', 'Materi wajib ini selesai.') : (r.left > 0 ? zi('回去再看一遍资料，今天还能考 ' + r.left + ' 次。', 'Pelajari lagi materinya. Sisa ' + r.left + ' kali hari ini.') : zi('今天的 3 次用完了，明天再来。', 'Kesempatan hari ini habis, coba besok.'))) + '</div><button class="btn" onclick="scGo(1)">' + zi('返回考试列表', 'Kembali ke daftar ujian') + '</button></div>'; }
+  h += '<div style="margin:0 16px 10px;font-size:13px;color:var(--g)">' + zi(d.n + ' 题 · ' + d.pass + ' 分及格 · 全部答完才能交卷', d.n + ' soal · lulus ' + d.pass + ' · jawab semua sebelum kirim') + '</div>';
+  h += d.qs.map(function (q, n) {
+    var multi = q.type === 'multi', a = X.ans[q.k] || [];
+    return '<div class="card"><div style="font-size:12px;color:var(--g)">' + (n + 1) + ' / ' + d.n + ' · ' + (multi ? zi('多选', 'Pilih beberapa') : q.type === 'tf' ? zi('判断', 'Benar / Salah') : zi('单选', 'Pilih satu')) + '</div><div style="font-size:16px;font-weight:700;margin:6px 0 8px;line-height:1.4">' + esc(q.q) + '</div>' +
+      q.opts.map(function (o) { var on = a.indexOf(o.i) >= 0; return '<button onclick="scAns(' + q.k + ',' + o.i + ',' + multi + ')" style="display:flex;gap:10px;align-items:center;width:100%;text-align:left;margin-top:8px;border-radius:12px;padding:12px;font-size:15px;border:1px solid ' + (on ? '#000' : '#ccc') + ';background:' + (on ? 'var(--y)' : '#fff') + '"><span style="width:20px;height:20px;flex:none;border:2px solid #000;border-radius:' + (multi ? '4px' : '50%') + ';background:' + (on ? '#000' : '#fff') + '"></span>' + esc(o.t) + '</button>'; }).join('') + '</div>';
+  }).join('');
+  return h + '<div style="padding:0 14px 30px"><button class="btn" onclick="scSubmit()">' + zi('交卷', 'Kirim jawaban') + '</button></div>';
+}
+function scSubmit() {
+  var X = S.ex, miss = X.d.qs.filter(function (q) { return !(X.ans[q.k] || []).length; }).length;
+  if (miss) return toast(zi('还有 ' + miss + ' 题没答', miss + ' soal belum dijawab'));
+  if (!confirm(zi('确定交卷？', 'Yakin kirim jawaban?'))) return;
+  busy('…'); xApi(SC_API, 'submit', [X.d.id, X.ans, X.d.started]).then(function (r) { busy(); X.res = r; S.scp = null; S.scr = null; xApi(SC_API, 'boot', []).then(function (b) { S.sc = b; S.scp = { at: Date.now(), todo: b.todo, done: b.done }; }).catch(function () {}); render(); window.scrollTo(0, 0); }).catch(function (e) { busy(); xErr(e); });
+}
+var XV = { lapor: vLapor, lpForm: vLpForm, lpRec: vLpRec, lpDet: vLpDet, school: vSchool, scMat: vScMat, scExam: vScExam };
 
 function vMyStore() {
   var H = S.home;
