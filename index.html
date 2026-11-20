@@ -125,7 +125,7 @@ table.r{width:100%;border-collapse:collapse;font-size:14px}table.r td{padding:8p
 <div class="app" id="app"></div>
 <script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261120130407';
+var APP_VER = '20261120130757';
 function chkVer() { fetch('version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
@@ -353,7 +353,7 @@ function vLogin() {
     (S.forgot ? '<div style="margin-top:8px;padding:10px;border-radius:10px;background:#fffbea;border:1px solid #f0d36a;font-size:13px">' + (L === 'zh' ? '请联系公司 IT 重置密码。重置后用初始密码登录，登录后请马上设置新密码。' : 'Silakan hubungi IT perusahaan untuk reset password. Setelah direset, login dengan password awal, lalu segera buat password baru.') + '</div>' : '') +
     a2hsTip() + '</div>';
 }
-function vHb() { return '<div class="hb"><div><b>LK</b>Toko</div><button class="lang" onclick="swLang()">' + (L === 'id' ? '<b>ID</b>' : '<span style="opacity:.45">ID</span>') + ' | ' + (L === 'zh' ? '<b>中文</b>' : '<span style="opacity:.45">中文</span>') + '</button></div>'; }
+function vHb() { return '<div class="hb"><div><b>LK</b>Toko</div><button class="lang" onclick="swLang()">' + (L === 'id' ? '<b>ID</b>' : '<span style="opacity:.45">ID</span>') + '<span style="margin:0 6px;opacity:.6">|</span>' + (L === 'zh' ? '<b>中文</b>' : '<span style="opacity:.45">中文</span>') + '</button></div>'; }
 // ---------- 登录页：怎么加到手机桌面（和 LK Hub 同一套文字）----------
 function standalone() { return (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true; }
 function a2hsEnv() { var ua = navigator.userAgent; if (/FBAN|FBAV|Instagram|WhatsApp|Line\/|; wv\)/i.test(ua)) return 'inapp'; var ios = /iPhone|iPad|iPod/i.test(ua) || (/Macintosh/.test(ua) && 'ontouchend' in document);
