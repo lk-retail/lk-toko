@@ -124,7 +124,7 @@ table.r{width:100%;border-collapse:collapse;font-size:14px}table.r td{padding:8p
 <div class="app" id="app"></div>
 <script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261119213542';
+var APP_VER = '20261120105634';
 function chkVer() { fetch('version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
@@ -1057,6 +1057,7 @@ function vRec() {
 }
 function calPop(dt) {
   var C = S.cal, D = C.days[dt] || {}, st = calStat(dt, C.days[dt], C), lg = t('calLeg'), P = C.sched[dt], rows = [];
+  var det = dayDetGet(dt);
   var row = function (a, b) { rows.push('<div style="display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-top:1px solid #f0efeb;font-size:15px"><span style="color:var(--g)">' + a + '</span><span style="text-align:right;font-weight:600">' + b + '</span></div>'); };
   if (P) row(t('calPlan'), t('shiftN')[P.shift] + ' ' + P.start + '–' + P.end);
   if (D.absen) {
@@ -1067,11 +1068,87 @@ function calPop(dt) {
     var qt = [t('q1T'), t('q2T'), t('q3T'), t('q4T'), t('q5T')], ns = (D.notes || []).map(function (x, i) { return [qt[i], x]; }).filter(function (x) { return String(x[1] || '').trim(); });
     if (D.notes) rows.push('<div style="padding:10px 0 2px;border-top:1px solid #f0efeb;font-size:13px;color:var(--g)">' + t('calNote') + '</div>' + (ns.length ? ns.map(function (x) { return '<div style="font-size:14px;padding:4px 0"><b>' + esc(x[0]) + '</b><br>' + esc(x[1]).replace(/\n/g, '<br>') + '</div>'; }).join('') : '<div style="font-size:14px;padding:4px 0">' + t('calNone') + '</div>'));
   } else if (!P) rows.push('<div style="padding:12px 0;color:var(--g)">' + t('calNoRec') + '</div>');
+  if (det && det.ok) rows = dayDetRows(det);
+  else if (det === 'loading') rows.push('<div style="padding:10px 0;font-size:13px;color:var(--g)">' + (L === 'zh' ? '正在加载完整明细和照片…' : 'Memuat detail dan foto…') + '</div>');
+  if (det && det.ok) rows.push('<div style="padding:10px 0 0;font-size:12px;color:var(--g)">' + (L === 'zh' ? '只能看，不能改 · 最近 7 天有完整明细和照片' : 'Hanya bisa dilihat, tidak bisa diubah · Detail dan foto tersedia 7 hari terakhir') + '</div>');
+  else if (dt < dayAdd(C.today, -6) && D.absen) rows.push('<div style="padding:10px 0 0;font-size:12px;color:var(--g)">' + (L === 'zh' ? '7 天以前的日子只显示时间和状态' : 'Lebih dari 7 hari: hanya jam dan status') + '</div>');
   var dd = new Date(dt + 'T00:00:00Z'), wd = t('wk')[(dd.getUTCDay() + 6) % 7];
   return '<div onclick="if(event.target===this){S.calSel=null;render()}" style="position:fixed;inset:0;background:rgba(0,0,0,.35);display:flex;align-items:flex-end;z-index:50"><div style="background:#fff;width:100%;max-width:520px;margin:0 auto;border-radius:20px 20px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom));max-height:80vh;overflow:auto">' +
     '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><i style="width:14px;height:14px;border-radius:4px;display:inline-block;background:' + CAL_BG[st] + (st === 'plan' || st === 'none' ? ';border:1.5px dashed #9aa0a6' : '') + '"></i><b style="font-size:17px">' + dayLbl(dt) + '</b></div>' +
     (st !== 'none' ? '<div style="font-size:14px;margin-bottom:6px">' + (st === 'yellow' ? [D.absen.diff > 0 ? t('calLate')(D.absen.diff) : '', D.card.early > 10 ? t('calOutEarly')(D.card.early) : ''].filter(Boolean).join(' · ') : lg[st]) + '</div>' : '') + rows.join('') +
     '<button class="btn ghost" style="margin-top:12px" onclick="S.calSel=null;render()">' + t('calClose') + '</button></div></div>';
+}
+// ---------- 我的记录 · 某一天的完整明细（2026-11-20：最近 7 天，含照片，只读）----------
+function dayAdd(d, n) { var x = new Date(d + 'T00:00:00Z'); x.setUTCDate(x.getUTCDate() + n); return x.toISOString().slice(0, 10); }
+// 有记录、在最近 7 天内的日子，打开时去拿完整明细；照片链接 1 小时有效，50 分钟后重新拿
+function dayDetGet(dt) {
+  var C = S.cal; if (!C || !S.sess) return null;
+  var D = C.days[dt] || {};
+  if (!(D.absen || D.card || D.notes) || dt > C.today || dt < dayAdd(C.today, -6)) return null;
+  S.dayDet = S.dayDet || {};
+  var x = S.dayDet[dt];
+  if (x && x.at && Date.now() - x.at < 3e6) return x.r;
+  if (x && x.r === 'loading') return 'loading';
+  S.dayDet[dt] = { r: 'loading' };
+  api('myDay', [S.sess.token, dt]).then(function (r) { S.dayDet[dt] = { r: r, at: Date.now() }; if (S.calSel === dt) render(); })
+    .catch(function () { delete S.dayDet[dt]; if (S.calSel === dt) { render(); toast(t('err')); } });
+  return 'loading';
+}
+function dayPh(list) {
+  list = (list || []).filter(function (u) { return /^https:\/\//.test(u || ''); });
+  if (!list.length) return '';
+  S.dayPhs = S.dayPhs || [];
+  return '<div style="display:flex;gap:8px;flex-wrap:wrap;padding:6px 0 2px">' + list.map(function (u) { var k = S.dayPhs.push(u) - 1;
+    return '<img src="' + esc(u) + '" loading="lazy" onclick="dayBig(' + k + ')" style="width:84px;height:84px;object-fit:cover;border-radius:8px;background:#eee;cursor:zoom-in">'; }).join('') + '</div>';
+}
+function dayBig(k) {
+  var u = (S.dayPhs || [])[k]; if (!u) return;
+  var d = document.createElement('div');
+  d.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:80;display:flex;align-items:center;justify-content:center;padding:12px';
+  d.innerHTML = '<img src="' + esc(u) + '" style="max-width:100%;max-height:100%;object-fit:contain">';
+  d.onclick = function () { d.remove(); };
+  document.body.appendChild(d);
+}
+function dayOpt(arr, v) { if (L !== 'zh') return v; for (var i = 0; i < arr.length; i++) if (arr[i][0] === v) return arr[i][1]; return v; }
+function dayDetRows(R) {
+  var zh = L === 'zh', out = [], yes = '✓', no = '✗';
+  var sec = function (n, title, time, sub, body) {
+    out.push('<div style="border-top:1px solid #f0efeb;padding:10px 0">' +
+      '<div style="display:flex;align-items:center;gap:8px"><span style="width:22px;height:22px;border-radius:11px;background:#000;color:#FDCD17;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none">' + n + '</span>' +
+      '<b style="flex:1;font-size:15px">' + title + '</b><b style="font-size:14px">' + (time || '') + '</b></div>' +
+      (sub ? '<div style="font-size:13px;color:#3c4043;padding:4px 0 0 30px">' + sub + '</div>' : '') +
+      (body ? '<div style="padding:2px 0 0 30px">' + body + '</div>' : '') + '</div>');
+  };
+  var kv = function (k, v) { return '<div style="display:flex;gap:10px;font-size:13px;padding:5px 0;border-top:1px dashed #eee"><span style="color:var(--g);width:96px;flex:none">' + k + '</span><span style="flex:1;word-break:break-word">' + v + '</span></div>'; };
+  var ptsT = function (p) { return p == null ? (zh ? '积分待定' : 'poin menunggu') : (p > 0 ? '+' : '') + totP(p) + (zh ? ' 分' : ' poin'); };
+  S.dayPhs = [];
+  var A = R.absen;
+  if (A) sec(1, t('calIn'), A.time, [A.diff == null ? '' : A.diff > 0 ? t('calLate')(A.diff) : A.diff < 0 ? t('calEarly')(-A.diff) : t('calOnTime'), ptsT(A.points)].filter(String).join(' · '),
+    kv(zh ? '门店' : 'Toko', esc(R.store)) + kv(zh ? '班次' : 'Shift', esc((t('shiftN')[A.shift] || '') + (A.start ? ' ' + A.start + '–' + A.end : ''))) + dayPh([A.photo]));
+  var B = R.buka;
+  if (B) sec(2, t('calBuka'), B.time, B.byMe ? (zh ? '我做的 · 门店 READY ✓' : 'Saya yang cek · Toko READY ✓') : (zh ? '由 ' + esc(B.by) + ' 做的 · 门店 READY ✓' : 'Dicek oleh ' + esc(B.by) + ' · Toko READY ✓'),
+    kv(zh ? '3 项检查' : '3 cek', (zh ? '设备 ' : 'Alat ') + (B.alat ? yes : no) + (zh ? ' · 卫生 ' : ' · Bersih ') + (B.bersih ? yes : no) + (zh ? ' · 陈列 ' : ' · Display ') + (B.display ? yes : no)) + (B.note ? kv(zh ? '备注' : 'Catatan', esc(B.note)) : '') + dayPh([B.photo]));
+  else if (A) sec(2, t('calBuka'), '', zh ? '这一天门店没有开店检查记录' : 'Tidak ada catatan cek buka toko hari ini', '');
+  var V = R.survey;
+  if (V) {
+    var yn = function (b) { return b ? t('yes') : t('no'); }, b = '';
+    b += kv(esc(t('q1T')), yn(V.q1) + (V.lost || []).map(function (x) { return '<br>• ' + esc(x[0]) + (x[1] ? ' · ' + esc(x[1]) : '') + (x[2] ? ' · ' + esc(dayOpt(WHY, x[2])) : '') + (x[3] ? ' · ' + esc(x[3]) + (zh ? ' 个顾客' : ' pelanggan') : ''); }).join('') + (V.said ? '<br>' + esc(V.said).replace(/\n/g, '<br>') : ''));
+    b += kv(esc(t('q2T')), yn(V.q2) + (V.comp ? '<br>' + esc(V.comp).replace(/\n/g, '<br>') : ''));
+    b += kv(esc(t('q3T')), (V.q3 ? t('yes') : t('normalDay')) + (V.factors || []).map(function (f) { return '<br>• ' + esc(dayOpt(FACT, f)); }).join('') + (V.hurt ? '<br>' + esc(V.hurt).replace(/\n/g, '<br>') : ''));
+    b += kv(esc(t('q4T')), yn(V.q4) + (V.qual || []).map(function (x) { return '<br>• ' + x.map(function (z) { return esc(dayOpt(QT, z)); }).join(' · '); }).join(''));
+    b += kv(esc(t('q5T')), V.idea ? esc(V.idea).replace(/\n/g, '<br>') : '—');
+    sec(3, t('svT'), V.time, V.early ? (zh ? '提前填写' : 'Diisi lebih awal') : '', b);
+  }
+  var M = R.store_;
+  if (M && M.byMe) sec('3+', t('sdT'), M.time, zh ? '关店班 · 我填的' : 'Shift tutup · saya yang isi',
+    kv(t('cash'), money(M.cash)) + kv(t('qris'), money(M.qris)) + kv(t('grab'), money(M.grab)) + kv('<b>' + t('total') + '</b>', '<b>' + money(M.total) + '</b>') +
+    kv(t('visitors'), M.visitors) + kv(t('buyers'), M.buyers) + kv(t('googleReview'), M.googleReview) + kv(t('waJoin'), M.waJoin) + kv(t('wechatJoin'), M.wechatJoin) + kv(t('igFollow'), M.igFollow) +
+    kv('Stock opname', M.soDone ? esc(M.soBrands || '-') + ' · ' + (zh ? '差异 ' : 'Selisih ') + esc(M.soDiff || '0') : (zh ? '没做' : 'Tidak')) + dayPh(M.photos));
+  else if (M) sec('3+', t('sdT'), M.time, zh ? '由 ' + esc(M.by) + ' 填写' : 'Diisi oleh ' + esc(M.by), '');
+  var O = R.pulang;
+  if (O) sec(4, t('calOut'), O.time, [O.early == null ? '' : O.early > 10 ? t('calOutEarly')(O.early) : t('calOnTime'), ptsT(O.points)].filter(String).join(' · '), dayPh([O.photo, O.lockPhoto]));
+  else if (A) sec(4, t('calOut'), '', t('calNone'), '');
+  return out;
 }
 render();
 if (S.sess && !S.sess.mustChange) loadHome();
