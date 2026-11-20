@@ -125,7 +125,7 @@ table.r{width:100%;border-collapse:collapse;font-size:14px}table.r td{padding:8p
 <div class="app" id="app"></div>
 <script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261120132404';
+var APP_VER = '20261120132604';
 function chkVer() { fetch('version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
@@ -601,7 +601,7 @@ function ckPick(id) { S.ckStore = id; S.ckH = null; S.shift = null; render(); ap
 function vAbsen() {
   var M = ckMulti(), C = M ? S.ckH : S.home, sh = C ? C.store.shifts : [], back = '<div class="page"><button class="back" onclick="go(\'home\')">' + t('back') + '</button><h2>' + t('absenT') + '</h2>';
   var pickH = M ? '<label class="f">' + t('storePick') + '</label><div style="display:flex;flex-direction:column;gap:8px;margin-bottom:6px">' + S.home.stores.slice().sort(function (a, b) { return (b.id === S.home.store.id) - (a.id === S.home.store.id); }).map(function (s) { var on = S.ckStore === s.id; return '<button onclick="ckPick(\'' + s.id + '\')" style="text-align:left;padding:14px 16px;border-radius:12px;font-size:15px;font-weight:700;border:2px solid ' + (on ? '#000;background:#000;color:#FDCD17' : '#e6e4df;background:#fff;color:#000') + '">' + (on ? '✓ ' : '') + esc(s.name) + '</button>'; }).join('') + '</div>' : '';
-  if (M && !S.ckStore) return back + pickH + '</div>';
+  if (M && !S.ckStore) return back + geoStat() + pickH + '</div>';
   if (M && !C) return back + pickH + '<div class="card" style="margin:10px 0">…</div></div>';
   var stName = C.store.name;
   return back + pickH +
