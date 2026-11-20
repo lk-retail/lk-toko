@@ -127,7 +127,7 @@ table.r{width:100%;border-collapse:collapse;font-size:14px}table.r td{padding:8p
 <div class="app" id="app"></div>
 <script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261121030519';
+var APP_VER = '20261121033859';
 function chkVer() { fetch('version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
@@ -957,6 +957,8 @@ function gdBanner() { gdPeek(); var o = S.gdp && S.gdp.o; if (o && o.stage === '
 // 报修：大类 → 小类 → 影响营业吗 → 描述 → 照片 1–4 张，交给维修负责人；本店同类单子还没关时先问「是同一个问题吗」
 // 反馈：开放式，交给本区运营经理；违规举报：保密，只有指定的人看得到，可以匿名
 // LK School：学习 / 考试 / 我的记录；必学要考过才算完成，推到「任务」和首页
+// 照片满 12 个月按规定删除后（决策记录 646），原来的位置显示说明，不显示破图
+document.addEventListener('error', function (e) { var el = e.target; if (!el || el.tagName !== 'IMG' || el.dataset.gone) return; var s = el.getAttribute('src') || ''; if (s.indexOf('/storage/v1/') < 0 && s !== '') return; el.dataset.gone = 1; var d = document.createElement('div'); var zh = (typeof L !== 'undefined' ? L : 'id') === 'zh'; d.textContent = zh ? '照片已按规定删除（超过 12 个月）或暂时打不开' : 'Foto sudah dihapus sesuai aturan (lebih dari 12 bulan) atau belum bisa dibuka'; d.style.cssText = 'display:flex;align-items:center;justify-content:center;text-align:center;background:#f3f3f1;color:#6b6b6b;font-size:11px;line-height:1.3;padding:6px;border-radius:8px;box-sizing:border-box;width:' + (el.width || 96) + 'px;min-height:' + (el.height || 64) + 'px'; el.replaceWith(d); }, true);
 var LP_API = 'https://okzfaepdfeolsmurwtft.supabase.co/functions/v1/lk-lapor', SC_API = 'https://okzfaepdfeolsmurwtft.supabase.co/functions/v1/lk-school';
 function zi(zh, id) { return L === 'zh' ? zh : id; }
 function xApi(url, fn, args) {
@@ -1077,7 +1079,7 @@ function vLpDet() {
   h += '<div class="card"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><b style="font-size:16px">' + (r.kind === 'repair' ? lpCatName(r.cat) + (r.sub ? ' · ' + lpSubName(r.cat, r.sub) : '') : lpKind(r.kind)) + '</b>' + pill2(st) + '</div>' +
     '<div style="font-size:13px;color:var(--g);margin-top:6px">' + esc(r.store_name || '') + ' · ' + String(r.at).slice(0, 10) + (r.impact ? ' · <b style="color:var(--r)">' + zi('影响营业', 'Mengganggu') + '</b>' : '') + (r.repeat ? ' · <b>' + zi('重复故障', 'Kerusakan berulang') + '</b>' : '') + '</div>' +
     '<div style="margin-top:10px;white-space:pre-line;line-height:1.5">' + esc(r.body) + '</div>' +
-    (r.photos && r.photos.length ? '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px">' + r.photos.map(function (p) { return '<a href="' + p + '" target="_blank"><img src="' + p + '" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px"></a>'; }).join('') + '</div>' : '') +
+    (r.photos_deleted ? '<div style="font-size:12px;color:var(--g);margin-top:10px">' + zi('照片已按规定删除（超过 12 个月）', 'Foto sudah dihapus sesuai aturan (lebih dari 12 bulan)') + '</div>' : '') + (r.photos && r.photos.length && !r.photos_deleted ? '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px">' + r.photos.map(function (p) { return '<a href="' + p + '" target="_blank"><img src="' + p + '" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px"></a>'; }).join('') + '</div>' : '') +
     (r.reply ? '<div class="info" style="margin:12px 0 0">' + zi('回复：', 'Balasan: ') + esc(r.reply) + '</div>' : '') + (r.eta && r.status === 'doing' ? '<div style="font-size:13px;margin-top:8px">' + zi('预计修好：', 'Perkiraan selesai: ') + r.eta + '</div>' : '') + '</div>';
   if (r.log && r.log.length) h += '<div class="card"><h3>' + zi('进度', 'Progres') + '</h3>' + r.log.map(function (x) { return '<div style="padding:8px 0;border-top:1px solid var(--line);font-size:14px"><div style="font-size:12px;color:var(--g)">' + x.at + (x.who_name ? ' · ' + esc(x.who_name) : '') + '</div><div style="margin-top:2px;white-space:pre-line">' + esc(x.note || '') + '</div>' + ((x.photos || []).length ? '<div style="display:flex;gap:6px;margin-top:6px">' + x.photos.map(function (p) { return '<a href="' + p + '" target="_blank"><img src="' + p + '" style="width:64px;height:64px;object-fit:cover;border-radius:6px"></a>'; }).join('') + '</div>' : '') + '</div>'; }).join('') + '</div>';
   if (r.can && r.can.confirm) h += '<div style="padding:0 14px 20px"><div class="info" style="margin:0 0 4px">' + zi('维修的人说已经修好了。请到现场看一下：真的修好了就点确认；没修好就退回并写原因。3 天没人确认会自动关闭。', 'Tim maintenance bilang sudah diperbaiki. Cek di toko: kalau benar sudah, konfirmasi; kalau belum, kembalikan dengan alasan. Tanpa konfirmasi 3 hari akan tutup otomatis.') + '</div>' +
