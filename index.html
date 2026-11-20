@@ -20,9 +20,9 @@ button{font-family:inherit}
 .hb{position:sticky;top:0;z-index:30;background:#111;color:#fff;height:calc(50px + env(safe-area-inset-top));padding:env(safe-area-inset-top) 16px 0;display:flex;align-items:center;justify-content:space-between;font-size:18px}
 .hb b{color:var(--y);margin-right:6px}
 .hb .lang{border:1px solid var(--y);color:var(--y);background:none;border-radius:8px;padding:4px 10px;font-size:14px;font-family:inherit}
-.pf{position:relative;background:var(--y);color:#111;border-radius:16px;border-bottom:3px solid #111;margin:12px 14px 0;padding:16px 16px 16px;z-index:6}
-.pf .av{flex:0 0 72px;width:72px;height:72px;border-radius:50%;background:#111 center/cover no-repeat;color:var(--y);font-weight:800;font-size:26px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 3px var(--y),0 0 0 5px #111;cursor:pointer}
-.pf .gear{position:absolute;top:8px;right:8px;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#5a4a00;cursor:pointer}
+.pf{position:relative;background:#fff;color:#111;border-radius:14px;border:1px solid var(--line);border-left:4px solid var(--y);margin:12px 14px 0;padding:10px 12px;z-index:6}
+.pf .av{flex:0 0 44px;width:44px;height:44px;border-radius:50%;background:#111 center/cover no-repeat;color:var(--y);font-weight:800;font-size:16px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 2px var(--y);cursor:pointer}
+.pf .gear{position:absolute;top:50%;transform:translateY(-50%);right:6px;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#9aa0a6;cursor:pointer}
 
 .top .row{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
 .top .hi{font-size:13px;font-weight:600}
@@ -107,7 +107,8 @@ textarea.in{min-height:72px;resize:vertical}
 .add{margin-top:10px;border:1px solid #000;background:#fff;border-radius:999px;padding:9px 14px;font-size:14px;font-weight:600}
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.chips button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 12px;font-size:13px;color:#000}.chips button.on{background:#000;color:var(--y);border-color:#000;font-weight:700}
 .lnk{display:block;margin-top:14px;background:none;border:0;color:var(--y);font-size:14px;font-weight:600;padding:0;text-decoration:underline}
-.stsel{margin-top:6px;background:rgba(0,0,0,.08);border:0;border-radius:10px;padding:7px 10px;font-size:14px;font-weight:700;color:#000;text-align:left}
+.stsel{margin-top:3px;background:#fff;border:1px solid #d8d8d4;border-radius:8px;padding:3px 9px;font-size:13px;font-weight:600;color:#333;text-align:left;font-family:inherit}
+.pf .store{font-size:13px;color:#5f6368;margin-top:2px}
 .stmenu{position:absolute;top:100%;left:0;margin-top:6px;background:#fff;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.18);z-index:30;min-width:250px;max-width:calc(100vw - 60px);max-height:55vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .stmenu button{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid var(--line);background:#fff;padding:13px 14px;font-size:15px;color:#000}
 .stmenu button.on{font-weight:700}.stmenu small{color:var(--ok);font-weight:600;font-size:12px}
@@ -124,7 +125,7 @@ table.r{width:100%;border-collapse:collapse;font-size:14px}table.r td{padding:8p
 <div class="app" id="app"></div>
 <script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261120125121';
+var APP_VER = '20261120130407';
 function chkVer() { fetch('version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
@@ -434,10 +435,10 @@ function myAv() { var H = S.home; try { if (H && H.avatar !== undefined) { if (H
 var GEAR = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg>';
 function pfCard(H, u) {
   var nm = String(u.fullName || u.nick || ''), ini = nm.split(/\s+/).filter(Boolean).slice(0, 2).map(function (w) { return w.charAt(0).toUpperCase(); }).join(''), av = myAv();
-  return '<div class="pf"><div class="gear" onclick="acctMenu()">' + GEAR + '</div><div style="display:flex;gap:16px;align-items:center">' +
+  return '<div class="pf"><div class="gear" onclick="acctMenu()">' + GEAR + '</div><div style="display:flex;gap:12px;align-items:center">' +
     '<div class="av" onclick="avMenu()" style="' + (av ? 'background-image:url(' + av + ')' : '') + '">' + (av ? '' : esc(ini || 'LK')) + '</div>' +
-    '<div style="min-width:0;flex:1;padding-right:22px"><div style="font-size:13px;color:#4a3d00">' + greetT() + (H ? ' · ' + dayLbl(H.local.date) : '') + '</div>' +
-    '<div style="font-size:22px;font-weight:800;line-height:1.25;margin-top:2px;overflow-wrap:anywhere">' + esc(nm) + '</div>' + (H ? stSel(H) : '') + '</div></div></div>';
+    '<div style="min-width:0;flex:1;padding-right:34px">' +
+    '<div style="font-size:17px;font-weight:800;line-height:1.25;overflow-wrap:anywhere">' + esc(nm) + '</div>' + (H ? stSel(H) : '') + '</div></div></div>';
 }
 // 齿轮：我的账号（和 LK Hub 一样：更换头像 / 修改密码 / 退出登录）
 function acctMenu() {
@@ -481,6 +482,7 @@ function nList(H) { var r = nRead(), o = { urgent: 0, important: 1, info: 2 }; r
 function nTxt(n) { return L === 'zh' ? n.zh : n.id_; }
 function nBar(H) {
   var all = nList(H), act = all.filter(function (n) { return !n.read && !n.ended; }), zh = L === 'zh';
+  if (!act.length && S.view === 'home') return '';
   if (!act.length) return '<div onclick="go(\'notices\')" style="margin:10px 14px 0;padding:11px 14px;border-radius:12px;background:#fff;border:1px solid var(--line);font-size:14px;color:#9aa0a6;cursor:pointer;display:flex;justify-content:space-between"><span>✓ ' + (zh ? '目前没有需要你处理的事' : 'Tidak ada yang perlu kamu urus') + '</span><span>›</span></div>';
   var n = act[0], c = NLV[n.level] || NLV.info, more = act.length - 1;
   return '<div onclick="go(\'notices\')" style="margin:10px 14px 0;padding:11px 14px;border-radius:12px;background:' + c[1] + ';border:1px solid ' + c[0] + '33;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:8px"><span style="width:8px;height:8px;border-radius:50%;background:' + c[0] + ';flex:none"></span><b style="flex:1;color:' + c[0] + ';overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(nTxt(n).t) + '</b><span style="color:' + c[0] + ';white-space:nowrap">' + (more > 0 ? '+' + more + ' ' : '') + '›</span></div>';
@@ -821,6 +823,7 @@ function sayaRows(H) {
     entryRow(IC.shop, t('myStores'), stSub, 'mystore') +
     entryRow(IC.cal, t('records'), t('attSub')((H && H.att) || { days: 0 }), 'rec') +
     entryRow(IC.chart, t('msT'), t('msSoon'), 'mysales') +
+    entryRow('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg>', L === 'zh' ? '通知' : 'Pemberitahuan', (function () { var n = nList(H).filter(function (x) { return !x.read && !x.ended; }).length; return n ? (L === 'zh' ? n + ' 条没看' : n + ' belum dibaca') : (L === 'zh' ? '没有新通知' : 'Tidak ada yang baru'); })(), 'notices') +
     entryRow(IC.wallet, t('pcT'), pcSub, P && P.has ? 'mypc' : null, true) + '</div>';
 }
 function vMyStore() {
