@@ -127,7 +127,7 @@ table.r{width:100%;border-collapse:collapse;font-size:14px}table.r td{padding:8p
 <div class="app" id="app"></div>
 <script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261121033859';
+var APP_VER = '20261121040512';
 function chkVer() { fetch('version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
@@ -1130,11 +1130,11 @@ function vSchool() {
   }
   if (tab === 1) {
     var ex = D.exams || [], seg = S.scSeg || 0, todo = ex.filter(function (e) { return !e.passed; }), ok = ex.filter(function (e) { return e.passed; });
-    h += '<div style="display:flex;gap:4px;background:#e6e4df;border-radius:12px;padding:3px;margin:0 14px 12px">' + [zi('待考', 'Belum') + '（' + todo.length + '）', zi('已通过', 'Lulus') + '（' + ok.length + '）'].map(function (n, k) { return '<button onclick="S.scSeg=' + k + ';render()" style="flex:1;border:0;border-radius:10px;padding:9px 2px;font-size:14px;font-weight:' + (k === seg ? '700;background:#fff' : '500;background:transparent;color:#6b6b6b') + '">' + n + '</button>'; }).join('') + '</div>';
+    h += '<div style="display:flex;gap:4px;background:#e6e4df;border-radius:12px;padding:3px;margin:0 14px 12px">' + [zi('待考', 'Belum ujian') + '（' + todo.length + '）', zi('已通过', 'Lulus') + '（' + ok.length + '）'].map(function (n, k) { return '<button onclick="S.scSeg=' + k + ';render()" style="flex:1;border:0;border-radius:10px;padding:9px 2px;font-size:14px;font-weight:' + (k === seg ? '700;background:#fff' : '500;background:transparent;color:#6b6b6b') + '">' + n + '</button>'; }).join('') + '</div>';
     var list = seg ? ok : todo;
     if (!list.length) return h + '<div class="card" style="text-align:center;color:var(--g);padding:24px">' + (seg ? zi('还没有通过的考试', 'Belum ada ujian yang lulus') : zi('没有要考的', 'Tidak ada ujian')) + '</div>';
     h += list.map(function (e) {
-      return '<div class="card"><div style="display:flex;justify-content:space-between;gap:8px"><b style="font-size:16px">' + esc(e.title) + '</b>' + (e.passed ? pill2([zi('最高 ', 'Tertinggi ') + e.best, '#e6f4ea']) : e.best != null ? pill2([zi('上次最高 ', 'Tertinggi ') + e.best, '#fdecea']) : e.req ? pill2([zi('必考', 'Wajib'), '#111;color:#FDCD17']) : '') + '</div>' +
+      return '<div class="card"><div style="display:flex;justify-content:space-between;gap:8px"><b style="font-size:16px">' + esc(e.title) + '</b>' + (e.passed ? pill2([zi('最高 ', 'Tertinggi ') + e.best, '#e6f4ea']) : e.best != null ? pill2([zi('上次最高 ', 'Tertinggi sebelumnya ') + e.best, '#fdecea']) : e.req ? pill2([zi('必考', 'Wajib'), '#111;color:#FDCD17']) : '') + '</div>' +
         '<div style="font-size:13px;color:var(--g);margin-top:6px;line-height:1.5">' + zi(e.n + ' 题 · ' + e.pass + ' 分及格', e.n + ' soal · lulus ' + e.pass) + (e.due ? ' · ' + scDue(e.due) : '') + (e.mat_title ? '<br>' + zi('先学：', 'Pelajari dulu: ') + esc(e.mat_title) : '') + '</div>' +
         (e.passed ? '' : e.left > 0 ? '<button class="btn" style="padding:13px;font-size:16px" onclick="scStart(' + e.id + ')">' + (e.tries ? zi('重考', 'Ulangi ujian') : zi('开始考试', 'Mulai ujian')) + '</button><div style="font-size:12px;color:var(--g);margin-top:6px">' + zi('今天还能考 ' + e.left + ' 次', 'Sisa ' + e.left + ' kali hari ini') + '</div>' : '<div class="info" style="margin:10px 0 0">' + zi('今天已经考了 3 次，明天再来。', 'Sudah 3 kali hari ini, coba lagi besok.') + '</div>') + '</div>';
     }).join('');
@@ -1537,7 +1537,7 @@ fetch(API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-
   var cs=getComputedStyle(i),w=document.createElement('span');
   w.style.cssText='position:relative;display:block;margin:'+cs.marginTop+' '+cs.marginRight+' '+cs.marginBottom+' '+cs.marginLeft;
   i.parentNode.insertBefore(w,i);w.appendChild(i);i.style.margin='0';i.style.paddingRight='46px';i.style.width='100%';i.style.boxSizing='border-box';
-  var b=document.createElement('button');b.type='button';b.tabIndex=-1;b.title='显示 / 隐藏密码';
+  var b=document.createElement('button');b.type='button';b.tabIndex=-1;b.title=(typeof L!=='undefined'&&L==='zh')?'显示 / 隐藏密码':'Tampilkan / sembunyikan kata sandi';
   b.style.cssText='position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:0;padding:8px;margin:0;width:auto;min-height:0;cursor:pointer;color:#888;line-height:0;box-shadow:none';
   b.innerHTML=EYE;
   b.onmousedown=function(e){e.preventDefault();};
