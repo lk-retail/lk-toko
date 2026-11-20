@@ -125,7 +125,7 @@ table.r{width:100%;border-collapse:collapse;font-size:14px}table.r td{padding:8p
 <div class="app" id="app"></div>
 <script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261120132604';
+var APP_VER = '20261120133005';
 function chkVer() { fetch('version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
@@ -302,7 +302,7 @@ function getGeo(cb) {
 function geoOk() { return !!(S.geo && Date.now() - S.geo.at < 120000); }
 function needGeo(retry) { busy(L === 'zh' ? '正在定位…' : 'Mencari lokasi…'); getGeo(function (g) { busy(); if (!g) return geoFail(retry); retry(); }); }
 var GEO_INTRO_ZH = '打卡、开店检查、下班打卡都要用定位。下面的设置只要做一次，以后就不用再管。', GEO_INTRO_ID = 'Absen masuk, cek buka, dan absen pulang butuh lokasi. Pengaturan ini cukup sekali saja.';
-var GEO_HELP_ZH = '还是不行？截图发给你的区域主管或 PIC。', GEO_HELP_ID = 'Masih tidak bisa? Kirim screenshot ke Area Supervisor atau PIC kamu.';
+var GEO_HELP_ZH = '还是不行？截图发给你的区域主管。', GEO_HELP_ID = 'Masih tidak bisa? Kirim screenshot ke Area Supervisor kamu.';
 function geoFail(retry) { geoHelp(retry, 1); }
 function geoHelpRetry() { var d = document.getElementById('geoHelp'); if (d) d.remove(); S.geo = null; var r = window._geoRetry; if (r) return needGeo(r); S.geoBusy = 1; render(); getGeo(function () { S.geoBusy = 0; render(); }); }
 // 打卡页、开店检查、下班打卡页：拍照前先显示定位状态
