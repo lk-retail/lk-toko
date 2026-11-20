@@ -125,7 +125,7 @@ table.r{width:100%;border-collapse:collapse;font-size:14px}table.r td{padding:8p
 <div class="app" id="app"></div>
 <script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261120131931';
+var APP_VER = '20261120132404';
 function chkVer() { fetch('version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
@@ -301,13 +301,38 @@ function getGeo(cb) {
 // 2026-11-20：上班打卡、开店检查、下班打卡必须拿到手机定位才能提交（离门店多远只记录，不限制）
 function geoOk() { return !!(S.geo && Date.now() - S.geo.at < 120000); }
 function needGeo(retry) { busy(L === 'zh' ? '正在定位…' : 'Mencari lokasi…'); getGeo(function (g) { busy(); if (!g) return geoFail(retry); retry(); }); }
-function geoFail(retry) {
-  var zh = L === 'zh', d = document.createElement('div'); d.className = 'busy'; d.id = 'geoFail';
-  d.innerHTML = '<div style="background:#fff;border-radius:14px;padding:18px;max-width:320px;margin:auto;text-align:left;color:#111"><b style="font-size:16px">' + (zh ? '没拿到定位，不能继续' : 'Lokasi belum terbaca') + '</b><div style="font-size:14px;margin:8px 0 14px;line-height:1.5">' +
-    (zh ? '请打开手机的定位（GPS），并允许浏览器 / App 使用位置，然后点「再试一次」。' : 'Nyalakan lokasi (GPS) di HP dan izinkan browser / aplikasi memakai lokasi, lalu tekan "Coba lagi".') + '</div>' +
-    '<button class="btn" id="geoRetry">' + (zh ? '再试一次' : 'Coba lagi') + '</button><button class="btn" style="background:#eee;color:#111;margin-top:8px" onclick="document.getElementById(\'geoFail\').remove()">' + (zh ? '关闭' : 'Tutup') + '</button></div>';
-  document.body.appendChild(d); document.getElementById('geoRetry').onclick = function () { d.remove(); S.geo = null; needGeo(retry); };
-}
+var GEO_INTRO_ZH = '打卡、开店检查、下班打卡都要用定位。下面的设置只要做一次，以后就不用再管。', GEO_INTRO_ID = 'Absen masuk, cek buka, dan absen pulang butuh lokasi. Pengaturan ini cukup sekali saja.';
+var GEO_HELP_ZH = '还是不行？截图发给你的区域主管或 PIC。', GEO_HELP_ID = 'Masih tidak bisa? Kirim screenshot ke Area Supervisor atau PIC kamu.';
+function geoFail(retry) { geoHelp(retry, 1); }
+function geoHelpRetry() { var d = document.getElementById('geoHelp'); if (d) d.remove(); S.geo = null; var r = window._geoRetry; if (r) return needGeo(r); S.geoBusy = 1; render(); getGeo(function () { S.geoBusy = 0; render(); }); }
+// 打卡页、开店检查、下班打卡页：拍照前先显示定位状态
+function geoStat() { var zh = L === 'zh';
+  if (geoOk()) return '<div style="margin:6px 0 10px;font-size:14px;color:#1e8e3e">📍 ' + (zh ? '定位已打开 ✓' : 'Lokasi aktif ✓') + '</div>';
+  if (S.geoBusy) return '<div style="margin:6px 0 10px;font-size:14px;color:#777">📍 ' + (zh ? '正在定位…' : 'Mencari lokasi…') + '</div>';
+  return '<div onclick="geoHelp()" style="margin:6px 0 10px;padding:10px 12px;border-radius:10px;background:#fdecea;border:1px solid #f3c2bd;font-size:14px;color:#b3261e;cursor:pointer;display:flex;justify-content:space-between;gap:8px"><span>📍 ' + (zh ? '请先打开定位，不然没法提交' : 'Nyalakan lokasi dulu, kalau tidak tidak bisa dikirim') + '</span><b style="white-space:nowrap">' + (zh ? '怎么打开 ›' : 'Caranya ›') + '</b></div>'; }
+// ---- 怎么打开定位（2026-11-20）：打卡页状态行、拿不到定位的提示、「我的 / 账号菜单」里的帮助，都打开这一个说明 ----
+function isIOS(){var u=navigator.userAgent||'';return /iPhone|iPad|iPod/i.test(u)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);}
+function geoHelp(retry,failed,os){var zh=L==='zh',old=document.getElementById('geoHelp');if(old)old.remove();os=os||(isIOS()?'ios':'and');
+ var d=document.createElement('div');d.id='geoHelp';d.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:80;display:flex;align-items:flex-end;justify-content:center';
+ d.onclick=function(e){if(e.target===d)d.remove();};
+ var st=function(n,ti,tx){return '<div style="display:flex;gap:12px;padding:12px 0;border-top:1px solid #eee"><div style="flex:none;width:26px;height:26px;border-radius:50%;background:#FDCD17;color:#111;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:14px">'+n+'</div><div style="flex:1;min-width:0"><div style="font-weight:700;font-size:15px;margin-bottom:3px">'+ti+'</div><div style="font-size:14px;line-height:1.55;color:#333">'+tx+'</div></div></div>';};
+ var B=function(x){return '<b>'+x+'</b>';};
+ var and=st(1,zh?'打开手机定位':'Nyalakan lokasi HP',zh?'从屏幕顶端往下滑，找到「定位」图标（印尼文是 '+B('Lokasi')+'），点一下让它变亮。':'Usap layar dari atas ke bawah, cari ikon '+B('Lokasi')+', ketuk sampai menyala.')
+   +st(2,zh?'允许浏览器使用位置':'Izinkan browser memakai lokasi',zh?'在这个页面点地址栏左边的小图标 → '+B('Izin')+'（权限）→ '+B('Lokasi')+' → 选 '+B('Izinkan')+'（允许）。<br><span style="color:#777">找不到的话：Chrome 右上角 ⋮ → '+B('Setelan')+' → '+B('Setelan situs')+' → '+B('Lokasi')+' → 把 lk-retail.github.io 改成 '+B('Izinkan')+'。如果用的是桌面上的图标：长按图标 → '+B('Info aplikasi')+' → '+B('Izin')+' → '+B('Lokasi')+' → '+B('Izinkan')+'。</span>':'Di halaman ini, ketuk ikon kecil di kiri kolom alamat → '+B('Izin')+' → '+B('Lokasi')+' → pilih '+B('Izinkan')+'.<br><span style="color:#777">Kalau tidak ketemu: Chrome ⋮ (kanan atas) → '+B('Setelan')+' → '+B('Setelan situs')+' → '+B('Lokasi')+' → ubah lk-retail.github.io jadi '+B('Izinkan')+'. Kalau pakai ikon di layar utama: tekan lama ikon → '+B('Info aplikasi')+' → '+B('Izin')+' → '+B('Lokasi')+' → '+B('Izinkan')+'.</span>')
+   +st(3,zh?'回到这里，点「再试一次」':'Kembali ke sini, tekan "Coba lagi"','');
+ var ios=st(1,zh?'打开手机定位':'Nyalakan lokasi HP',zh?'打开 '+B('Pengaturan')+'（设置）→ '+B('Privasi & Keamanan')+'（隐私与安全性）→ '+B('Layanan Lokasi')+'（定位服务）→ 打开开关。':'Buka '+B('Pengaturan')+' → '+B('Privasi & Keamanan')+' → '+B('Layanan Lokasi')+' → nyalakan.')
+   +st(2,zh?'允许 Safari 使用位置':'Izinkan Safari memakai lokasi',zh?'在同一页往下找 '+B('Situs Web Safari')+'（Safari 网站）→ 选 '+B('Saat Menggunakan App')+'（使用 App 期间）。<br>再回到 Safari，点地址栏的 '+B('aA')+' → '+B('Pengaturan Situs Web')+'（网站设置）→ '+B('Lokasi')+' → '+B('Izinkan')+'（允许）。':'Di halaman yang sama, cari '+B('Situs Web Safari')+' → pilih '+B('Saat Menggunakan App')+'.<br>Lalu di Safari, ketuk '+B('aA')+' di kolom alamat → '+B('Pengaturan Situs Web')+' → '+B('Lokasi')+' → '+B('Izinkan')+'.')
+   +st(3,zh?'回到这里，点「再试一次」':'Kembali ke sini, tekan "Coba lagi"','');
+ var tab=function(k,l){var on=os===k;return '<span onclick="geoHelp(window._geoRetry,'+(failed?1:0)+',\''+k+'\')" style="flex:1;text-align:center;padding:7px 0;border-radius:8px;cursor:pointer;font-size:14px;'+(on?'background:#111;color:#FDCD17;font-weight:700':'color:#555')+'">'+l+'</span>';};
+ window._geoRetry=retry||null;
+ d.innerHTML='<div style="background:#fff;width:100%;max-width:480px;max-height:90vh;overflow:auto;border-radius:16px 16px 0 0;padding:16px 18px calc(22px + env(safe-area-inset-bottom));color:#111;text-align:left">'
+  +'<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px"><div><div style="font-size:18px;font-weight:800">'+(failed?(zh?'没拿到定位，不能继续':'Lokasi belum terbaca'):(zh?'怎么打开定位':'Cara menyalakan lokasi'))+'</div><div style="font-size:13px;color:#666;margin-top:4px;line-height:1.5">'+(zh?GEO_INTRO_ZH:GEO_INTRO_ID)+'</div></div><span onclick="document.getElementById(\'geoHelp\').remove()" style="font-size:22px;color:#999;cursor:pointer;line-height:1">✕</span></div>'
+  +'<div style="display:flex;gap:4px;background:#f1f1ef;border-radius:10px;padding:3px;margin:12px 0 4px">'+tab('and','Android')+tab('ios','iPhone')+'</div>'
+  +(os==='ios'?ios:and)
+  +'<button onclick="geoHelpRetry()" style="display:block;width:100%;margin-top:6px;padding:14px;border:0;border-radius:12px;background:#FDCD17;color:#111;font-size:16px;font-weight:800;font-family:inherit;cursor:pointer">'+(zh?'已经打开了，再试一次':'Sudah, coba lagi')+'</button>'
+  +'<div style="font-size:13px;color:#777;text-align:center;margin-top:10px">'+(zh?GEO_HELP_ZH:GEO_HELP_ID)+'</div></div>';
+ document.body.appendChild(d);}
+
 function geoArg() { return S.geo ? { lat: S.geo.lat, lng: S.geo.lng, acc: S.geo.acc } : null; }
 function compress(file, to) {
   return new Promise(function (ok, no) {
@@ -541,7 +566,7 @@ function vNav() {
 }
 function go(v) {
   S.view = v;
-  if (v === 'absen' || v === 'buka' || v === 'pulang' || v === 'storedata') getGeo(function () {});   // 先拿定位，拍照时水印就有 GPS
+  if (v === 'absen' || v === 'buka' || v === 'pulang' || v === 'storedata') { if (!geoOk()) S.geoBusy = 1; getGeo(function () { S.geoBusy = 0; if (S.view === v) render(); }); }   // 先拿定位，拍照时水印就有 GPS
   if (v === 'absen') { S.ckStore = null; S.ckH = null; S.photo = null; var ok = (S.home.opts || []).filter(function (o) { return o.ok; }); S.shift = S.home.shift ? S.home.shift.code : (ok.length === 1 ? ok[0].code : null); }
   if (v === 'buka') { S.photo = null; S.ck = { alat: false, bersih: false, display: false }; }
   if (v === 'survey') { if (!S.sv) S.sv = svNew(); if (S.home.out && S.home.out.open) S.svEarly = 0; }
@@ -581,7 +606,7 @@ function vAbsen() {
   var stName = C.store.name;
   return back + pickH +
     (!sh.length ? '' : '<label class="f">' + t('shift') + '</label><div class="seg">' + (C.opts || sh).map(function (s) { var dis = s.ok === false; return '<button ' + (dis ? 'disabled style="opacity:.4" ' : '') + 'class="' + (S.shift === s.code ? 'on' : '') + '" onclick="S.shift=\'' + s.code + '\';render()">' + shiftLbl(s) + '' + '</button>'; }).join('') + '</div>') +
-    '<label class="photo" for="cam">' + (S.photo ? '<img src="' + S.photo + '">' : t('selfie')) + '</label>' +
+    geoStat() + '<label class="photo" for="cam">' + (S.photo ? '<img src="' + S.photo + '">' : t('selfie')) + '</label>' +
     '<input id="cam" type="file" accept="image/*" capture="user" style="display:none" onchange="pick(this)">' +
     '<button class="btn" onclick="sendAbsen()"' + (S.photo ? '' : ' disabled') + '>' + (M ? t('sendAt')(esc(stName)) : t('send')) + '</button>' +
     (S.photo ? '<button class="btn ghost" onclick="document.getElementById(\'cam\').click()">' + t('retake') + '</button>' : '') + '</div>';
@@ -611,7 +636,7 @@ function vRes() {
 function vBuka() {
   var c = S.ck, row = function (k) { return '<label class="toggle">' + t(k) + '<input type="checkbox" ' + (c[k] ? 'checked' : '') + ' onchange="S.ck.' + k + '=this.checked;render()"></label>'; };
   var ok = c.alat && c.bersih && c.display && S.photo;
-  return '<div class="page"><button class="back" onclick="go(\'home\')">' + t('back') + '</button><h2>' + t('bukaT') + '</h2>' + row('alat') + row('bersih') + row('display') +
+  return '<div class="page"><button class="back" onclick="go(\'home\')">' + t('back') + '</button><h2>' + t('bukaT') + '</h2>' + row('alat') + row('bersih') + row('display') + geoStat() +
     '<label class="f">' + t('fotoToko') + '</label><label class="photo" for="cam2" style="aspect-ratio:4/3">' + (S.photo ? '<img src="' + S.photo + '">' : '<span style="padding:0 20px;text-align:center">' + t('fotoTokoH') + '</span>') + '</label>' +
     '<input id="cam2" type="file" accept="image/*" capture="environment" style="display:none" onchange="pick(this)">' +
     '<button class="btn" onclick="sendBuka()"' + (ok ? '' : ' disabled') + '>' + t('sendBuka') + '</button></div>';
@@ -813,7 +838,7 @@ function vTugas() {
     '<div class="card" style="text-align:center;padding:28px 18px"><div style="width:52px;height:52px;margin:0 auto 10px;color:#b0b0ab">' + IC.task + '</div><div style="font-size:17px;font-weight:700">' + t(k0 ? 'taskLogT' : 'taskSoonT') + '</div><div style="font-size:14px;color:var(--g);margin-top:8px;line-height:1.5">' + t(k0 ? 'taskLogS' : 'taskSoonS') + '</div></div>';
 }
 function entryRow(ic, title, sub, go_, last) {
-  return '<div' + (go_ ? ' onclick="go(\'' + go_ + '\')"' : '') + ' style="display:flex;align-items:center;gap:14px;padding:14px 16px;' + (go_ ? 'cursor:pointer;' : '') + (last ? '' : 'border-bottom:1px solid var(--line)') + '"><div style="width:44px;height:44px;border-radius:12px;background:var(--y);display:flex;align-items:center;justify-content:center;flex:none"><span style="width:24px;height:24px;display:block">' + ic + '</span></div><div style="flex:1;min-width:0"><div style="font-size:16px;font-weight:700">' + title + '</div><div style="font-size:13px;color:var(--g);margin-top:2px">' + sub + '</div></div><div style="font-size:22px;color:' + (go_ ? 'var(--g)' : 'transparent') + '">›</div></div>';
+  return '<div' + (go_ ? ' onclick="' + (go_.indexOf('fn:') === 0 ? go_.slice(3) : 'go(\'' + go_ + '\')') + '"' : '') + ' style="display:flex;align-items:center;gap:14px;padding:14px 16px;' + (go_ ? 'cursor:pointer;' : '') + (last ? '' : 'border-bottom:1px solid var(--line)') + '"><div style="width:44px;height:44px;border-radius:12px;background:var(--y);display:flex;align-items:center;justify-content:center;flex:none"><span style="width:24px;height:24px;display:block">' + ic + '</span></div><div style="flex:1;min-width:0"><div style="font-size:16px;font-weight:700">' + title + '</div><div style="font-size:13px;color:var(--g);margin-top:2px">' + sub + '</div></div><div style="font-size:22px;color:' + (go_ ? 'var(--g)' : 'transparent') + '">›</div></div>';
 }
 function sayaRows(H) {
   var ss = H && H.stores ? H.stores : [], P = S.pc;
@@ -824,7 +849,8 @@ function sayaRows(H) {
     entryRow(IC.cal, t('records'), t('attSub')((H && H.att) || { days: 0 }), 'rec') +
     entryRow(IC.chart, t('msT'), t('msSoon'), 'mysales') +
     entryRow('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg>', L === 'zh' ? '通知' : 'Pemberitahuan', (function () { var n = nList(H).filter(function (x) { return !x.read && !x.ended; }).length; return n ? (L === 'zh' ? n + ' 条没看' : n + ' belum dibaca') : (L === 'zh' ? '没有新通知' : 'Tidak ada yang baru'); })(), 'notices') +
-    entryRow(IC.wallet, t('pcT'), pcSub, P && P.has ? 'mypc' : null, true) + '</div>';
+    entryRow(IC.wallet, t('pcT'), pcSub, P && P.has ? 'mypc' : null) +
+    entryRow('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>', L === 'zh' ? '帮助 · 怎么打开定位' : 'Bantuan · Cara menyalakan lokasi', L === 'zh' ? '打卡需要定位，安卓和 iPhone 的设置步骤' : 'Absen butuh lokasi · langkah Android & iPhone', 'fn:geoHelp()', true) + '</div>';
 }
 function vMyStore() {
   var H = S.home;
@@ -1001,7 +1027,7 @@ function sendStoreData() {
 // 下班打卡：自拍；关店班加锁门照。这个时间就是下班时间
 function vPulang() {
   var O = S.home.out || {}, c = S.po;
-  return '<div class="page"><button class="back" onclick="go(\'home\')">' + t('back') + '</button><h2>' + t('poT') + '</h2><div class="guide">' + t('poIntro')(O.end || '') + '</div>' +
+  return '<div class="page"><button class="back" onclick="go(\'home\')">' + t('back') + '</button><h2>' + t('poT') + '</h2><div class="guide">' + t('poIntro')(O.end || '') + '</div>' + geoStat() +
     '<label class="f">' + t('selfieOut') + '</label><label class="photo" for="cam" style="aspect-ratio:1">' + (c.selfie ? '<img src="' + c.selfie + '">' : '<span style="padding:0 24px;text-align:center">' + t('selfieHint') + '</span>') + '</label><input id="cam" type="file" accept="image/*" capture="user" style="display:none" onchange="pick(this,\'selfie\')">' +
     (O.closing ? '<label class="f">' + t('lock') + '</label><label class="photo" for="lk" style="aspect-ratio:4/3">' + (c.lock ? '<img src="' + c.lock + '">' : '<span style="padding:0 24px;text-align:center">' + t('lockHint') + '</span>') + '</label><input id="lk" type="file" accept="image/*" capture="environment" style="display:none" onchange="pick(this,\'lock\')">' : '') +
     '<button class="btn" onclick="sendPulang()"' + (c.selfie && (!O.closing || c.lock) ? '' : ' disabled') + '>' + t('poSend') + '</button></div>';
