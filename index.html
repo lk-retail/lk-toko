@@ -58,6 +58,8 @@ button{font-family:inherit}
 .more{display:flex;gap:10px;margin:0 14px 12px}
 .more div{flex:1;background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 6px;text-align:center;font-size:12px;color:#000}
 .more div.soon{opacity:.45}
+.more div.live{cursor:pointer;border:2px solid var(--y)}
+.more div small{color:#666}
 .more svg,.nav svg{width:22px;height:22px;display:block;margin:0 auto 4px}
 .nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:440px;background:#fff;border-top:1px solid var(--line);display:flex;padding:8px 0 calc(8px + env(safe-area-inset-bottom))}
 .nav a{flex:1;text-align:center;font-size:11px;color:var(--g);text-decoration:none}
@@ -125,7 +127,7 @@ table.r{width:100%;border-collapse:collapse;font-size:14px}table.r td{padding:8p
 <div class="app" id="app"></div>
 <script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261121020917';
+var APP_VER = '20261121022133';
 function chkVer() { fetch('version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
@@ -556,8 +558,10 @@ function vHome() {
   var gap = (H.local && H.local.date < '2026-12-08') ? t('boardSoon') : P.inTop10 ? t('in10')(P.rank) : (P.gap == null ? t('gapNone') : t('gap')(P.gap));
   var pts = '<div class="card" style="cursor:pointer" onclick="go(\'poin\')"><h3>' + t('pts') + '</h3><div class="pts"><div class="big">' + totP(P.total) + '<small>' + t('u') + '</small></div><div class="gap" onclick="go(\'poin\')">' + gap + ' ›</div></div>' +
     '</div>';
-  var more = '<div class="more">' + [IC.box, IC.wrench, IC.book].map(function (ic, k) { return '<div class="soon">' + ic + t('more')[k] + '<br><small>' + t('soon') + '</small></div>'; }).join('') + '</div>';
-  // 二期功能入口（货品、报修与反馈、LK School）先放灰色「即将上线」，让门店知道后面会有（2026-11-19 Victory 定）
+  var more = '<div class="more">' + [IC.box, IC.wrench, IC.book].map(function (ic, k) {
+    if (k === 0) return '<div class="live" onclick="S.gd=null;go(\'goods\')">' + ic + t('more')[k] + '<br><small>' + (L === 'zh' ? '补货 · 收货 · 库存' : 'Kiriman · stok') + '</small></div>';
+    return '<div class="soon">' + ic + t('more')[k] + '<br><small>' + t('soon') + '</small></div>'; }).join('') + '</div>';
+  // 首页三个入口：「货品」已上线，点开就是本店货品（补货单 / 断货 / 快卖完 / 调拨退仓）；报修与反馈、LK School 仍是灰色「即将上线」（2026-11-21 Victory 定：本店货品只从首页「货品」进，「我的」里不再放）
   return top + nx + todayCard + salesCard(H) + pts + more;
 }
 function vNav() {
@@ -853,7 +857,6 @@ function sayaRows(H) {
     entryRow(BELL, zh ? '通知' : 'Pemberitahuan', nNew ? '<span style="color:#b3261e;font-weight:700">' + (zh ? nNew + ' 条没看' : nNew + ' belum dibaca') + '</span>' : (zh ? '没有新通知' : 'Tidak ada yang baru'), 'notices') +
     entryRow(IC.cal, t('records'), t('attSub')((H && H.att) || { days: 0 }) + '<br>' + (zh ? '点日期看当天明细和照片（近 7 天）' : 'Ketuk tanggal untuk lihat detail & foto (7 hari terakhir)'), 'rec') +
     entryRow(IC.shop, t('myStores'), stSub, 'mystore') +
-    entryRow(GD_BOX, zh ? '本店货品' : 'Barang toko', gdSub(), 'fn:S.gd=null;go(\'goods\')') +
     (pcHas ? entryRow(IC.wallet, t('pcT'), pcSub, 'mypc') : off(IC.wallet, t('pcT'), pcSub)) +
     off(IC.chart, t('msT'), t('msSoon')) +
     entryRow(PIN, zh ? '帮助 · 怎么打开定位' : 'Bantuan · Cara menyalakan lokasi', zh ? '打卡需要定位，安卓和 iPhone 的设置步骤' : 'Absen butuh lokasi · langkah Android & iPhone', 'fn:geoHelp()', true) + '</div>';
@@ -888,7 +891,7 @@ function gdReject() {
 }
 function vGoods() {
   var G = S.gd, zh = L === 'zh';
-  var h = '<div class="page"><button class="back" onclick="go(\'saya\')">' + t('back') + '</button><h2>' + gdT('本店货品', 'Barang toko') + '</h2></div>';
+  var h = '<div class="page"><button class="back" onclick="go(\'home\')">' + t('back') + '</button><h2>' + gdT('本店货品', 'Barang toko') + '</h2></div>';
   if (!G || (!G.d && !G.err)) { if (!G || !G.loading) gdLoad(); return h + '<div class="card">' + t('loading') + '</div>'; }
   if (G.err) return h + '<div class="card">' + (/NO_ACCESS/.test(G.err) ? gdT('你的工号还没在门店名单里，请联系区域主管。', 'ID kamu belum ada di daftar tim toko. Hubungi supervisor.') : t('err')) + '</div>';
   var D = G.d, o = D.order, ss = (S.home && S.home.stores) || [], tab = G.tab || 'order';
