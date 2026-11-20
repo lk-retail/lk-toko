@@ -125,7 +125,7 @@ table.r{width:100%;border-collapse:collapse;font-size:14px}table.r td{padding:8p
 <div class="app" id="app"></div>
 <script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261120142601';
+var APP_VER = '20261120173819';
 function chkVer() { fetch('version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
@@ -1202,6 +1202,26 @@ function dayDetRows(R) {
 render();
 if (S.sess && !S.sess.mustChange) loadHome();
 fetch(API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ fn: 'warm', args: [] }) }).catch(function () {});
+</script>
+<script>
+// 密码框加「眼睛」：点一下显示密码，再点一下隐藏（LK Hub / LK Toko 共用，2026-11-20）
+(function(){
+ var EYE='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+ var OFF='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 19c-7 0-11-7-11-7a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 7 11 7a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+ function add(i){if(i.getAttribute('data-eye'))return;i.setAttribute('data-eye','1');
+  var cs=getComputedStyle(i),w=document.createElement('span');
+  w.style.cssText='position:relative;display:block;margin:'+cs.marginTop+' '+cs.marginRight+' '+cs.marginBottom+' '+cs.marginLeft;
+  i.parentNode.insertBefore(w,i);w.appendChild(i);i.style.margin='0';i.style.paddingRight='46px';i.style.width='100%';i.style.boxSizing='border-box';
+  var b=document.createElement('button');b.type='button';b.tabIndex=-1;b.title='显示 / 隐藏密码';
+  b.style.cssText='position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:0;padding:8px;margin:0;width:auto;min-height:0;cursor:pointer;color:#888;line-height:0;box-shadow:none';
+  b.innerHTML=EYE;
+  b.onmousedown=function(e){e.preventDefault();};
+  b.onclick=function(e){e.preventDefault();e.stopPropagation();var show=i.type==='password';i.type=show?'text':'password';b.innerHTML=show?OFF:EYE;b.style.color=show?'#111':'#888';};
+  w.appendChild(b);}
+ function scan(){var l=document.querySelectorAll('input[type=password]:not([data-eye])');for(var k=0;k<l.length;k++)add(l[k]);}
+ if(window.MutationObserver)new MutationObserver(scan).observe(document.body,{childList:true,subtree:true});
+ scan();
+})();
 </script>
 </body>
 </html>
