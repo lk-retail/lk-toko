@@ -125,7 +125,7 @@ table.r{width:100%;border-collapse:collapse;font-size:14px}table.r td{padding:8p
 <div class="app" id="app"></div>
 <script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261120133341';
+var APP_VER = '20261120135959';
 function chkVer() { fetch('version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
@@ -841,16 +841,23 @@ function entryRow(ic, title, sub, go_, last) {
   return '<div' + (go_ ? ' onclick="' + (go_.indexOf('fn:') === 0 ? go_.slice(3) : 'go(\'' + go_ + '\')') + '"' : '') + ' style="display:flex;align-items:center;gap:14px;padding:14px 16px;' + (go_ ? 'cursor:pointer;' : '') + (last ? '' : 'border-bottom:1px solid var(--line)') + '"><div style="width:44px;height:44px;border-radius:12px;background:var(--y);display:flex;align-items:center;justify-content:center;flex:none"><span style="width:24px;height:24px;display:block">' + ic + '</span></div><div style="flex:1;min-width:0"><div style="font-size:16px;font-weight:700">' + title + '</div><div style="font-size:13px;color:var(--g);margin-top:2px">' + sub + '</div></div><div style="font-size:22px;color:' + (go_ ? 'var(--g)' : 'transparent') + '">›</div></div>';
 }
 function sayaRows(H) {
-  var ss = H && H.stores ? H.stores : [], P = S.pc;
+  // 2026-11-20：常用的在上（考勤、通知、门店、备用金），帮助和还没上线的放下面一组、变灰
+  var ss = H && H.stores ? H.stores : [], P = S.pc, zh = L === 'zh';
   var stSub = ss.length > 1 ? t('nStores')(ss.length) + ' · ' + t('stInfo') : ss.length ? (function (x) { var sh = x.shifts || []; return esc(x.name) + (sh.length ? ' · ' + t('hours') + ' ' + sh.map(function (z) { return z.start; }).sort()[0] + '–' + sh.map(function (z) { return z.end; }).sort().slice(-1)[0] : ''); })(ss[0]) : '';
-  var pcSub = !P ? '…' : P.has ? t('pcBal') + ' ' + (P.bal < 0 ? '-' : '') + money(Math.abs(P.bal)) : t('pcNone');
+  var pcHas = P && P.has, pcSub = !P ? '…' : pcHas ? t('pcBal') + ' ' + (P.bal < 0 ? '-' : '') + money(Math.abs(P.bal)) : t('pcNone');
+  var nNew = nList(H).filter(function (x) { return !x.read && !x.ended; }).length;
+  var BELL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg>';
+  var PIN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>';
+  var dim = function (ic, title, sub, fn, last) { return '<div' + (fn ? ' onclick="' + fn + '"' : '') + ' style="display:flex;align-items:center;gap:12px;padding:11px 16px;' + (fn ? 'cursor:pointer;' : '') + (last ? '' : 'border-bottom:1px solid var(--line)') + '"><div style="width:34px;height:34px;border-radius:10px;background:#efeee9;color:' + (fn ? '#555' : '#aaa') + ';display:flex;align-items:center;justify-content:center;flex:none"><span style="width:19px;height:19px;display:block">' + ic + '</span></div><div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600;color:' + (fn ? '#222' : '#999') + '">' + title + '</div><div style="font-size:12px;color:#9a9a9a;margin-top:1px">' + sub + '</div></div><div style="font-size:20px;color:' + (fn ? 'var(--g)' : 'transparent') + '">›</div></div>'; };
   return '<div class="card" style="padding:0;overflow:hidden;margin-top:14px">' +
-    entryRow(IC.shop, t('myStores'), stSub, 'mystore') +
-    entryRow(IC.cal, t('records'), t('attSub')((H && H.att) || { days: 0 }), 'rec') +
-    entryRow(IC.chart, t('msT'), t('msSoon'), 'mysales') +
-    entryRow('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg>', L === 'zh' ? '通知' : 'Pemberitahuan', (function () { var n = nList(H).filter(function (x) { return !x.read && !x.ended; }).length; return n ? (L === 'zh' ? n + ' 条没看' : n + ' belum dibaca') : (L === 'zh' ? '没有新通知' : 'Tidak ada yang baru'); })(), 'notices') +
-    entryRow(IC.wallet, t('pcT'), pcSub, P && P.has ? 'mypc' : null) +
-    entryRow('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>', L === 'zh' ? '帮助 · 怎么打开定位' : 'Bantuan · Cara menyalakan lokasi', L === 'zh' ? '打卡需要定位，安卓和 iPhone 的设置步骤' : 'Absen butuh lokasi · langkah Android & iPhone', 'fn:geoHelp()', true) + '</div>';
+    entryRow(IC.cal, t('records'), t('attSub')((H && H.att) || { days: 0 }) + '<br>' + (zh ? '点日期看当天明细和照片（近 7 天）' : 'Ketuk tanggal untuk lihat detail & foto (7 hari terakhir)'), 'rec') +
+    entryRow(BELL, zh ? '通知' : 'Pemberitahuan', nNew ? '<span style="color:#b3261e;font-weight:700">' + (zh ? nNew + ' 条没看' : nNew + ' belum dibaca') + '</span>' : (zh ? '没有新通知' : 'Tidak ada yang baru'), 'notices') +
+    entryRow(IC.shop, t('myStores'), stSub, 'mystore', !pcHas) +
+    (pcHas ? entryRow(IC.wallet, t('pcT'), pcSub, 'mypc', true) : '') + '</div>' +
+    '<div class="card" style="padding:0;overflow:hidden;margin-top:12px">' +
+    (pcHas ? '' : dim(IC.wallet, t('pcT'), pcSub, null)) +
+    dim(PIN, zh ? '帮助 · 怎么打开定位' : 'Bantuan · Cara menyalakan lokasi', zh ? '打卡需要定位，安卓和 iPhone 的设置步骤' : 'Absen butuh lokasi · langkah Android & iPhone', 'geoHelp()') +
+    dim(IC.chart, t('msT'), t('msSoon'), null, true) + '</div>';
 }
 function vMyStore() {
   var H = S.home;
@@ -913,7 +920,7 @@ function pcCard() {
 function vSaya() {
   // 2026-11-19：和「今天」页用同一张人员卡；工号和岗位放到退出按钮上方
   var u = S.sess.user, H = S.home;
-  return pfCard(H, u) + sayaRows(H) + '<div class="page">' +
+  return pfCard(H, u) + sayaRows(H) + '<div class="page" style="padding-bottom:110px">' +
     '<div style="text-align:center;font-size:12px;color:#9a9a9a;margin:0 0 8px">' + esc(u.nick) + (u.role ? ' · ' + esc(u.role) : '') + '</div>' +
     '<button class="btn ghost" onclick="logout()">' + t('logout') + '</button></div>';
 }
