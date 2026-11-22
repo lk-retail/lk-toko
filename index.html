@@ -126,8 +126,34 @@ table.r{width:100%;border-collapse:collapse;font-size:14px}table.r td{padding:8p
 <body>
 <div class="app" id="app"></div>
 <script>
+// 页面出错（2026-11-22）：以前页面一出错，按钮就像没反应，用户只能关掉 app 重开，后台也看不到。
+// 现在：底部出现红条「页面出错了，点这里刷新」，同时把错误发给后台（app_errors），每天的检查能看到。网络断开这类不是页面本身的错，不提示也不上报。
+var ERR_SENT = {};
+function pageErr(msg, stack) {
+  try {
+    msg = String(msg || '');
+    if (!msg || /Failed to fetch|Load failed|NetworkError|network|SESSION_EXPIRED|AbortError|^Script error/i.test(msg)) return;
+    errBar();
+    var k = msg.slice(0, 200); if (ERR_SENT[k]) return; ERR_SENT[k] = 1;
+    var v = ''; try { v = String(S.view || ''); } catch (e) {}
+    var n = ''; try { n = String(S.sess && S.sess.user && S.sess.user.nick || ''); } catch (e) {}
+    fetch(API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ fn: 'clientErr', args: [null, { msg: msg.slice(0, 300), stack: String(stack || '').slice(0, 900), view: v, ver: (typeof APP_VER !== 'undefined' ? APP_VER : ''), nick: n, ua: navigator.userAgent.slice(0, 120) }] }) }).catch(function () {});
+  } catch (e) {}
+}
+function errBar() {
+  if (document.getElementById('errbar')) return;
+  var zh = (typeof L !== 'undefined' && L === 'zh'), d = document.createElement('div'); d.id = 'errbar';
+  d.style.cssText = 'position:fixed;left:12px;right:12px;bottom:84px;z-index:99;background:#b3261e;color:#fff;padding:13px 14px;border-radius:12px;font-size:15px;font-weight:600;box-shadow:0 4px 16px rgba(0,0,0,.25);text-align:center;cursor:pointer;max-width:520px;margin:0 auto';
+  d.textContent = zh ? '页面出错了，点这里刷新' : 'Halaman error. Ketuk di sini untuk memuat ulang.';
+  d.onclick = function () { location.reload(); };
+  document.body.appendChild(d);
+}
+window.addEventListener('error', function (e) { if (e && e.target && e.target !== window && e.target.tagName) return; pageErr(e && e.message, e && e.error && e.error.stack); });
+window.addEventListener('unhandledrejection', function (e) { var r = e && e.reason; pageErr(r && r.message || r, r && r.stack); });
+</script>
+<script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261122153725';
+var APP_VER = '20261122160149';
 function chkVer() { fetch('version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
