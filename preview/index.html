@@ -162,7 +162,7 @@ window.addEventListener('unhandledrejection', function (e) { var r = e && e.reas
 </script>
 <script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261122200124';
+var APP_VER = '20261122201418';
 function chkVer() { fetch('preview/version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
@@ -1309,7 +1309,8 @@ var TX2 = {
     gsT: 'Ganti shift', gsPick: 'Pilih shift baru', gsWhy: 'Alasan ganti shift (wajib)', gsEx: 'Contoh: Dimas izin sakit, saya ganti full day',
     gsNote: 'Jam pulang dihitung dari shift baru. Perubahan ini tercatat dan bisa dilihat HR & Operations Manager.', gsSend: 'Simpan shift baru', gsDone: 'Shift sudah diganti', gsNow: 'Shift sekarang',
     inApp: 'Halaman ini dibuka di dalam aplikasi (misalnya WhatsApp). Kamera dan lokasi bisa tidak jalan. Buka di Chrome / Safari: ketuk ⋮ atau ⋯ → Buka di browser.',
-    calCek: 'Cek Awal Shift', calRp: 'Laporan Penutupan Harian'
+    calCek: 'Cek Awal Shift', calRp: 'Laporan Penutupan Harian',
+    shPrep: 'Menyiapkan foto…', shHint: 'Teks juga sudah disalin. Kalau teks tidak ikut terkirim, tekan lama di kolom chat lalu Tempel.'
   },
   zh: {
     stepN: { absen: '上班打卡', cek: '上班检查', survey: '下班问卷', report: '营业日报', pulang: '下班打卡' },
@@ -1355,7 +1356,8 @@ var TX2 = {
     gsT: '改班次', gsPick: '选新班次', gsWhy: '改班次原因（必填）', gsEx: '例：Dimas 请病假，我改上全天',
     gsNote: '下班时间按新班次算。改班次会留记录，HR 和运营经理能看到。', gsSend: '保存新班次', gsDone: '班次已改好', gsNow: '现在的班次',
     inApp: '现在是在 App 里面（例如 WhatsApp）打开的，相机和定位可能用不了。请点右上角 ⋮ 或 ⋯ → 在浏览器中打开（Chrome / Safari）。',
-    calCek: '上班检查', calRp: '营业日报'
+    calCek: '上班检查', calRp: '营业日报',
+    shPrep: '准备照片中…', shHint: '文字也已经复制好了。如果文字没跟着发出去，在聊天框长按粘贴就行。'
   }
 };
 (function () { for (var l in TX2) for (var k in TX2[l]) TX[l][k] = TX2[l][k]; })();
@@ -1489,29 +1491,75 @@ function doneShare() {
   var H = S.home, F = H.flow, a = F && F.steps && F.steps[0];
   shareTxt(briefText({ date: today2(), store: H.store.name, name: S.sess.user.fullName, in: a ? a.done : '', out: F && F.done ? F.done.time : '', survey: !!(F && F.survey) }));
 }
-function shareTxt(text) {
+// 2026-11-22 Victory 定：每一步提交完就在完成页转发到门店群，文字全发（按填写顺序，不概括），照片一起发。
+// 文字同时复制好：有的手机 WhatsApp 会把文字丢掉只发照片，员工在群里长按粘贴就行
+function copyTxt(text) { try { if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).catch(function () {}); } catch (e) {} }
+function shareTxt(text, files) {
+  copyTxt(text);
+  files = files || [];
+  if (files.length && navigator.canShare && navigator.canShare({ files: files })) { navigator.share({ text: text, files: files }).catch(function () {}); return; }
   if (navigator.share) { navigator.share({ text: text }).catch(function () {}); return; }
   location.href = 'https://wa.me/?text=' + encodeURIComponent(text);
 }
-function briefText(b) { return ['ABSEN PULANG', 'Tanggal: ' + dmy(b.date), 'Toko: ' + b.store, 'Vaporista: ' + b.name, 'Masuk: ' + (b.in || '-') + ' · Pulang: ' + (b.out || '-'), 'Laporan Akhir Shift: ' + (b.survey ? 'sudah dikirim' : 'belum')].join('\n'); }
-function cekText(r) {
-  var probs = (r.problems || []).filter(function (p) { return !p.fixed; }).map(function (p) { return TX.id.cekT[p.item] + ': ' + p.problem + (p.lapor ? ', sudah lapor perbaikan' : ''); });
-  return ['CEK AWAL SHIFT', 'Tanggal: ' + dmy(r.date), 'Toko: ' + r.store, 'Vaporista: ' + r.name, 'Jam hadir: ' + r.absen, 'Status: ' + (r.status === 'READY' ? 'READY' : 'BUKA, ADA MASALAH' + (probs.length ? ' – ' + probs.join('; ') : ''))].join('\n');
+function shPhSrc(list) { return (list || []).map(function (s) { return s.d || s.url || s.id || ''; }).filter(function (u) { return /^(data:|https:)/.test(u); }); }
+function shBlob(src) {
+  if (/^data:/.test(src)) { try { var b = atob(src.split(',')[1]), a = new Uint8Array(b.length); for (var i = 0; i < b.length; i++) a[i] = b.charCodeAt(i); return Promise.resolve(new Blob([a], { type: 'image/jpeg' })); } catch (e) { return Promise.reject(e); } }
+  return fetch(src).then(function (r) { if (!r.ok) throw new Error('IMG'); return r.blob(); });
+}
+function shImg(src) { return shBlob(src).then(function (b) { return new Promise(function (ok, no) { var u = URL.createObjectURL(b), im = new Image(); im.onload = function () { ok(im); }; im.onerror = no; im.src = u; }); }); }
+function shFile(blob, name) { try { return new File([blob], name, { type: 'image/jpeg' }); } catch (e) { blob.name = name; return blob; } }
+// 上班检查一项拼成一张图：顶部字幕（第几项 · 状态 · 问题），下面这一项的 1–4 张照片（原照片的水印保留）
+function shCollage(title, sub, bad, srcs) {
+  return Promise.all(srcs.map(function (u) { return shImg(u).catch(function () { return null; }); })).then(function (ims) {
+    ims = ims.filter(Boolean);
+    var W = 1080, cols = ims.length > 1 ? 2 : 1, rows = Math.max(1, Math.ceil(ims.length / cols)), cw = W / cols, ch = cols === 1 ? 1440 : 720, head = sub ? 150 : 100;
+    var c = document.createElement('canvas'); c.width = W; c.height = head + rows * ch; var x = c.getContext('2d');
+    x.fillStyle = '#111'; x.fillRect(0, 0, W, c.height);
+    x.fillStyle = bad ? '#b3261e' : '#000'; x.fillRect(0, 0, W, head);
+    x.fillStyle = '#FDCD17'; x.font = 'bold 44px Arial'; x.fillText(title, 24, 62);
+    if (sub) { x.fillStyle = '#fff'; x.font = '34px Arial'; var t2 = sub; while (x.measureText(t2).width > W - 48 && t2.length > 4) t2 = t2.slice(0, -2); x.fillText(t2 === sub ? sub : t2 + '…', 24, 118); }
+    ims.forEach(function (im, i) {
+      var cx = (i % cols) * cw, cy = head + Math.floor(i / cols) * ch, k = Math.min(cw / im.width, ch / im.height), w = im.width * k, h = im.height * k;
+      x.drawImage(im, cx + (cw - w) / 2, cy + (ch - h) / 2, w, h);
+    });
+    return new Promise(function (ok) { c.toBlob(function (b) { ok(b); }, 'image/jpeg', 0.82); });
+  });
+}
+// 完成页先显示「准备照片中…」，照片准备好再能点（iPhone 要在点按钮那一下直接分享，不能点了再去下载）
+function shPrep(job) {
+  S.shFiles = null; S.shBusy = 1;
+  job().then(function (files) { S.shFiles = files.filter(Boolean); }).catch(function () { S.shFiles = []; }).then(function () { S.shBusy = 0; if (S.view === 'res2') render(); });
+}
+function briefText(b, x) {
+  var a = ['ABSEN PULANG', 'Tanggal: ' + dmy(b.date), 'Toko: ' + b.store, 'Vaporista: ' + b.name, 'Masuk: ' + (b.in || '-') + ' · Pulang: ' + (b.out || '-'), 'Laporan Akhir Shift: ' + (b.survey ? 'sudah dikirim' : 'belum')];
+  x = x || {};
+  if (x.early && x.early.why) a.push('Pulang lebih awal: ' + x.early.why + (x.early.note ? ' – ' + x.early.note : '') + ' · Izin ke: ' + (x.early.none || !(x.early.izin || []).length ? 'belum' : x.early.izin.join(', ')));
+  if (x.last) a.push('Orang terakhir, toko sudah dikunci (foto kunci terlampir)');
+  return a.join('\n');
+}
+function cekLine(n, k, it) { return n + '. ' + TX.id.cekT[k] + ': ' + (it.ok ? 'OK' : 'ADA MASALAH – ' + it.problem + ' (' + (it.fixed ? 'sudah diperbaiki' : 'belum bisa diperbaiki' + (it.laporId ? ', sudah lapor perbaikan' : '')) + ')'); }
+function cekText(r, items, cash) {
+  var a = ['CEK AWAL SHIFT', 'Tanggal: ' + dmy(r.date), 'Toko: ' + r.store, 'Vaporista: ' + r.name, 'Jam hadir: ' + r.absen, 'Selesai cek: ' + r.time,
+    'Status: ' + (r.status === 'READY' ? 'READY' : 'BUKA, ADA MASALAH'), ''];
+  CK_ITEMS.forEach(function (k, i) { a.push(cekLine(i + 1, k, items[k])); });
+  if (cash) a.push('', 'Uang tunai kemarin Rp ' + fmtN(cash.amount) + ': ' + (cash.done ? 'sudah disetor' : 'belum disetor – ' + (cash.reason || '')));
+  return a.join('\n');
 }
 function closeText(c) {
   if (!c) return ''; var r = c.r, m = c.mtd || {}, rp = function (n) { return 'Rp ' + n0(n).toLocaleString('en-US'); };
-  var a = ['LAPORAN PENUTUPAN HARIAN', 'Tanggal: ' + dmy(c.date), 'Toko: ' + c.store, 'Vaporista: ' + (c.staff || []).join(', '), 'Target harian: ' + rp(m.daily), 'Tunai: ' + rp(r.cash), 'QRIS/EDC: ' + rp(r.qris), 'GrabMart: ' + rp(r.grab),
+  var a = ['LAPORAN PENUTUPAN HARIAN', 'Tanggal: ' + dmy(c.date), 'Toko: ' + c.store, 'Vaporista: ' + (c.staff || []).join(', '), 'Diisi oleh: ' + (r.name || '') + ' ' + (r.time || ''), 'Target harian: ' + rp(m.daily), 'Tunai: ' + rp(r.cash), 'QRIS/EDC: ' + rp(r.qris), 'GrabMart: ' + rp(r.grab),
     'Penjualan hari ini: ' + rp(r.total), 'Penjualan MTD (laporan): ' + rp(m.mtd), 'Pencapaian target: ' + (m.pct == null ? '-' : m.pct + '%'), '', 'LAPORAN PELANGGAN', 'Jumlah pengunjung: ' + r.visitors, 'Pembeli di toko: ' + r.buyers, 'Pesanan WhatsApp: ' + r.waOrder,
     'Google Review: ' + r.googleNew + ' orang (Total: ' + r.googleTotal + ')', 'Kontak WA toko: ' + r.waNew + ' orang (Total: ' + r.waTotal + ')'];
   if (r.commHas) a.push('WA Community: ' + r.commNew + ' orang (Total: ' + r.commTotal + ')');
   if (r.wechatHas) a.push('WeChat toko: ' + r.wechatNew + ' orang (Total: ' + r.wechatTotal + ')');
-  a.push(''); a.push('Uang tunai belum disetor: ' + (c.cash && c.cash.amount > 0 ? rp(c.cash.amount) + (c.cash.plan ? ' (disetor ' + (/^\d{4}-/.test(c.cash.plan) ? dmy(c.cash.plan) : 'besok pagi') + ')' : '') : 'Rp 0'));
+  a.push(''); a.push('Uang tunai belum disetor: ' + (r.cashStatus === 'LEFT' && r.cashLeft > 0 ? 'Rp ' + fmtN(r.cashLeft) + (r.cashReason ? ' – ' + r.cashReason : '') + (r.cashWhen ? ' (disetor ' + (/^\d{4}-/.test(r.cashWhen) ? dmy(r.cashWhen) : 'besok pagi') + ')' : '') : 'Rp 0'));
   return a.join('\n');
 }
 
 // ---------- 每一步做完：✓ Selesai. Langkah berikutnya ----------
-function afterStep(title, sub, share) {
+function afterStep(title, sub, share, job) {
   busy(t('loading'));
+  if (job) shPrep(job); else { S.shFiles = []; S.shBusy = 0; }
   var fin = function () { busy(); S.res2 = { title: title, sub: sub, share: share || null }; S.view = 'res2'; render(); window.scrollTo(0, 0); };
   loadHome().then(fin, fin);
 }
@@ -1522,7 +1570,7 @@ XV.res2 = function () {
   if (nx === 'pulang' && F.survey) nxt += '<div style="font-size:17px;font-weight:700;margin:8px 0">' + t('notYet') + '</div>';
   var btn = nx && nx !== 'done' && nx !== 'work' ? '<button class="btn" onclick="go(\'' + nextGoV(nx) + '\')">' + stepName(nx) + '</button>' : '';
   return '<div class="res"><div class="big"' + (nx === 'done' ? ' style="color:var(--ok)"' : '') + '>✓</div><div style="font-size:20px;font-weight:700">' + (R.title || '') + '</div>' + (R.sub ? '<div style="color:var(--g);margin-top:6px">' + R.sub + '</div>' : '') + nxt +
-    (R.share ? '<button class="btn' + (btn ? ' ghost' : '') + '" onclick="shareTxt(S.res2.share)">' + t('shareWa') + '</button>' : '') + btn +
+    (R.share ? '<button class="btn" style="margin-top:18px"' + (S.shBusy ? ' disabled' : '') + ' onclick="shareTxt(S.res2.share, S.shFiles)">' + (S.shBusy ? t('shPrep') : '📤 ' + t('shareWa') + ((S.shFiles || []).length ? ' (' + S.shFiles.length + ' foto)' : '')) + '</button><div style="font-size:12px;color:var(--g);margin-top:6px">' + t('shHint') + '</div>' : '') + btn.replace('class="btn"', R.share ? 'class="btn ghost"' : 'class="btn"') +
     '<button class="btn ghost" onclick="go(\'home\')">' + t('nav')[0] + '</button></div>';
 };
 
@@ -1611,8 +1659,15 @@ function ckSend() {
     if (!r.ok && r.err === 'NO_GEO') { S.geo = null; return geoFail(ckSend); }
     if (!r.ok && r.err === 'INCOMPLETE') { var k = (r.items || [])[0]; if (k === 'cash') return ckGo(0); if (k) { S.ck.err = ckItemErr(k) || t('min1'); return ckGo(sc.indexOf(k)); } }
     if (!r.ok) return toast(t('err'));
+    var CK = S.ck, cashA = S.ci && S.ci.cashAsk && CK.cash ? { amount: S.ci.cashAsk.amount, done: CK.cash.done, reason: CK.cash.reason } : null;
+    var srcs = {}; CK_ITEMS.forEach(function (k) { srcs[k] = shPhSrc(CK.ph['cek.' + k]); });
     dDel('cek'); S.ck = null; S.ci = null;
-    afterStep(r.status === 'ISSUE' ? t('issue') : t('ready'), r.time, r.share && !r.dup ? cekText(r) : null);
+    if (r.dup) return afterStep(r.status === 'ISSUE' ? t('issue') : t('ready'), r.time);
+    afterStep(r.status === 'ISSUE' ? t('issue') : t('ready'), r.time, cekText(r, CK.items, cashA), function () {
+      return Promise.all(CK_ITEMS.map(function (k, i) { var it = CK.items[k];
+        return shCollage((i + 1) + '. ' + TX.id.cekT[k] + ' · ' + (it.ok ? 'OK' : 'ADA MASALAH'), it.ok ? '' : it.problem + ' (' + (it.fixed ? 'sudah diperbaiki' : 'belum bisa diperbaiki' + (it.laporId ? ', sudah lapor' : '')) + ')', !it.ok && !it.fixed, srcs[k])
+          .then(function (b) { return b ? shFile(b, 'cek_' + (i + 1) + '_' + k + '.jpg') : null; }).catch(function () { return null; }); }));
+    });
   }).catch(function () { busy(); toast(t('err')); });
 }
 
@@ -1831,9 +1886,10 @@ function rpSend() {
     busy();
     if (!x.ok) { if (x.err === 'INCOMPLETE') { var it = (x.items || [])[0], map = { sales: 0, photos: 0, cust: 1, buyers: 1, fans: 2, cash: 3 }; S.rp.err = it === 'buyers' ? t('rpBuyErr') : t('fixRed'); return rpGo(map[it] || 0); }
       return toast(x.err === 'NOT_OPEN' ? t('err') : x.err === 'ALREADY_OUT' ? t('err') : t('err')); }
-    var edited = r.edit; dDel('rp'); S.rp = null; S.ri = null;
+    var edited = r.edit, pos = shPhSrc(r.ph['rp.pos']); dDel('rp'); S.rp = null; S.ri = null;
     if (x.dup) { toast(t('sendBy')(x.by || '', x.time || '')); return go('home'); }
-    api('reportShare', [S.sess.token, { storeId: S.home.store.id }]).then(function (s) { var txt = s && s.share ? closeText(s.share) : null; afterStep(edited ? t('rpSaved') : t('rpSent'), x.time, txt); }).catch(function () { afterStep(edited ? t('rpSaved') : t('rpSent'), x.time, null); });
+    var job = function () { return Promise.all(pos.map(function (u, i) { return shBlob(u).then(function (b) { return shFile(b, 'pos_' + (i + 1) + '.jpg'); }).catch(function () { return null; }); })); };
+    api('reportShare', [S.sess.token, { storeId: S.home.store.id }]).then(function (s) { var txt = s && s.share ? closeText(s.share) : null; afterStep(edited ? t('rpSaved') : t('rpSent'), x.time, txt, txt ? job : null); }).catch(function () { afterStep(edited ? t('rpSaved') : t('rpSent'), x.time, null); });
   }).catch(function () { busy(); toast(t('err')); });
 }
 function rpCannotForm() {
@@ -1899,10 +1955,10 @@ function poSend() {
     if (!r.ok && (r.err === 'NEED_REPORT' || r.err === 'NO_LOCK')) { S.pi = null; poReload(); return toast(r.err === 'NEED_REPORT' ? t('lastMust') : t('lockT')); }
     if (!r.ok && r.err === 'NEED_EARLY_REASON') { S.pi.early = true; S.po2.err = t('earlyNeed'); return render(); }
     if (!r.ok) return toast(r.err === 'NO_SURVEY' ? t('svNeed') : t('err'));
-    var txt = r.share ? closeText(r.share) : briefText(r.brief);
+    var txt = briefText(r.brief, { early: P.early ? E : null, last: r.last }), ph = shPhSrc(S.po2.ph['po.selfie']).concat(r.last ? shPhSrc(S.po2.ph['po.lock']) : []);
     try { LS.setItem(lastShareKey(), txt); LS.removeItem(dKey('early')); } catch (e) {}
     S.po2 = null; S.pi = null;
-    afterStep(t('allDone'), t('doneS')(r.time), txt);
+    afterStep(t('allDone'), t('doneS')(r.time), txt, function () { return Promise.all(ph.map(function (u, i) { return shBlob(u).then(function (b) { return shFile(b, (i ? 'kunci' : 'pulang') + '.jpg'); }).catch(function () { return null; }); })); });
   }).catch(function () { busy(); toast(t('err')); });
 }
 function poReload() { api('pulangInfo', [S.sess.token, { storeId: S.home.store.id }]).then(function (r) { if (r.ok) { S.pi = r; render(); } }).catch(function () {}); }
