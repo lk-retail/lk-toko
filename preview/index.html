@@ -162,7 +162,7 @@ window.addEventListener('unhandledrejection', function (e) { var r = e && e.reas
 </script>
 <script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261122201842';
+var APP_VER = '20261122204428';
 function chkVer() { fetch('preview/version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
@@ -314,7 +314,7 @@ function api(fn, args, tries) {
     .then(function (r) { return r.json(); })
     .then(function (j) { if (j.err) throw new Error(j.err); return j.data; })
     .catch(function (e) {
-      if (/SESSION_EXPIRED/.test(e.message)) { logout(); throw e; }
+      if (/SESSION_EXPIRED/.test(e.message)) { EXPIRED = 1; logout(); throw e; }
       if (tries > 0 && !/BAD_PW|LOCKED|NOT_MY|NO_/.test(e.message)) return new Promise(function (ok) { setTimeout(ok, 1500); }).then(function () { return api(fn, args, tries - 1); });
       throw e;
     });
@@ -407,8 +407,11 @@ function render() {
   if (v === 'home' || v === 'poin' || v === 'saya' || v === 'tugas') h += vNav();
   a.innerHTML = vHb() + h;
 }
+// 2026-11-22：登录过期跳回登录页时，提示固定显示在登录框上方（通用原因，分点）
+var EXPIRED = 0;
 function vLogin() {
   return '<div class="login"><img class="logo" src="img/icon-192.png?v=2" alt=""><h2 style="text-align:center;margin-bottom:6px">LK Toko</h2>' +
+    (EXPIRED ? '<div style="background:#fff8d6;border:1px solid #f0dc8a;border-radius:12px;padding:10px 12px;font-size:14px;line-height:1.6;margin:8px 0 6px">' + (L === 'zh' ? '<b>需要重新登录。</b>可能原因：<br>1. 每天要重新登录一次<br>2. 账号在别处登录了<br>3. 密码被改了' : '<b>Silakan masuk lagi.</b> Kemungkinan:<br>1. Wajib masuk ulang setiap hari<br>2. Akun dipakai masuk di tempat lain<br>3. Password sudah diganti') + '</div>' : '') +
     '<label class="f">' + t('eid') + '</label><input class="in" id="eid" autocapitalize="characters" autocomplete="username" placeholder="ID-2026-…">' +
     '<label class="f">' + t('pw') + '</label><input class="in" id="pw" type="password" autocomplete="current-password">' +
     '<button class="btn" onclick="doLogin()">' + t('login') + '</button>' +
@@ -446,6 +449,7 @@ function a2hsTip() {
   return h + '</div>';
 }
 function doLogin() {
+  EXPIRED = 0;
   var id = document.getElementById('eid').value.trim(), pw = document.getElementById('pw').value;
   if (!id || !pw) return;
   busy('…');
@@ -873,7 +877,7 @@ function sayaRows(H) {
 var GD_API = 'https://wyhkkxwrxzmahbvzhsbg.supabase.co/functions/v1/toko-api'; // 2026-11-22 起货品接口也走 toko-api，接口名前加 goods.
 function gdApi(fn, args) {
   return fetch(GD_API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ fn: 'goods.' + fn, args: [S.sess.token].concat(args || []) }) })
-    .then(function (r) { return r.json(); }).then(function (j) { if (j.err) { if (/SESSION_EXPIRED/.test(j.err)) logout(); throw new Error(j.err); } return j.data; });
+    .then(function (r) { return r.json(); }).then(function (j) { if (j.err) { if (/SESSION_EXPIRED/.test(j.err)) { EXPIRED = 1; logout(); } throw new Error(j.err); } return j.data; });
 }
 function gdT(zh, id) { return L === 'zh' ? zh : id; }
 var GDS = { open: ['系统已分配，周一 12:00 前运营还可能调整', 'Sudah dialokasi, Ops masih bisa ubah s/d Senin 12:00'], locked: ['已锁定，仓库在备货', 'Sudah dikunci, gudang sedang menyiapkan'], confirmed: ['仓库已确认，准备发出', 'Gudang sudah konfirmasi, siap dikirim'],
@@ -965,7 +969,7 @@ function zi(zh, id) { return L === 'zh' ? zh : id; }
 function xApi(pre, fn, args) {
   return fetch(API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ fn: pre + fn, app: 'toko', args: [S.sess.token].concat(args || []) }) })
     .then(function (r) { return r.json(); }).then(function (j) { if (j.err) throw new Error(j.err); return j.data; })
-    .catch(function (e) { if (/SESSION_EXPIRED/.test(e.message)) logout(); throw e; });
+    .catch(function (e) { if (/SESSION_EXPIRED/.test(e.message)) { EXPIRED = 1; logout(); } throw e; });
 }
 function xErr(e) {
   var m = String((e && e.message) || e || ''), map = {
