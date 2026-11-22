@@ -162,7 +162,7 @@ window.addEventListener('unhandledrejection', function (e) { var r = e && e.reas
 </script>
 <script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261122201734';
+var APP_VER = '20261122201842';
 function chkVer() { fetch('preview/version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
@@ -1663,7 +1663,7 @@ function ckSend() {
     if (!r.ok && r.err === 'INCOMPLETE') { var k = (r.items || [])[0]; if (k === 'cash') return ckGo(0); if (k) { S.ck.err = ckItemErr(k) || t('min1'); return ckGo(sc.indexOf(k)); } }
     if (!r.ok) return toast(t('err'));
     var CK = S.ck, cashA = S.ci && S.ci.cashAsk && CK.cash ? { amount: S.ci.cashAsk.amount, done: CK.cash.done, reason: CK.cash.reason } : null;
-    var srcs = {}; CK_ITEMS.forEach(function (k) { srcs[k] = shPhSrc(CK.ph['cek.' + k]); });
+    var srcs = {}; CK_ITEMS.forEach(function (k) { srcs[k] = shPhSrc(CK.ph['cek.' + k]).slice(0, 1); });   // 2026-11-22 Victory 定：每项只带第一张照片（手机差也不卡），全部照片在 LK Hub 看
     dDel('cek'); S.ck = null; S.ci = null;
     if (r.dup) return afterStep(r.status === 'ISSUE' ? t('issue') : t('ready'), r.time);
     afterStep(r.status === 'ISSUE' ? t('issue') : t('ready'), r.time, cekText(r, CK.items, cashA), function () {
