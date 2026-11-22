@@ -162,7 +162,7 @@ window.addEventListener('unhandledrejection', function (e) { var r = e && e.reas
 </script>
 <script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261122201418';
+var APP_VER = '20261122201734';
 function chkVer() { fetch('preview/version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
@@ -1506,11 +1506,13 @@ function shBlob(src) {
   if (/^data:/.test(src)) { try { var b = atob(src.split(',')[1]), a = new Uint8Array(b.length); for (var i = 0; i < b.length; i++) a[i] = b.charCodeAt(i); return Promise.resolve(new Blob([a], { type: 'image/jpeg' })); } catch (e) { return Promise.reject(e); } }
   return fetch(src).then(function (r) { if (!r.ok) throw new Error('IMG'); return r.blob(); });
 }
-function shImg(src) { return shBlob(src).then(function (b) { return new Promise(function (ok, no) { var u = URL.createObjectURL(b), im = new Image(); im.onload = function () { ok(im); }; im.onerror = no; im.src = u; }); }); }
+function shImg(src) { return shBlob(src).then(function (b) { return new Promise(function (ok, no) { var u = URL.createObjectURL(b), im = new Image(); im.onload = function () { im._u = u; ok(im); }; im.onerror = function (e) { URL.revokeObjectURL(u); no(e); }; im.src = u; }); }); }
+// 一张一张做（便宜安卓手机内存小，不一次解开 24 张照片）
+function shSeq(list, fn) { var out = []; return list.reduce(function (p, x, i) { return p.then(function () { return fn(x, i); }).then(function (r) { out.push(r); }, function () { out.push(null); }); }, Promise.resolve()).then(function () { return out; }); }
 function shFile(blob, name) { try { return new File([blob], name, { type: 'image/jpeg' }); } catch (e) { blob.name = name; return blob; } }
 // 上班检查一项拼成一张图：顶部字幕（第几项 · 状态 · 问题），下面这一项的 1–4 张照片（原照片的水印保留）
 function shCollage(title, sub, bad, srcs) {
-  return Promise.all(srcs.map(function (u) { return shImg(u).catch(function () { return null; }); })).then(function (ims) {
+  return shSeq(srcs, function (u) { return shImg(u); }).then(function (ims) {
     ims = ims.filter(Boolean);
     var W = 1080, cols = ims.length > 1 ? 2 : 1, rows = Math.max(1, Math.ceil(ims.length / cols)), cw = W / cols, ch = cols === 1 ? 1440 : 720, head = sub ? 150 : 100;
     var c = document.createElement('canvas'); c.width = W; c.height = head + rows * ch; var x = c.getContext('2d');
@@ -1522,7 +1524,8 @@ function shCollage(title, sub, bad, srcs) {
       var cx = (i % cols) * cw, cy = head + Math.floor(i / cols) * ch, k = Math.min(cw / im.width, ch / im.height), w = im.width * k, h = im.height * k;
       x.drawImage(im, cx + (cw - w) / 2, cy + (ch - h) / 2, w, h);
     });
-    return new Promise(function (ok) { c.toBlob(function (b) { ok(b); }, 'image/jpeg', 0.82); });
+    ims.forEach(function (im) { URL.revokeObjectURL(im._u); });
+    return new Promise(function (ok) { c.toBlob(function (b) { c.width = c.height = 1; ok(b); }, 'image/jpeg', 0.82); });
   });
 }
 // 完成页先显示「准备照片中…」，照片准备好再能点（iPhone 要在点按钮那一下直接分享，不能点了再去下载）
@@ -1664,9 +1667,9 @@ function ckSend() {
     dDel('cek'); S.ck = null; S.ci = null;
     if (r.dup) return afterStep(r.status === 'ISSUE' ? t('issue') : t('ready'), r.time);
     afterStep(r.status === 'ISSUE' ? t('issue') : t('ready'), r.time, cekText(r, CK.items, cashA), function () {
-      return Promise.all(CK_ITEMS.map(function (k, i) { var it = CK.items[k];
+      return shSeq(CK_ITEMS, function (k, i) { var it = CK.items[k];
         return shCollage((i + 1) + '. ' + TX.id.cekT[k] + ' · ' + (it.ok ? 'OK' : 'ADA MASALAH'), it.ok ? '' : it.problem + ' (' + (it.fixed ? 'sudah diperbaiki' : 'belum bisa diperbaiki' + (it.laporId ? ', sudah lapor' : '')) + ')', !it.ok && !it.fixed, srcs[k])
-          .then(function (b) { return b ? shFile(b, 'cek_' + (i + 1) + '_' + k + '.jpg') : null; }).catch(function () { return null; }); }));
+          .then(function (b) { return b ? shFile(b, 'cek_' + (i + 1) + '_' + k + '.jpg') : null; }).catch(function () { return null; }); });
     });
   }).catch(function () { busy(); toast(t('err')); });
 }
