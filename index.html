@@ -73,7 +73,7 @@ input.in{width:100%;font-size:17px;padding:13px;border:1px solid var(--line);bor
 .seg button{flex:1;min-width:30%;padding:12px 6px;border:1px solid var(--line);background:#fff;border-radius:10px;font-size:14px}
 .seg button.on{background:#000;color:var(--y);border-color:#000;font-weight:700}
 .photo{margin-top:10px;width:100%;aspect-ratio:3/4;background:#fff;border:2px dashed #ccc;border-radius:14px;display:flex;align-items:center;justify-content:center;color:var(--g);font-size:15px;overflow:hidden}
-.photo img{width:100%;height:100%;object-fit:cover}
+.photo img{width:100%;height:100%;object-fit:contain;background:#000}
 .toggle{display:flex;justify-content:space-between;align-items:center;gap:10px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:8px;font-size:15px}
 .toggle input{width:24px;height:24px;accent-color:#000;flex:none}
 .back{background:none;border:0;font-size:15px;color:var(--g);padding:4px 0 12px}
@@ -127,7 +127,7 @@ table.r{width:100%;border-collapse:collapse;font-size:14px}table.r td{padding:8p
 <div class="app" id="app"></div>
 <script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261122150756';
+var APP_VER = '20261122153725';
 function chkVer() { fetch('version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
@@ -573,7 +573,6 @@ function vNav() {
 }
 function go(v) {
   S.view = v;
-  if (v === 'absen' || v === 'buka' || v === 'pulang' || v === 'storedata') { if (!geoOk()) S.geoBusy = 1; getGeo(function () { S.geoBusy = 0; if (S.view === v) render(); }); }   // 先拿定位，拍照时水印就有 GPS
   if (v === 'absen') { S.ckStore = null; S.ckH = null; S.photo = null; var ok = (S.home.opts || []).filter(function (o) { return o.ok; }); S.shift = S.home.shift ? S.home.shift.code : (ok.length === 1 ? ok[0].code : null); }
   if (v === 'buka') { S.photo = null; S.ck = { alat: false, bersih: false, display: false }; }
   if (v === 'survey') { if (!S.sv) S.sv = svNew(); if (S.home.out && S.home.out.open) S.svEarly = 0; }
@@ -584,6 +583,9 @@ function go(v) {
   if (v === 'rec') { S.calSel = null; S.calYm = null; calLoad(null); }
   if (v === 'saya' && S.sess) { var pk = 'tk_pc_' + (S.sess.user.nick || '').toLowerCase(); try { S.pc = S.pc || JSON.parse(localStorage.getItem(pk) || 'null'); } catch (e) {} api('myPetty', [S.sess.token]).then(function (r) { S.pc = r; try { localStorage.setItem(pk, JSON.stringify(r)); } catch (e) {} if (S.view === 'saya') render(); }).catch(function () {}); }
   if (v === 'poin') { S.pMon = null; if (!S.pn) { try { S.pn = JSON.parse(localStorage.getItem(pnKey()) || 'null'); } catch (e) {} } loadPoin(); }
+  // 先拿定位，拍照时水印就有 GPS。要放在上面准备好页面数据之后：刚提交过一步时手机里的定位还新鲜，getGeo 会马上回调重画页面，
+  // 放在前面会用上一步留下的空数据画页面而出错，按钮就点不动（2026-11-22 修）
+  if (v === 'absen' || v === 'buka' || v === 'pulang' || v === 'storedata') { if (!geoOk()) S.geoBusy = 1; getGeo(function () { S.geoBusy = 0; if (S.view === v) render(); }); }
   render(); window.scrollTo(0, 0); if (v === 'home') loadHome();
 }
 // 上班打卡：班次自动选好，可以改 → 自拍 → 提交；时间以服务器为准
