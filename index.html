@@ -121,6 +121,7 @@ textarea.in{min-height:72px;resize:vertical}
 table.r{width:100%;border-collapse:collapse;font-size:14px}table.r td{padding:8px 4px;border-bottom:1px solid var(--line)}table.r td:last-child{text-align:right;font-weight:700}
 .login{padding:28px 22px 40px}
 .login .logo{width:84px;height:84px;border-radius:20px;display:block;margin:0 auto 16px}
+details.dd>summary::-webkit-details-marker{display:none}details.dd[open]>summary .ddArr{transform:rotate(90deg);display:inline-block}
 </style>
 </head>
 <body>
@@ -153,7 +154,7 @@ window.addEventListener('unhandledrejection', function (e) { var r = e && e.reas
 </script>
 <script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261122160149';
+var APP_VER = '20261122205732';
 function chkVer() { fetch('version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
@@ -171,49 +172,49 @@ var TX = {
     login: 'Masuk', eid: 'ID Karyawan', pw: 'Password', wrong: 'ID atau password salah', locked: 'Terlalu banyak salah. Coba lagi 15 menit lagi',
     useHub: 'Akun ini untuk LK Hub. Mengalihkan…', notFound: 'ID tidak ditemukan. Cek lagi ID Karyawan kamu (contoh: ID-2026-08096). Tim inti pakai LK Hub.', err: 'Koneksi gagal, coba lagi', newpw: 'Buat password baru', newpw1: 'Password baru (min. 8 karakter: huruf besar, huruf kecil, angka)', newpw2: 'Ulangi password baru',
     pwdiff: 'Password tidak sama, atau belum memenuhi syarat (min. 8 karakter, huruf besar, huruf kecil, angka; tanpa urutan mudah seperti 1234 / abcd / password, tanpa ID kamu)', save: 'Simpan', next: 'Langkah berikutnya', today: 'Hari ini', pts: 'Poin bulan ini', u: 'poin',
-    steps: ['Absen Masuk', 'Cek Buka', 'Laporan', 'Absen Pulang'],
-    pickS: 'Pilih shift kamu hari ini, lalu ambil selfie.', pickSM: 'Pilih toko dan shift kamu hari ini, lalu ambil selfie.', hours: 'Buka', pickFirst: 'Pilih shift dulu', storePick: 'Absen di toko mana?', pickStore: 'Pilih toko dulu', sendAt: function (n) { return 'Absen di ' + n; }, already: function (n) { return 'Hari ini kamu sudah absen di ' + n + '.'; }, myStores: 'Toko saya', supL: 'Area Supervisor', omL: 'Operations Manager', moreStores: function (n) { return ' +' + n + ' toko'; }, notOpen: 'Shift ini belum bisa dipilih (paling cepat 90 menit sebelum mulai).',
-    absenT: 'Absen Masuk', absenS: function (s) { return 'Shift ' + s + '. Foto selfie lalu kirim.'; }, absenB: 'Absen sekarang',
+    steps: ['Absen Masuk', 'Cek Awal Shift', 'Laporan Akhir Shift', 'Absen Pulang'],
+    pickS: 'Pilih shift kamu hari ini, lalu ambil selfie.', pickSM: 'Pilih toko dan shift kamu hari ini, lalu ambil selfie.', hours: 'Buka', pickFirst: 'Pilih shift dulu', storePick: 'Absen di toko mana?', pickStore: 'Pilih toko dulu', sendAt: function (n) { return 'Absen di ' + n; }, already: function (n) { return 'Hari ini kamu sudah absen di ' + n + '.'; }, myStores: 'Toko saya', supL: 'Area Supervisor', omL: 'Operations Manager', moreStores: function (n) { return ' +' + n + ' toko'; }, notOpen: 'Shift ini belum bisa dipilih (paling cepat 2 jam sebelum mulai).',
+    absenT: 'Absen Masuk', absenB: 'Absen sekarang',
     lateT: function () { return 'Belum absen'; }, lateS: function () { return 'Shift sudah mulai. Segera absen.'; },
-    bukaT: 'Cek Buka Toko', bukaS: 'Cek alat, kebersihan, display + foto depan toko. Sekali sehari per toko.', bukaB: 'Mulai cek',
-    workT: 'Selamat bekerja', workS: function (x) { return 'Laporan Akhir Shift dibuka 30 menit sebelum shift selesai (' + x + ').'; },
+    
+    
     noShift: 'Jam shift toko ini belum diisi. Hubungi Operations Manager.', noStore: 'Kamu belum terdaftar di toko mana pun. Hubungi HR.',
     in10: function (r) { return '<b>Peringkat Poin</b>ke-' + r; }, gap: function (g) { return '<b>' + fmtP(g).replace('+', '') + ' poin lagi</b>masuk peringkat'; }, gapNone: '<b>Absen tepat waktu</b>untuk masuk peringkat', boardSoon: '<b>Peringkat Poin</b>mulai 8 Des',
     todayP: function (p) { return 'Hari ini: ' + fmtP(p) + ' poin'; }, more: ['Barang', 'Perbaikan & Laporan', 'LK School'], soon: 'Segera',
     nav: ['Hari Ini', 'Tugas', 'Poin', 'Saya'], attSub: function (a) { return a.days ? 'Bulan ini: masuk ' + a.days + ' hari · tepat waktu ' + a.onTime + (a.late ? ' · terlambat ' + a.late : '') + (a.early ? ' · pulang awal ' + a.early : '') + (a.noCard ? ' · tanpa absen pulang ' + a.noCard : '') : 'Kalender kehadiran bulan ini'; }, taskT: 'Tugas', pcT: 'Kas kecil saya', pcNone: 'Belum ada kas kecil', pcBal: 'Saldo', pcAsOf: 'Data per', pcCols: ['Diajukan', 'Dipakai', 'Dikembalikan', 'Saldo'], nStores: function (n) { return n + ' toko'; }, stInfo: 'jam buka · shift · supervisor', taskTabs: ['Belum selesai', 'Selesai'], taskSoonT: 'Belum ada tugas', taskSoonS: 'Tugas dari tim operasional akan tampil di sini, misalnya pasang materi promo, unggah foto perbaikan, atau pelajari promo baru. Cukup selesaikan tepat waktu, tidak memengaruhi absen masuk/pulang.', taskLogT: 'Belum ada tugas selesai', taskLogS: 'Tugas yang sudah kamu selesaikan akan tersimpan di sini.', back: '‹ Kembali', shift: 'Shift', selfie: 'Ketuk untuk selfie · wajah kamu dan toko harus kelihatan', retake: 'Foto ulang', send: 'Kirim absen',
-    sending: 'Mengirim…', upl: 'Mengunggah foto…', needPhoto: 'Ambil foto dulu', got: 'Absen tercatat', ptsGot: 'poin', doneBuka: 'Toko READY ✓',
-    alat: 'HP, tablet/POS, EDC, lampu & AC menyala', bersih: 'Toko bersih: lantai, rak & etalase', display: 'Display rapi & siap', fotoToko: 'Foto depan toko',
-    sendBuka: 'Kirim — Toko READY', shiftN: { F: 'Full', M: 'Pagi', E: 'Malam' },
-    rules: 'Aturan poin', rule: [['ABSEN MASUK', ''], ['Datang ≥ 20 mnt lebih awal', '+3'], ['10–20 mnt lebih awal', '+2.5'], ['0–10 mnt lebih awal', '+2'], ['Telat 0–10 mnt', '0'], ['Telat 10–20 mnt', '−2'], ['Telat 20–30 mnt', '−3'], ['Telat > 30 mnt', '−5'], ['PULANG', ''], ['Absen pulang tepat waktu (10 mnt sebelum s/d 60 mnt sesudah shift selesai)', '+2'], ['Pulang 10–20 mnt lebih awal', '−2'], ['Pulang 20–30 mnt lebih awal', '−3'], ['Pulang > 30 mnt lebih awal', '−5'], ['LAINNYA', ''], ['Izin / cuti yang sudah disetujui', '0'], ['Tidak masuk tanpa izin (HR konfirmasi)', '−10'], ['Kuis aturan LK School (sekali)', '+5'], ['Konfirmasi terima barang tepat waktu (≤ 5 hari setelah dikirim; orang yang menekan konfirmasi)', '+3'], ['PERINGKAT', ''], ['Poin sama: yang lebih sedikit potongan di atas, lalu rata-rata datang lebih awal', ''], ['Yang tampil peringkat 1–10 (poin sama, peringkat sama); poin 0 tidak tampil', ''], ['Tanggal 1–7: tampil peringkat final bulan lalu', ''], ['Salah hitung? Lapor ke atasan dalam 3 hari', '']],
+    sending: 'Mengirim…', upl: 'Mengunggah foto…', needPhoto: 'Ambil foto dulu', got: 'Absen tercatat', ptsGot: 'poin', 
+    
+    shiftN: { F: 'Full', M: 'Pagi', E: 'Malam' },
+    rules: 'Aturan poin', rule: [['ABSEN MASUK', ''], ['Datang ≥ 20 mnt lebih awal', '+3'], ['10–20 mnt lebih awal', '+2.5'], ['0–10 mnt lebih awal', '+2'], ['Telat 0–10 mnt', '0'], ['Telat 10–20 mnt', '−2'], ['Telat 20–30 mnt', '−3'], ['Telat > 30 mnt', '−5'], ['PULANG', ''], ['Absen pulang tepat waktu (10 mnt sebelum s/d 60 mnt sesudah shift selesai; yang shift-nya sampai toko tutup: s/d 90 mnt)', '+2'], ['Pulang 10–20 mnt lebih awal', '−2'], ['Pulang 20–30 mnt lebih awal', '−3'], ['Pulang > 30 mnt lebih awal', '−5'], ['LAINNYA', ''], ['Izin / cuti yang sudah disetujui', '0'], ['Tidak masuk tanpa izin (HR konfirmasi)', '−10'], ['Kuis aturan LK School (sekali)', '+5'], ['Konfirmasi terima barang tepat waktu (≤ 5 hari setelah dikirim; orang yang menekan konfirmasi)', '+3'], ['PERINGKAT', ''], ['Poin sama: yang lebih sedikit potongan di atas, lalu rata-rata datang lebih awal', ''], ['Yang tampil peringkat 1–10 (poin sama, peringkat sama); poin 0 tidak tampil', ''], ['Tanggal 1–7: tampil peringkat final bulan lalu', ''], ['Salah hitung? Lapor ke atasan dalam 3 hari', '']],
     logout: 'Keluar', lang: 'Bahasa', test: 'AKUN TES — tidak masuk peringkat',
-    cardT: 'Laporan Akhir Shift', kondT: 'Kondisi Toko', cardS: 'Penjualan, pelanggan, kondisi toko, stock opname + foto kunci.', kondS: 'Isi kondisi toko sebelum pulang.', cardB: 'Isi laporan',
-    workS2: function (x) { return 'Laporan Akhir Shift dibuka jam ' + x + '.'; }, fullBy: function (n, x) { return 'Laporan toko sudah dikirim ' + n + ' ' + x + '. Kamu isi Kondisi Toko saja.'; },
+    
+    
     doneT: 'Kerja hari ini selesai ✓', doneS: function (x) { return 'Absen pulang ' + x + '. Terima kasih atas kerja kerasnya hari ini, hati-hati di jalan!'; }, share: 'Bagikan ke grup WhatsApp',
-    st1: 'Penjualan', st2: 'Pelanggan', st3: 'Kondisi Toko', st4: 'Stock opname & kunci', cash: 'Tunai', qris: 'QRIS / EDC', grab: 'GrabMart', total: 'Total hari ini',
-    shot: 'Foto layar laporan harian POS (1–2 foto, wajib)', visitors: 'Pengunjung', buyers: 'Pembeli', googleReview: 'Google Review baru', waJoin: 'Join WA toko', wechatJoin: 'Join WeChat toko', igFollow: 'Follow Instagram',
-    ada: 'Ada', tidak: 'Tidak', stockOut: 'Stok menipis / habis', requestNew: 'Produk yang belum pernah ada di toko (diminta pelanggan)', lostSales: 'Pelanggan tidak jadi beli karena stok habis',
-    opsIssue: 'Kendala operasional', competitor: 'Info kompetitor', defect: 'Barang rusak / cacat', idea: 'Ide / masukan', writeHere: 'Tulis di sini…',
-    soDone: 'Stock opname harian sudah dilakukan', soBrands: 'Brand yang di-stock opname', soDiff: 'Selisih (tulis 0 kalau tidak ada)', lock: 'Foto toko yang sudah terkunci', nextStep: 'Lanjut', prev: 'Kembali', submit: 'Kirim laporan',
-    needLock: 'Foto toko terkunci wajib', records: 'Kehadiran saya', calSum: ['Masuk', 'Tepat waktu', 'Terlambat', 'Pulang awal', 'Tanpa absen pulang'], calLeg: { green: 'Tepat waktu', yellow: 'Terlambat / pulang awal', red: 'Tidak absen pulang', live: 'Sedang kerja', grey: 'Tidak ada catatan', plan: 'Jadwal shift' }, wk: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'], calIn: 'Absen masuk', calBuka: 'Cek buka toko', calOut: 'Absen pulang', calNote: 'Laporan Akhir Shift saya', calNone: 'Belum ada', calLate: function (m) { return 'terlambat ' + m + ' mnt'; }, calEarly: function (m) { return m + ' mnt lebih awal'; }, calOnTime: 'tepat waktu', calOutEarly: function (m) { return 'pulang ' + m + ' mnt lebih awal'; }, calPlan: 'Jadwal', calSales: 'Omzet yang saya isi saat pulang', calNoRec: 'Tidak ada catatan absen hari ini.', calClose: 'Tutup', calHint: 'Ketuk tanggal untuk lihat detail.', recT: { ABSEN: 'Absen', BUKA: 'Cek Buka Toko', FULL: 'Laporan Akhir Shift', KONDISI: 'Kondisi Toko' },
+     
+     
+    
+    
+    
+    records: 'Kehadiran saya', calSum: ['Masuk', 'Tepat waktu', 'Terlambat', 'Pulang awal', 'Tanpa absen pulang'], calLeg: { green: 'Tepat waktu', yellow: 'Terlambat / pulang awal', red: 'Tidak absen pulang', live: 'Sedang kerja', grey: 'Tidak ada catatan', plan: 'Jadwal shift' }, wk: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'], calIn: 'Absen masuk', calBuka: 'Cek Awal Shift', calOut: 'Absen pulang', calNote: 'Laporan Akhir Shift saya', calNone: 'Belum ada', calLate: function (m) { return 'terlambat ' + m + ' mnt'; }, calEarly: function (m) { return m + ' mnt lebih awal'; }, calOnTime: 'tepat waktu', calOutEarly: function (m) { return 'pulang ' + m + ' mnt lebih awal'; }, calPlan: 'Jadwal', calSales: 'Omzet yang saya isi saat pulang', calNoRec: 'Tidak ada catatan absen hari ini.', calClose: 'Tutup', calHint: 'Ketuk tanggal untuk lihat detail.', 
     board: 'Peringkat Poin', boardWait: function (d) { return 'Peringkat mulai tampil ' + d + '.'; }, history: 'Rincian poin saya', pTabs: ['Rincian poin saya', 'Peringkat Poin', 'Aturan poin'], noData: 'Belum ada data.',
-    svT: 'Laporan Akhir Shift', svS: 'Isi dulu (±3 menit), setelah itu absen pulang.', svB: 'Isi laporan', earlyL: 'Mau pulang lebih awal? Isi laporan sekarang ›',
-    sdT: 'Data toko hari ini', sdS: 'Kamu shift tutup toko. Isi penjualan dan pelanggan hari ini sesuai laporan harian POS.', sdB: 'Isi data toko', sdBy: function (n, x) { return 'Data toko sudah diisi ' + n + ' ' + x + '.'; },
-    poT: 'Absen Pulang', poS: 'Selfie sebelum pulang.', poSc: 'Selfie + foto toko yang sudah terkunci.', poB: 'Absen pulang',
-    otherSt: function (n) { return 'Hari ini kamu absen di ' + n + '. Laporan dan absen pulang dilakukan di toko itu.'; }, backSt: function (n) { return 'Kembali ke ' + n; }, bukaNone: 'belum', inHere: 'sudah absen', loading: 'Memuat…',
+    svT: 'Laporan Akhir Shift', 
+    
+    
+    otherSt: function (n) { return 'Hari ini kamu absen di ' + n + '. Laporan dan absen pulang dilakukan di toko itu.'; }, backSt: function (n) { return 'Kembali ke ' + n; }, inHere: 'sudah absen', loading: 'Memuat…',
     svIntro: 'Isi sebelum pulang, ±3 menit. Ceritakan yang kamu lihat di toko tapi kantor tidak lihat: ini dipakai untuk memperbaiki toko dan menaikkan penjualan.', svEarly: function (x) { return 'Shift kamu selesai jam ' + x + '. Kalau pulang sekarang, tercatat pulang lebih awal.'; },
     yes: 'Ada', no: 'Tidak ada', normalDay: 'Hari biasa',
-    q1T: 'Pelanggan mau beli, tapi tidak jadi', q1H: 'Hanya pelanggan yang kamu layani sendiri. Satu produk satu baris.', q2T: 'Info kompetitor dan harga', q2H: 'Pelanggan bilang lebih murah di tempat lain, ada promo / toko baru di dekat sini, atau produk baru yang dicari.',
+    q1T: 'Pelanggan mau beli, tapi tidak jadi', q1H: 'Hanya pelanggan yang kamu layani sendiri. Satu produk satu baris.', 
     q3T: 'Ada yang bikin penjualan turun hari ini?', q3H: 'Centang semua yang terjadi, lalu ceritakan.', q4T: 'Keluhan kualitas, retur, tukar', q4H: 'Keluhan kualitas dan retur / tukar dari pelanggan (tidak tercatat di POS). Satu produk satu baris.',
-    q5T: 'Satu ide supaya toko ini jual lebih banyak (opsional)', q5H: 'Produk, promo, display, jam buka, apa saja yang kamu lihat.',
+    q5H: 'Produk, promo, display, jam buka, apa saja yang kamu lihat.',
     prod: 'Produk', cat: 'Kategori', why: 'Alasan', howMany: 'Berapa pelanggan?', addProd: '+ Tambah produk', addOne: '+ Tambah', problem: 'Masalah', qtyL: 'Jumlah', whatHap: 'Apa yang terjadi?',
     ph1: 'Contoh: RELX Infinity 2 cartridge Red Apple', ph1n: 'Contoh: 3 orang cari Pod Pro 2 Watermelon Ice, bilang minggu lalu juga kosong', n1L: 'Apa kata pelanggan? (opsional)',
     n2L: 'Ceritakan: toko / brand apa, produk apa, harga atau promonya', ph2: 'Contoh: toko vape sebelah jual Xlim Pro 2 Rp 430,000 (kita Rp 490,000), 2 pelanggan batal beli',
     n3L: 'Apa yang terjadi, berapa lama, kira-kira berapa pelanggan terpengaruh?', ph3: 'Contoh: QRIS error 14:00–16:00, 4 pelanggan pergi karena tidak bawa cash',
     ph4: 'Contoh: HUBOO liquid Ice Tea 30ml', ph4n: 'Kata pelanggan, sudah dipakai berapa lama', ph5: 'Contoh: banyak ojol datang jam 22:00–23:00, toko sebaiknya buka sampai jam 23:00',
-    svErr: 'Jawab semua pertanyaan 1–4. Yang merah belum lengkap.', svSend: 'Kirim laporan', svDone: 'Laporan terkirim', svNeed: 'Isi Laporan Akhir Shift dulu.',
-    sdIntro: 'Isi sesuai laporan harian di POS, jangan kira-kira. Foto layar laporan POS wajib.', secSales: 'Penjualan hari ini', secCust: 'Pelanggan hari ini', secSO: 'Stock opname hari ini', zeroHint: 'Tidak ada? Tulis 0.',
-    sdErr: 'Isi semua angka penjualan, pengunjung dan pembeli (tulis 0 kalau tidak ada), dan foto laporan POS.', buyersErr: 'Pembeli tidak boleh lebih banyak dari pengunjung.', soErr: 'Isi brand dan selisih stock opname.', sdSend: 'Kirim data toko', sdDone: 'Data toko terkirim', sdNeed: 'Isi data toko dulu.',
-    poIntro: function (x) { return 'Jam absen pulang = jam pulang kamu. Lakukan saat kamu benar-benar mau pulang' + (x ? ' (shift selesai ' + x + ').' : '.'); }, selfieOut: 'Selfie pulang', selfieHint: 'Ketuk untuk selfie · wajah kamu dan toko harus kelihatan', lockHint: 'Kunci pintu / rolling door dulu, lalu ketuk untuk foto gemboknya', poSend: 'Absen pulang sekarang', fotoTokoH: 'Ketuk untuk foto depan toko · konter dan display harus kelihatan',
+    svSend: 'Kirim laporan', svDone: 'Laporan terkirim', svNeed: 'Isi Laporan Akhir Shift dulu.',
+    
+    
+    poIntro: function (x) { return 'Jam absen pulang = jam pulang kamu. Lakukan saat kamu benar-benar mau pulang' + (x ? ' (shift selesai ' + x + ').' : '.'); }, 
     p12: 'Poin 12 bulan terakhir', pTap: 'Ketuk bulan untuk lihat rinciannya.', pLive: 'berjalan', pSettling: 'belum final (final tgl 3)', rankN: function (r) { return 'Peringkat ' + r; }, attLine: function (a) { return 'masuk ' + a.days + ' hari · tepat waktu ' + a.onTime + ' · terlambat ' + a.late + ' · pulang awal ' + a.early + ' · tanpa absen pulang ' + a.noCard; },
     ssT: 'Penjualan toko bulan ini', ssT2: 'Penjualan toko', ssAsOf: function (d) { return 'Data s/d ' + d; }, ssTarget: 'target', ssPct: function (p, tp) { return 'Tercapai ' + p + '%' + (tp != null ? ' · waktu berjalan ' + tp + '%' : ''); },
     ssNeed: function (a, d, x) { return 'Kurang Rp ' + a + ' · sisa ' + d + ' hari, rata-rata Rp ' + x + ' per hari'; }, ssShort: function (a) { return 'Kurang Rp ' + a + ' dari target'; }, ssDone: function (a) { return 'Target tercapai, lebih Rp ' + a; },
@@ -226,49 +227,49 @@ var TX = {
     login: '登录', eid: '工号', pw: '密码', wrong: '工号或密码不对', locked: '错误次数太多，15 分钟后再试',
     useHub: '这个账号用 LK Hub，正在跳转…', notFound: '找不到这个工号，请检查一下（例如 ID-2026-08096）。核心团队请用 LK Hub。', err: '网络连接失败，请再试一次', newpw: '设置新密码', newpw1: '新密码（至少 8 位，要有大写字母、小写字母和数字）', newpw2: '再输一次新密码',
     pwdiff: '两次不一样，或者不符合要求（至少 8 位，要有大写字母、小写字母和数字；不能有 1234、abcd、password 这类简单组合，不能包含自己的工号）', save: '保存', next: '下一步', today: '今天', pts: '本月积分', u: '分',
-    steps: ['上班打卡', '开店检查', '下班问卷', '下班打卡'],
-    pickS: '先选你今天上的班次，再拍自拍。', pickSM: '先选今天在哪家店、上哪个班次，再拍自拍。', hours: '营业', pickFirst: '请先选班次', storePick: '在哪家店打卡？', pickStore: '请先选门店', sendAt: function (n) { return '在 ' + n + ' 打卡'; }, already: function (n) { return '你今天已经在 ' + n + ' 打过卡了。'; }, myStores: '我的门店', supL: '区域主管', omL: '运营经理', moreStores: function (n) { return ' 等 ' + (n + 1) + ' 家店'; }, notOpen: '这个班次现在还不能选（最早开始前 90 分钟）。',
-    absenT: '上班打卡', absenS: function (s) { return '班次 ' + s + '。拍一张自拍就能提交。'; }, absenB: '现在打卡',
+    steps: ['上班打卡', '上班检查', '下班问卷', '下班打卡'],
+    pickS: '先选你今天上的班次，再拍自拍。', pickSM: '先选今天在哪家店、上哪个班次，再拍自拍。', hours: '营业', pickFirst: '请先选班次', storePick: '在哪家店打卡？', pickStore: '请先选门店', sendAt: function (n) { return '在 ' + n + ' 打卡'; }, already: function (n) { return '你今天已经在 ' + n + ' 打过卡了。'; }, myStores: '我的门店', supL: '区域主管', omL: '运营经理', moreStores: function (n) { return ' 等 ' + (n + 1) + ' 家店'; }, notOpen: '这个班次现在还不能选（最早开始前 2 小时）。',
+    absenT: '上班打卡', absenB: '现在打卡',
     lateT: function () { return '还没打卡'; }, lateS: function () { return '班次已经开始，请马上打卡。'; },
-    bukaT: '开店检查', bukaS: '设备、卫生、陈列 + 门店正面照。每店每天一次。', bukaB: '开始检查',
-    workT: '上班中', workS: function (x) { return '下班问卷在下班前 30 分钟开放（' + x + '）。'; },
+    
+    
     noShift: '这家店的班次时间还没填，请联系运营经理。', noStore: '你还没有分配门店，请联系 HR。',
     in10: function (r) { return '<b>积分排行榜</b>第 ' + r + ' 名'; }, gap: function (g) { return '<b>还差 ' + fmtP(g).replace('+', '') + ' 分</b>上榜'; }, gapNone: '<b>准时打卡</b>就能上榜', boardSoon: '<b>积分排行榜</b>12/8 开始',
     todayP: function (p) { return '今天：' + fmtP(p) + ' 分'; }, more: ['货品', '报修与反馈', 'LK School'], soon: '即将上线',
     nav: ['今天', '任务', '积分', '我的'], attSub: function (a) { return a.days ? '本月上班 ' + a.days + ' 天 · 准时 ' + a.onTime + ' 天' + (a.late ? ' · 迟到 ' + a.late + ' 次' : '') + (a.early ? ' · 早退 ' + a.early + ' 次' : '') + (a.noCard ? ' · 没打下班卡 ' + a.noCard + ' 次' : '') : '查看本月考勤日历'; }, taskT: '任务', pcT: '我的备用金', pcNone: '暂无备用金', pcBal: '余额', pcAsOf: '数据更新于', pcCols: ['申请', '核销', '归还', '余额'], nStores: function (n) { return n + ' 家店'; }, stInfo: '营业时间 · 班次 · 区域主管', taskTabs: ['待完成', '已完成'], taskSoonT: '暂时没有任务', taskSoonS: '运营团队发的任务会显示在这里，例如陈列促销物料、上传整改照片、学习新促销。按时完成就行，不影响上下班打卡。', taskLogT: '还没有完成的任务', taskLogS: '你完成的任务会保存在这里。', back: '‹ 返回', shift: '班次', selfie: '点这里拍自拍 · 要拍到你的脸和门店', retake: '重拍', send: '提交打卡',
-    sending: '提交中…', upl: '正在上传照片…', needPhoto: '请先拍照', got: '打卡成功', ptsGot: '分', doneBuka: '门店已 READY ✓',
-    alat: '手机、平板/POS、EDC、灯和空调都已打开', bersih: '店内干净：地面、货架、柜台', display: '陈列整齐，可以营业', fotoToko: '门店正面照',
-    sendBuka: '提交 — 门店 READY', shiftN: { F: '全天', M: '早班', E: '晚班' },
-    rules: '积分规则', rule: [['上班打卡', ''], ['提前 ≥ 20 分钟', '+3'], ['提前 10–20 分钟', '+2.5'], ['提前 0–10 分钟', '+2'], ['迟到 0–10 分钟', '0'], ['迟到 10–20 分钟', '−2'], ['迟到 20–30 分钟', '−3'], ['迟到 30 分钟以上', '−5'], ['下班', ''], ['下班打卡准时（下班前 10 分钟到下班后 60 分钟）', '+2'], ['早走 10–20 分钟', '−2'], ['早走 20–30 分钟', '−3'], ['早走 30 分钟以上', '−5'], ['其他', ''], ['事先批准的请假', '0'], ['无故缺勤（HR 确认）', '−10'], ['LK School 规则小测验（一次）', '+5'], ['按时确认收货（货发出后 5 天内，给点确认的人）', '+3'], ['排名', ''], ['同分：扣分次数少的在前，再比平均提前到店', ''], ['排行榜显示第 1–10 名（同分同名次）；0 分不上榜', ''], ['每月 1–7 号显示上个月最终排名', ''], ['觉得算错：3 天内找上级申诉', '']],
+    sending: '提交中…', upl: '正在上传照片…', needPhoto: '请先拍照', got: '打卡成功', ptsGot: '分', 
+    
+    shiftN: { F: '全天', M: '早班', E: '晚班' },
+    rules: '积分规则', rule: [['上班打卡', ''], ['提前 ≥ 20 分钟', '+3'], ['提前 10–20 分钟', '+2.5'], ['提前 0–10 分钟', '+2'], ['迟到 0–10 分钟', '0'], ['迟到 10–20 分钟', '−2'], ['迟到 20–30 分钟', '−3'], ['迟到 30 分钟以上', '−5'], ['下班', ''], ['下班打卡准时（下班前 10 分钟到下班后 60 分钟；班次做到关门的人到下班后 90 分钟）', '+2'], ['早走 10–20 分钟', '−2'], ['早走 20–30 分钟', '−3'], ['早走 30 分钟以上', '−5'], ['其他', ''], ['事先批准的请假', '0'], ['无故缺勤（HR 确认）', '−10'], ['LK School 规则小测验（一次）', '+5'], ['按时确认收货（货发出后 5 天内，给点确认的人）', '+3'], ['排名', ''], ['同分：扣分次数少的在前，再比平均提前到店', ''], ['排行榜显示第 1–10 名（同分同名次）；0 分不上榜', ''], ['每月 1–7 号显示上个月最终排名', ''], ['觉得算错：3 天内找上级申诉', '']],
     logout: '退出登录', lang: '语言', test: '测试账号 — 不进排名',
-    cardT: '下班问卷', kondT: '门店情况', cardS: '销售、顾客、门店情况、盘点 + 锁门照。', kondS: '下班前填写门店情况。', cardB: '开始填写',
-    workS2: function (x) { return '下班问卷 ' + x + ' 开放。'; }, fullBy: function (n, x) { return n + ' 已在 ' + x + ' 交了门店的下班问卷，你只填门店情况。'; },
+    
+    
     doneT: '今天的工作结束了 ✓', doneS: function (x) { return x + ' 已下班打卡。今天辛苦了，路上小心！'; }, share: '分享到 WhatsApp 群',
-    st1: '销售', st2: '顾客', st3: '门店情况', st4: '盘点和锁门', cash: '现金', qris: 'QRIS / EDC', grab: 'GrabMart', total: '今天合计',
-    shot: 'POS 日报截图（1–2 张，必须）', visitors: '进店人数', buyers: '购买人数', googleReview: '新增 Google 评价', waJoin: '新加门店 WA', wechatJoin: '新加门店微信', igFollow: '新关注 Instagram',
-    ada: '有', tidak: '没有', stockOut: '库存不足 / 断货', requestNew: '顾客问到、店里从来没卖过的产品', lostSales: '因为断货没买成的顾客',
-    opsIssue: '运营问题', competitor: '竞争对手情况', defect: '坏货 / 次品', idea: '想法 / 建议', writeHere: '写在这里…',
-    soDone: '今天的盘点做了', soBrands: '盘点了哪些品牌', soDiff: '差异（没有就写 0）', lock: '锁门照', nextStep: '下一步', prev: '上一步', submit: '提交',
-    needLock: '锁门照必须拍', records: '我的考勤', calSum: ['上班', '准时', '迟到', '早退', '没打下班卡'], calLeg: { green: '准时', yellow: '迟到 / 早退', red: '没打下班卡', live: '上班中', grey: '没有记录', plan: '排班' }, wk: ['一', '二', '三', '四', '五', '六', '日'], calIn: '上班打卡', calBuka: '开店检查', calOut: '下班打卡', calNote: '我的下班问卷', calNone: '没有', calLate: function (m) { return '迟到 ' + m + ' 分钟'; }, calEarly: function (m) { return '提前 ' + m + ' 分钟'; }, calOnTime: '准时', calOutEarly: function (m) { return '提前 ' + m + ' 分钟下班'; }, calPlan: '排班', calSales: '我下班时填的营业额', calNoRec: '这一天没有打卡记录。', calClose: '关闭', calHint: '点日期看当天明细。', recT: { ABSEN: '打卡', BUKA: '开店检查', FULL: '下班问卷', KONDISI: '门店情况' },
+     
+     
+    
+    
+    
+    records: '我的考勤', calSum: ['上班', '准时', '迟到', '早退', '没打下班卡'], calLeg: { green: '准时', yellow: '迟到 / 早退', red: '没打下班卡', live: '上班中', grey: '没有记录', plan: '排班' }, wk: ['一', '二', '三', '四', '五', '六', '日'], calIn: '上班打卡', calBuka: '上班检查', calOut: '下班打卡', calNote: '我的下班问卷', calNone: '没有', calLate: function (m) { return '迟到 ' + m + ' 分钟'; }, calEarly: function (m) { return '提前 ' + m + ' 分钟'; }, calOnTime: '准时', calOutEarly: function (m) { return '提前 ' + m + ' 分钟下班'; }, calPlan: '排班', calSales: '我下班时填的营业额', calNoRec: '这一天没有打卡记录。', calClose: '关闭', calHint: '点日期看当天明细。', 
     board: '积分排行榜', boardWait: function (d) { return '排行榜 ' + d + ' 开始显示。'; }, history: '我的积分明细', pTabs: ['我的积分明细', '积分排行榜', '积分规则'], noData: '还没有记录。',
-    svT: '下班问卷', svS: '先填问卷（大约 3 分钟），填完再下班打卡。', svB: '开始填写', earlyL: '要提前下班？现在填问卷 ›',
-    sdT: '今天门店数据', sdS: '你是关店班，照 POS 日报填今天的销售和顾客数据。', sdB: '开始填写', sdBy: function (n, x) { return n + ' ' + x + ' 已填今天的门店数据。'; },
-    poT: '下班打卡', poS: '下班前拍一张自拍。', poSc: '自拍 + 锁门照。', poB: '下班打卡',
-    otherSt: function (n) { return '你今天在 ' + n + ' 打卡，下班问卷和下班打卡都在那家店做。'; }, backSt: function (n) { return '切回 ' + n; }, bukaNone: '还没做', inHere: '已打卡', loading: '加载中…',
+    svT: '下班问卷', 
+    
+    
+    otherSt: function (n) { return '你今天在 ' + n + ' 打卡，下班问卷和下班打卡都在那家店做。'; }, backSt: function (n) { return '切回 ' + n; }, inHere: '已打卡', loading: '加载中…',
     svIntro: '下班前填，大约 3 分钟。把你在店里看到、办公室看不到的情况告诉我们：这些会用来改进门店、提升销售。', svEarly: function (x) { return '你的班次 ' + x + ' 结束，现在走会记为早退。'; },
     yes: '有', no: '没有', normalDay: '正常',
-    q1T: '顾客想买，但没买成', q1H: '只填你自己接待的顾客。一个产品填一行。', q2T: '竞品和价格', q2H: '顾客说别的地方更便宜、附近有促销或新店，或者在找新产品。',
+    q1T: '顾客想买，但没买成', q1H: '只填你自己接待的顾客。一个产品填一行。', 
     q3T: '今天有什么影响了销售？', q3H: '勾选所有发生的情况，再说明一下。', q4T: '质量问题、退货、换货', q4H: '顾客的质量投诉和退换货（POS 里没有记录）。一个产品填一行。',
-    q5T: '一个让这家店卖更多的想法（选填）', q5H: '产品、促销、陈列、营业时间，你看到的都可以。',
+    q5H: '产品、促销、陈列、营业时间，你看到的都可以。',
     prod: '产品', cat: '分类', why: '原因', howMany: '几个顾客？', addProd: '+ 再加一个产品', addOne: '+ 再加一个', problem: '问题', qtyL: '数量', whatHap: '发生了什么？',
     ph1: '例如：RELX Infinity 2 cartridge Red Apple', ph1n: '例如：3 个人找 Pod Pro 2 Watermelon Ice，说上周也没货', n1L: '顾客怎么说？（选填）',
     n2L: '写清楚：哪家店或品牌、什么产品、价格或促销', ph2: '例如：隔壁 vape 店卖 Xlim Pro 2 Rp 430,000（我们 Rp 490,000），2 个顾客没买',
     n3L: '发生了什么、持续多久、大概影响了几个顾客？', ph3: '例如：QRIS 14:00–16:00 故障，4 个顾客没带现金走了',
     ph4: '例如：HUBOO liquid Ice Tea 30ml', ph4n: '顾客怎么说、用了多久', ph5: '例如：22:00–23:00 很多外卖骑手来，门店可以开到 23:00',
-    svErr: '1–4 题都要回答，红色的还没填完整。', svSend: '提交问卷', svDone: '问卷已提交', svNeed: '请先填下班问卷。',
-    sdIntro: '照 POS 日报填，不要估。必须拍 POS 日报截图。', secSales: '今天销售', secCust: '今天顾客', secSO: '今天的盘点', zeroHint: '没有就写 0。',
-    sdErr: '销售、进店人数、购买人数都要填（没有写 0），并拍 POS 日报截图。', buyersErr: '购买人数不能比进店人数多。', soErr: '请填盘点的品牌和差异。', sdSend: '提交门店数据', sdDone: '门店数据已提交', sdNeed: '请先填门店数据。',
-    poIntro: function (x) { return '下班打卡的时间就是你的下班时间，真正要走的时候再打' + (x ? '（班次 ' + x + ' 结束）。' : '。'); }, selfieOut: '下班自拍', selfieHint: '点这里拍自拍 · 要拍到你的脸和门店', lockHint: '先锁好门或卷帘门，再点这里拍门锁', poSend: '现在下班打卡', fotoTokoH: '点这里拍门店正面 · 柜台和陈列都要拍进去',
+    svSend: '提交问卷', svDone: '问卷已提交', svNeed: '请先填下班问卷。',
+    
+    
+    poIntro: function (x) { return '下班打卡的时间就是你的下班时间，真正要走的时候再打' + (x ? '（班次 ' + x + ' 结束）。' : '。'); }, 
     p12: '近 12 个月积分', pTap: '点月份看那个月的明细。', pLive: '进行中', pSettling: '结算中（3 号定）', rankN: function (r) { return '第 ' + r + ' 名'; }, attLine: function (a) { return '上班 ' + a.days + ' 天 · 准时 ' + a.onTime + ' · 迟到 ' + a.late + ' · 早退 ' + a.early + ' · 没打下班卡 ' + a.noCard; },
     ssT: '本月门店销售', ssT2: '门店销售', ssAsOf: function (d) { return '数据到 ' + d; }, ssTarget: '目标', ssPct: function (p, tp) { return '完成 ' + p + '%' + (tp != null ? ' · 时间过了 ' + tp + '%' : ''); },
     ssNeed: function (a, d, x) { return '还差 Rp ' + a + '，剩 ' + d + ' 天，每天要卖 Rp ' + x; }, ssShort: function (a) { return '离目标差 Rp ' + a; }, ssDone: function (a) { return '目标完成了，超出 Rp ' + a; },
@@ -305,7 +306,7 @@ function api(fn, args, tries) {
     .then(function (r) { return r.json(); })
     .then(function (j) { if (j.err) throw new Error(j.err); return j.data; })
     .catch(function (e) {
-      if (/SESSION_EXPIRED/.test(e.message)) { logout(); throw e; }
+      if (/SESSION_EXPIRED/.test(e.message)) { EXPIRED = 1; logout(); throw e; }
       if (tries > 0 && !/BAD_PW|LOCKED|NOT_MY|NO_/.test(e.message)) return new Promise(function (ok) { setTimeout(ok, 1500); }).then(function () { return api(fn, args, tries - 1); });
       throw e;
     });
@@ -314,11 +315,11 @@ function toast(m) { var d = document.createElement('div'); d.className = 'toast'
 function busy(m) { var b = document.getElementById('busy'); if (!m) { if (b) b.remove(); return; } if (!b) { b = document.createElement('div'); b.id = 'busy'; b.className = 'busy'; document.body.appendChild(b); } b.textContent = m; }
 function logout() { if (S.sess) api('logout', [S.sess.token], 0).catch(function () {}); S.sess = null; S.home = null; S.pc = null; S.gd = null; S.gdp = null; S.pn = null; S.ss = {}; S.pnPre = 0; S.ssPre = 0; localStorage.removeItem('tk_sess'); try { Object.keys(localStorage).filter(function (k) { return k.indexOf('tk_home_') === 0 || k.indexOf('tk_cal_') === 0 || k.indexOf('tk_pc_') === 0 || k.indexOf('tk_pn_') === 0; }).forEach(function (k) { localStorage.removeItem(k); }); } catch (e) {} S.view = 'home'; render(); }
 
-// ---------- 照片：长边 1600、JPEG 0.8（2026-11-19 换数据库后放大），加水印（和 LK Hub 一样：时间、门店、人名、拍的是什么、GPS）----------
+// ---------- 照片：长边 1280、JPEG 0.8（2026-11-22 从 1600 降到 1280，省空间），加水印（和 LK Hub 一样：时间、门店、人名、拍的是什么、GPS）----------
 // 时间用服务器给的门店当地时间校正，改手机时间没用
 function wmNow() { var d = new Date(Date.now() + (S.off || 0)); if (S.off == null) d = new Date(Date.now() - new Date().getTimezoneOffset() * 60000); return d.toISOString().slice(0, 19).replace('T', ' ') + ' ' + ((S.home && S.home.store && S.home.store.tzName) || ''); }
 function wmStore() { var C = (typeof ckMulti === 'function' && S.view === 'absen' && ckMulti()) ? S.ckH : S.home; var st = C && C.store; return st ? st.id + ' ' + (st.name || '') : ''; }
-function wmLabel(to) { var zh = L === 'zh', m = { shot: zh ? 'POS 截图' : 'Screenshot POS', lock: zh ? '锁门照' : 'Foto kunci toko', selfie: zh ? '下班自拍' : 'Selfie pulang', reject: zh ? '拒收照片' : 'Foto penolakan barang', lapor: zh ? '报修与反馈' : 'Foto laporan' }; if (m[to]) return m[to]; return S.view === 'buka' ? (zh ? '门店正面' : 'Foto depan toko') : (zh ? '上班自拍' : 'Selfie absen'); }
+function wmLabel(to) { if (to && String(to).indexOf('L:') === 0) return String(to).slice(2); var zh = L === 'zh', m = { shot: zh ? 'POS 截图' : 'Screenshot POS', lock: zh ? '锁门照' : 'Foto kunci toko', selfie: zh ? '下班自拍' : 'Selfie pulang', reject: zh ? '拒收照片' : 'Foto penolakan barang', lapor: zh ? '报修与反馈' : 'Foto laporan' }; if (m[to]) return m[to]; return zh ? '上班自拍' : 'Selfie absen'; }
 function getGeo(cb) {
   if (S.geo && Date.now() - S.geo.at < 120000) return cb(S.geo);
   if (!navigator.geolocation) return cb(null);
@@ -329,7 +330,7 @@ function getGeo(cb) {
 // 2026-11-20：上班打卡、开店检查、下班打卡必须拿到手机定位才能提交（离门店多远只记录，不限制）
 function geoOk() { return !!(S.geo && Date.now() - S.geo.at < 120000); }
 function needGeo(retry) { busy(L === 'zh' ? '正在定位…' : 'Mencari lokasi…'); getGeo(function (g) { busy(); if (!g) return geoFail(retry); retry(); }); }
-var GEO_INTRO_ZH = '打卡、开店检查、下班打卡都要用定位。下面的设置只要做一次，以后就不用再管。', GEO_INTRO_ID = 'Absen masuk, cek buka, dan absen pulang butuh lokasi. Pengaturan ini cukup sekali saja.';
+var GEO_INTRO_ZH = '上班打卡、上班检查、下班打卡都要用定位。下面的设置只要做一次，以后就不用再管。', GEO_INTRO_ID = 'Absen Masuk, Cek Awal Shift, dan Absen Pulang butuh lokasi. Pengaturan ini cukup sekali saja.';
 var GEO_HELP_ZH = '还是不行？截图发给你的区域主管。', GEO_HELP_ID = 'Masih tidak bisa? Kirim screenshot ke Area Supervisor kamu.';
 function geoFail(retry) { geoHelp(retry, 1); }
 function geoHelpRetry() { var d = document.getElementById('geoHelp'); if (d) d.remove(); S.geo = null; var r = window._geoRetry; if (r) return needGeo(r); S.geoBusy = 1; render(); getGeo(function () { S.geoBusy = 0; render(); }); }
@@ -367,7 +368,7 @@ function compress(file, to) {
     var img = new Image(), url = URL.createObjectURL(file), geo, gotGeo = false, loaded = false;
     var draw = function () {
       if (!gotGeo || !loaded) return;
-      var m = 1600, w = img.width, h = img.height, k = Math.min(1, m / Math.max(w, h));
+      var m = 1280, w = img.width, h = img.height, k = Math.min(1, m / Math.max(w, h));
       var c = document.createElement('canvas'); c.width = Math.round(w * k); c.height = Math.round(h * k); w = c.width; h = c.height;
       var x = c.getContext('2d'); x.drawImage(img, 0, 0, w, h); URL.revokeObjectURL(url);
       var u = (S.sess && S.sess.user) || {};
@@ -393,13 +394,17 @@ function render() {
   if (!S.sess) { a.innerHTML = vHb() + vLogin(); if (S._li) { document.getElementById('eid').value = S._li[0]; document.getElementById('pw').value = S._li[1]; S._li = null; } return; }
   if (S.sess.mustChange) { a.innerHTML = vHb() + vNewPw(); return; }
   var v = S.view, h = '';
-  if (v === 'home') h = vHome(); else if (v === 'notices') h = vNotices(); else if (v === 'absen') h = vAbsen(); else if (v === 'buka') h = vBuka(); else if (v === 'poin') h = vPoin(); else if (v === 'saya') h = vSaya(); else if (v === 'pw') h = vMyPw(); else if (v === 'res') h = vRes(); else if (v === 'survey') h = vSurvey(); else if (v === 'storedata') h = vStoreData(); else if (v === 'pulang') h = vPulang(); else if (v === 'sales') h = vSales(); else if (v === 'mysales') h = vMySales(); else if (v === 'rec') h = vRec(); else if (v === 'tugas') h = vTugas(); else if (v === 'mystore') h = vMyStore(); else if (v === 'mypc') h = vMyPc(); else if (v === 'goods') h = vGoods();
+  if (v === 'home') h = vHome(); else if (v === 'notices') h = vNotices(); else if (v === 'absen') h = vAbsen(); else if (v === 'poin') h = vPoin(); else if (v === 'saya') h = vSaya(); else if (v === 'pw') h = vMyPw(); else if (v === 'sales') h = vSales(); else if (v === 'mysales') h = vMySales(); else if (v === 'rec') h = vRec(); else if (v === 'tugas') h = vTugas(); else if (v === 'mystore') h = vMyStore(); else if (v === 'mypc') h = vMyPc(); else if (v === 'goods') h = vGoods();
   else if ((window.XV || {})[v]) h = XV[v]();
   if (v === 'home' || v === 'poin' || v === 'saya' || v === 'tugas') h += vNav();
   a.innerHTML = vHb() + h;
 }
+// 2026-11-22：登录过期跳回登录页时，提示固定显示在登录框上方（通用原因，分点）
+var EXPIRED = 0;
 function vLogin() {
+  // 登录过期跳回来时：标题下面一行小字（红色"需要重新登录" + 灰色原因），不占地方；第一次打开、自己退出都不显示
   return '<div class="login"><img class="logo" src="img/icon-192.png?v=2" alt=""><h2 style="text-align:center;margin-bottom:6px">LK Toko</h2>' +
+    (EXPIRED ? '<div style="text-align:center;font-size:13px;line-height:1.5;margin:0 0 6px"><b style="color:var(--r)">' + (L === 'zh' ? '需要重新登录' : 'Silakan masuk lagi') + '</b><span style="color:#6b6b6b"> · ' + (L === 'zh' ? '① 每天要重新登录一次 ② 账号在别处登录了 ③ 密码被改了' : '① Wajib masuk ulang setiap hari ② Akun masuk di tempat lain ③ Password sudah diganti') + '</span></div>' : '') +
     '<label class="f">' + t('eid') + '</label><input class="in" id="eid" autocapitalize="characters" autocomplete="username" placeholder="ID-2026-…">' +
     '<label class="f">' + t('pw') + '</label><input class="in" id="pw" type="password" autocomplete="current-password">' +
     '<button class="btn" onclick="doLogin()">' + t('login') + '</button>' +
@@ -437,6 +442,7 @@ function a2hsTip() {
   return h + '</div>';
 }
 function doLogin() {
+  EXPIRED = 0;
   var id = document.getElementById('eid').value.trim(), pw = document.getElementById('pw').value;
   if (!id || !pw) return;
   busy('…');
@@ -557,30 +563,14 @@ function vHome() {
   if (u.test) top += '<div class="info">' + t('test') + '</div>';
   if (!H) return top + '<div class="next"><div class="lbl">' + t('next') + '</div><div class="t" style="opacity:.35">· · ·</div><div class="s">&nbsp;</div><button class="btn" disabled>&nbsp;</button></div><div class="card"><h3>' + t('today') + '</h3><div class="steps">' + t('steps').map(function (n, k) { return '<div class="st"><div class="dot">' + (k + 1) + '</div>' + n + '</div>'; }).join('') + '</div></div><div class="card"><h3>' + t('pts') + '</h3><div class="pts"><div class="big" style="opacity:.3">–</div></div></div>';
   if (!H.store) return top + '<div class="alert">' + t('noStore') + '</div>';
-  var O = H.out, nxc = function (ti, sub, onc, b) { return '<div class="next"><div class="lbl">' + t('next') + '</div><div class="t">' + ti + '</div><div class="s">' + sub + '</div><button class="btn" onclick="' + onc + '">' + b + '</button></div>'; };
-  var other = H.inToday && H.store && H.inToday !== H.store.id;
-  var stage = !H.absen ? 0 : !H.buka ? 1 : !O || !O.survey || O.needStore ? 2 : !O.done ? 3 : 4, nx = '';
+  var nxc = function (ti, sub, onc, b) { return '<div class="next"><div class="lbl">' + t('next') + '</div><div class="t">' + ti + '</div><div class="s">' + sub + '</div><button class="btn" onclick="' + onc + '">' + b + '</button></div>'; };
+  var other = H.inToday && H.store && H.inToday !== H.store.id, nx = '';
+  // 2026-11-22：首页一个大按钮，"下一步做什么"由后台 home.flow 算
   if (S.swLoading) nx = '<div class="next"><div class="lbl">' + t('next') + '</div><div class="t" style="opacity:.35">· · ·</div><div class="s">' + t('loading') + '</div></div>';
-  else if (other && H.doneToday) nx = '<div class="next" style="background:var(--okb);color:#000"><div class="lbl" style="color:var(--ok)">' + t('today') + '</div><div class="t">' + t('doneT') + '</div><div class="s" style="color:#3c4043">' + t('doneS')(H.doneToday) + '</div></div>';
+  else if (other && H.doneToday) nx = '<div class="next" style="background:var(--okb);color:#000"><div class="lbl" style="color:var(--ok)">' + t('today') + '</div><div class="t">' + t('allDone') + '</div><div class="s" style="color:#3c4043">' + t('doneS')(H.doneToday) + '</div></div>';
   else if (other) { var inSt = (H.stores.filter(function (x) { return x.id === H.inToday; })[0] || {}).name || ''; nx = nxc(esc(H.store.name), t('otherSt')(esc(inSt)), "pickSt('" + H.inToday + "')", t('backSt')(esc(inSt))); }
-  else if (stage === 0) {
-    if (!H.shift) nx = nxc(t('absenT'), multi ? t('pickSM') : t('pickS'), "go('absen')", t('absenB'));
-    else if (H.lateBy > 0) nx = '<div class="next late"><div class="lbl">' + t('next') + '</div><div class="t">' + t('lateT')(H.lateBy) + '</div><div class="s">' + t('lateS')(H.previewPts) + '</div><button class="btn red" onclick="go(\'absen\')">' + t('absenB') + '</button></div>';
-    else nx = nxc(t('absenT'), t('absenS')(shiftLbl(H.shift), H.previewPts), "go('absen')", t('absenB'));
-  } else if (stage === 1) nx = nxc(t('bukaT'), t('bukaS'), "go('buka')", t('bukaB'));
-  else if (stage === 2) {
-    if (O && O.survey && O.needStore) nx = nxc(t('sdT'), t('sdS'), "go('storedata')", t('sdB'));
-    else if (O && O.open) nx = nxc(t('svT'), t('svS'), "go('survey')", t('svB'));
-    else nx = '<div class="next"><div class="lbl">' + t('next') + '</div><div class="t">' + t('workT') + '</div><div class="s">' + t('doneBuka') + ' ' + esc(firstName(H.buka.name)) + ' ' + H.buka.time + (O ? '<br>' + t('workS2')(O.openAt) : '') + '</div>' + (O ? '<button class="lnk" onclick="S.svEarly=1;go(\'survey\')">' + t('earlyL') + '</button>' : '') + '</div>';
-  } else if (stage === 3) nx = nxc(t('poT'), (O.closing ? t('poSc') : t('poS')) + (O.storeData && O.storeData.nick !== u.nick ? '<br>' + t('sdBy')(esc(firstName(O.storeData.name)), O.storeData.time) : ''), "go('pulang')", t('poB'));
-  else nx = '<div class="next" style="background:var(--okb);color:#000"><div class="lbl" style="color:var(--ok)">' + t('today') + '</div><div class="t">' + t('doneT') + '</div><div class="s" style="color:#3c4043">' + t('doneS')(O.done.time) + '</div>' + (S.lastShare ? '<button class="btn" onclick="share()">' + t('share') + '</button>' : '') + '</div>';
-  var names = t('steps');
-  var tms = [H.absen ? H.absen.time : '', H.buka ? (H.buka.nick === u.nick ? H.buka.time : firstName(H.buka.name) + ' ' + H.buka.time) : '', O && O.survey ? O.survey.time : '', O && O.done ? O.done.time : ''];
-  var steps = names.map(function (n, k) {
-    var cls = k < stage ? 'ok' : (k === stage ? 'now' : '');
-    return '<div class="st ' + cls + '"><div class="dot">' + (k < stage ? '✓' : k + 1) + '</div>' + n + (tms[k] && k < stage ? '<span class="tm">' + esc(tms[k]) + '</span>' : '') + '</div>';
-  }).join('');
-  var todayCard = other ? '<div class="card"><h3>' + t('today') + ' · ' + esc(H.store.name) + '</h3><div style="font-size:15px">' + t('bukaT') + ': <b>' + (H.buka ? esc(firstName(H.buka.name)) + ' ' + H.buka.time : t('bukaNone')) + '</b></div></div>' : '<div class="card"><h3>' + t('today') + '</h3><div class="steps">' + steps + '</div></div>';
+  else nx = flowCard(H);
+  var todayCard = other ? '' : '<div class="card"><h3>' + t('today') + '</h3>' + flowSteps(H) + '</div>';
   var P = H.points;
   var gap = (H.local && H.local.date < '2026-12-08') ? t('boardSoon') : P.inTop10 ? t('in10')(P.rank) : (P.gap == null ? t('gapNone') : t('gap')(P.gap));
   var pts = '<div class="card" style="cursor:pointer" onclick="go(\'poin\')"><h3>' + t('pts') + '</h3><div class="pts"><div class="big">' + totP(P.total) + '<small>' + t('u') + '</small></div><div class="gap" onclick="go(\'poin\')">' + gap + ' ›</div></div>' +
@@ -600,10 +590,13 @@ function vNav() {
 function go(v) {
   S.view = v;
   if (v === 'absen') { S.ckStore = null; S.ckH = null; S.photo = null; var ok = (S.home.opts || []).filter(function (o) { return o.ok; }); S.shift = S.home.shift ? S.home.shift.code : (ok.length === 1 ? ok[0].code : null); }
-  if (v === 'buka') { S.photo = null; S.ck = { alat: false, bersih: false, display: false }; }
-  if (v === 'survey') { if (!S.sv) S.sv = svNew(); if (S.home.out && S.home.out.open) S.svEarly = 0; }
-  if (v === 'storedata' && !S.cd) S.cd = { sales: {}, shots: [], cust: {}, so: { done: false } };
-  if (v === 'pulang') S.po = { selfie: null, lock: null };
+  // 2026-11-22 新流程：每一步进来时准备数据（上班检查保留进行中的内容，去报修再回来接着做）
+  if (v === 'cek') ckEnter();
+  if (v === 'survey') { S.sv = null; svEnter(); }
+  if (v === 'report') { S.ri = null; S.rp = null; S.rpCan = null; rpEnter(); }
+  if (v === 'pulang') poEnter();
+  if (v === 'early') S.er = null;
+  if (v === 'gshift') S.gs = null;
   if (v === 'sales') { S.ssYm = null; S.ssPick = 0; S.ssDay = null; }
   S.stOpen = false;
   if (v === 'rec') { S.calSel = null; S.calYm = null; calLoad(null); }
@@ -611,7 +604,7 @@ function go(v) {
   if (v === 'poin') { S.pMon = null; if (!S.pn) { try { S.pn = JSON.parse(localStorage.getItem(pnKey()) || 'null'); } catch (e) {} } loadPoin(); }
   // 先拿定位，拍照时水印就有 GPS。要放在上面准备好页面数据之后：刚提交过一步时手机里的定位还新鲜，getGeo 会马上回调重画页面，
   // 放在前面会用上一步留下的空数据画页面而出错，按钮就点不动（2026-11-22 修）
-  if (v === 'absen' || v === 'buka' || v === 'pulang' || v === 'storedata') { if (!geoOk()) S.geoBusy = 1; getGeo(function () { S.geoBusy = 0; if (S.view === v) render(); }); }
+  if (v === 'absen' || v === 'cek' || v === 'pulang' || v === 'report') { if (!geoOk()) S.geoBusy = 1; getGeo(function () { S.geoBusy = 0; if (S.view === v) render(); }); }
   render(); window.scrollTo(0, 0); if (v === 'home') loadHome();
 }
 // 上班打卡：班次自动选好，可以改 → 自拍 → 提交；时间以服务器为准
@@ -646,41 +639,17 @@ function vAbsen() {
     '<button class="btn" onclick="sendAbsen()"' + (S.photo ? '' : ' disabled') + '>' + (M ? t('sendAt')(esc(stName)) : t('send')) + '</button>' +
     (S.photo ? '<button class="btn ghost" onclick="document.getElementById(\'cam\').click()">' + t('retake') + '</button>' : '') + '</div>';
 }
-function pick(inp, to) { var f = inp.files && inp.files[0]; if (!f) return; busy('…'); compress(f, to).then(function (d) { busy(); if (to === 'shot') { if (S.cd.shots.length < 2) S.cd.shots.push(d); } else if (to === 'lock') S.po.lock = d; else if (to === 'selfie') S.po.selfie = d; else S.photo = d; render(); }).catch(function () { busy(); toast(t('err')); }); }
+function pick(inp, to) { var f = inp.files && inp.files[0]; if (!f) return; busy('…'); compress(f, to).then(function (d) { busy(); S.photo = d; render(); }).catch(function () { busy(); toast(t('err')); }); }
 function sendAbsen() {
   var C = ckMulti() ? S.ckH : S.home; if (!C) return toast(t('pickStore'));
   if (!S.shift && (C.opts || []).length > 1) return toast(t('pickFirst'));
   if (!S.photo) return toast(t('needPhoto'));
   if (!geoOk()) return needGeo(sendAbsen);
   busy(t('upl'));
-  upload(S.photo, 'absen').then(function (pid) { busy(t('sending')); return api('checkIn', [S.sess.token, { storeId: C.store.id, shift: S.shift, photo: pid, geo: geoArg() }], 2); })
-    .then(function (r) { busy(); if (!r.ok && r.err === 'NO_GEO') { S.geo = null; return geoFail(sendAbsen); } if (!r.ok) return toast(r.err === 'PICK_SHIFT' ? t('pickFirst') : r.err === 'SHIFT_NOT_OPEN' ? t('notOpen') : r.err === 'ALREADY_IN' ? t('already')(r.store || '') : t('err')); S.selSt = null; try { localStorage.setItem(prefKey(), C.store.id); } catch (e) {} S.res = { kind: 'absen', time: r.time, points: r.points, needBuka: r.needBuka }; if (S.home) { S.home.absen = { time: r.time, points: r.points, shift: S.shift }; S.home.shift = (S.home.store.shifts || []).filter(function (x) { return x.code === S.shift; })[0] || S.home.shift; } S.view = 'res'; render(); loadHome(); })
-    .catch(function () { busy(); toast(t('err')); });
-}
-function vRes() {
-  var R = S.res;
-  if (R.kind === 'absen') return '<div class="res"><div class="big">✓</div><div style="font-size:18px;font-weight:700">' + t('got') + '</div><div style="color:var(--g)">' + R.time + '</div>' +
-    (R.needBuka ? '<button class="btn" onclick="go(\'buka\')">' + t('bukaT') + '</button>' : '') + '<button class="btn ghost" onclick="go(\'home\')">' + t('nav')[0] + '</button></div>';
-  var rs = function (ti, sub, btns) { return '<div class="res"><div class="big">✓</div><div style="font-size:18px;font-weight:700">' + ti + '</div><div style="color:var(--g);margin-bottom:6px">' + sub + '</div>' + btns + '<button class="btn ghost" onclick="go(\'home\')">' + t('nav')[0] + '</button></div>'; };
-  if (R.kind === 'survey') { S.sv = null; return rs(t('svDone'), R.time, R.needStore ? '<button class="btn" onclick="go(\'storedata\')">' + t('sdT') + '</button>' : '<button class="btn" onclick="go(\'pulang\')">' + t('poT') + '</button>'); }
-  if (R.kind === 'store') { S.cd = null; return rs(t('sdDone'), R.time + (R.by ? ' · ' + esc(R.by) : ''), (S.lastShare ? '<button class="btn" onclick="share()">' + t('share') + '</button>' : '') + '<button class="btn' + (S.lastShare ? ' ghost' : '') + '" onclick="go(\'pulang\')">' + t('poT') + '</button>'); }
-  if (R.kind === 'pulang') return '<div class="res"><div class="big" style="color:var(--ok)">✓</div><div style="font-size:20px;font-weight:700">' + t('doneT').replace(' ✓', '') + '</div><div style="color:var(--g);margin:6px 0">' + t('doneS')(R.time) + '</div><button class="btn ghost" onclick="go(\'home\')">' + t('nav')[0] + '</button></div>';
-  return '<div class="res"><div class="big">✓</div><div style="font-size:18px;font-weight:700">' + t('doneBuka') + '</div><div style="color:var(--g)">' + R.time + '</div><button class="btn ghost" onclick="go(\'home\')">' + t('nav')[0] + '</button></div>';
-}
-// 开店检查：3 个打勾 + 门店正面照，每店每天一次
-function vBuka() {
-  var c = S.ck, row = function (k) { return '<label class="toggle">' + t(k) + '<input type="checkbox" ' + (c[k] ? 'checked' : '') + ' onchange="S.ck.' + k + '=this.checked;render()"></label>'; };
-  var ok = c.alat && c.bersih && c.display && S.photo;
-  return '<div class="page"><button class="back" onclick="go(\'home\')">' + t('back') + '</button><h2>' + t('bukaT') + '</h2>' + row('alat') + row('bersih') + row('display') + geoStat() +
-    '<label class="f">' + t('fotoToko') + '</label><label class="photo" for="cam2" style="aspect-ratio:4/3">' + (S.photo ? '<img src="' + S.photo + '">' : '<span style="padding:0 20px;text-align:center">' + t('fotoTokoH') + '</span>') + '</label>' +
-    '<input id="cam2" type="file" accept="image/*" capture="environment" style="display:none" onchange="pick(this)">' +
-    '<button class="btn" onclick="sendBuka()"' + (ok ? '' : ' disabled') + '>' + t('sendBuka') + '</button></div>';
-}
-function sendBuka() {
-  if (!geoOk()) return needGeo(sendBuka);
-  busy(t('upl'));
-  upload(S.photo, 'buka').then(function (pid) { busy(t('sending')); return api('openCheck', [S.sess.token, { storeId: S.home.store.id, alat: S.ck.alat, bersih: S.ck.bersih, display: S.ck.display, photo: pid, geo: geoArg() }], 2); })
-    .then(function (r) { busy(); if (!r.ok && r.err === 'NO_GEO') { S.geo = null; return geoFail(sendBuka); } if (!r.ok) return toast(t('err')); S.res = { kind: 'buka', time: r.time || '' }; if (S.home) S.home.buka = { nick: S.sess.user.nick, name: S.sess.user.fullName, time: r.time || '' }; S.view = 'res'; render(); loadHome(); })
+  var day = (C.local && C.local.date) || today2();
+  api('uploadPhoto', [S.sess.token, 'absen_' + S.sess.user.nick + '_' + Date.now() + '.jpg', 'image/jpeg', S.photo.split(',')[1], { step: 'absen', store: C.store.id, date: day, n: 1 }], 3)
+    .then(function (u) { if (!u || !u.ok) throw new Error('UP'); busy(t('sending')); return api('checkIn', [S.sess.token, { storeId: C.store.id, shift: S.shift, photo: u.id, geo: geoArg() }], 2); })
+    .then(function (r) { busy(); if (!r.ok && r.err === 'NO_GEO') { S.geo = null; return geoFail(sendAbsen); } if (!r.ok) return toast(r.err === 'PICK_SHIFT' ? t('pickFirst') : r.err === 'SHIFT_NOT_OPEN' ? t('notOpen') : r.err === 'ALREADY_IN' ? t('already')(r.store || '') : t('err')); S.selSt = null; try { localStorage.setItem(prefKey(), C.store.id); } catch (e) {} S.photo = null; afterStep(t('got'), r.time); })
     .catch(function () { busy(); toast(t('err')); });
 }
 function rsn(r) {
@@ -901,7 +870,7 @@ function sayaRows(H) {
 var GD_API = 'https://okzfaepdfeolsmurwtft.supabase.co/functions/v1/toko-api'; // 2026-11-22 起货品接口也走 toko-api，接口名前加 goods.
 function gdApi(fn, args) {
   return fetch(GD_API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ fn: 'goods.' + fn, args: [S.sess.token].concat(args || []) }) })
-    .then(function (r) { return r.json(); }).then(function (j) { if (j.err) { if (/SESSION_EXPIRED/.test(j.err)) logout(); throw new Error(j.err); } return j.data; });
+    .then(function (r) { return r.json(); }).then(function (j) { if (j.err) { if (/SESSION_EXPIRED/.test(j.err)) { EXPIRED = 1; logout(); } throw new Error(j.err); } return j.data; });
 }
 function gdT(zh, id) { return L === 'zh' ? zh : id; }
 var GDS = { open: ['系统已分配，周一 12:00 前运营还可能调整', 'Sudah dialokasi, Ops masih bisa ubah s/d Senin 12:00'], locked: ['已锁定，仓库在备货', 'Sudah dikunci, gudang sedang menyiapkan'], confirmed: ['仓库已确认，准备发出', 'Gudang sudah konfirmasi, siap dikirim'],
@@ -993,7 +962,7 @@ function zi(zh, id) { return L === 'zh' ? zh : id; }
 function xApi(pre, fn, args) {
   return fetch(API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ fn: pre + fn, app: 'toko', args: [S.sess.token].concat(args || []) }) })
     .then(function (r) { return r.json(); }).then(function (j) { if (j.err) throw new Error(j.err); return j.data; })
-    .catch(function (e) { if (/SESSION_EXPIRED/.test(e.message)) logout(); throw e; });
+    .catch(function (e) { if (/SESSION_EXPIRED/.test(e.message)) { EXPIRED = 1; logout(); } throw e; });
 }
 function xErr(e) {
   var m = String((e && e.message) || e || ''), map = {
@@ -1089,7 +1058,7 @@ function lpSend() {
   if (F.body.length < 4) return toast(zi('写几句说明情况', 'Tulis penjelasan singkat'));
   busy(zi('上传中…', 'Mengunggah…'));
   xApi(LP_API, 'submit', [{ kind: F.kind, storeId: F.store, cat: F.cat, sub: F.cat === 'other' ? null : F.sub, impact: F.impact, body: F.body, anon: F.anon, appendTo: F.appendTo || null, photos: F.photos.map(function (p) { return p.split(',')[1]; }) }])
-    .then(function (r) { busy(); toast(r.appended ? zi('已补充到原来的单子', 'Ditambahkan ke laporan sebelumnya') : zi('已提交', 'Terkirim')); S.lf = null; S.lp = null; go('lpRec'); lpLoad(); })
+    .then(function (r) { busy(); toast(r.appended ? zi('已补充到原来的单子', 'Ditambahkan ke laporan sebelumnya') : zi('已提交', 'Terkirim')); S.lf = null; S.lp = null; var fr = S.lfFrom; S.lfFrom = null; if (fr && S.ck && S.ck.items[fr.item]) { S.ck.items[fr.item].laporId = String((r && (r.id || r.appendedTo)) || 'Y'); dSave('cek', S.ck); return go('cek'); } go('lpRec'); lpLoad(); })
     .catch(function (e) { busy(); xErr(e); });
 }
 function vLpRec() {
@@ -1281,146 +1250,754 @@ function vSaya() {
 // 问卷题目和选项照原 Laporan Akhir Shift LK（2026-11-11 版）；保存的文字用原来的印尼文 + 英文，数据可以接着原来的一起分析
 function money(n) { n = Number(String(n || '').replace(/[^0-9]/g, '')) || 0; return 'Rp ' + n.toLocaleString('en-US'); }
 function num(v) { return Number(String(v || '').replace(/[^0-9]/g, '')) || 0; }
-var CATS = ['Device (open system)', 'Device (closed system)', 'Cartridge', 'Liquid', 'Disposable', 'Accessory'];
 var WHY = [['Stok habis · Out of stock', '断货'], ['Varian / nikotin tidak ada · Flavour or strength not available', '口味或尼古丁浓度没有'], ['Tidak dijual · We don\'t sell it', '店里不卖'], ['Harga kemahalan · Too expensive', '价格太贵'], ['Lainnya · Other', '其他']];
 var FACT = [['Sepi pengunjung · Few visitors', '人少'], ['EDC / QRIS / POS error, tidak bisa bayar', 'EDC / QRIS / POS 故障，付不了款'], ['Listrik padam · Power out', '停电'], ['Jalan / parkir / akses ditutup', '路、停车或入口被封'], ['Hujan deras / banjir', '大雨 / 水淹'], ['Acara / aturan mall', '商场活动或规定'], ['AC / lampu / toko tidak nyaman', '空调、灯或店里环境不好'], ['Buka telat / tutup cepat', '晚开 / 早关'], ['Kurang staf · Short staff', '人手不够'], ['Lainnya · Other', '其他']];
 var QT = [['Bocor · Leaking', '漏油'], ['Device rusak · Broken', 'device 坏了'], ['Rasa aneh / gosong · Bad taste', '味道怪 / 有糊味'], ['Retur · Return', '退货'], ['Tukar · Exchange', '换货'], ['Lainnya · Other', '其他']];
 function lbl2(x) { return L === 'id' ? (String(x[0]).split(' · ')[0] || '—') : x[1]; }
-function svNew() { return { a: { lost: [], quality: [], factors: [] }, bad: {} }; }
-function svSet(path, v) { var o = S.sv.a, k = path.split('.'); for (var i = 0; i < k.length - 1; i++) o = o[k[i]]; o[k[k.length - 1]] = v; }
-function svYN(q, yesLbl, noLbl) {
-  var v = S.sv.a[q];
-  return '<div class="seg" style="margin-top:10px"><button class="' + (v === 'yes' ? 'on' : '') + '" onclick="svPick(\'' + q + '\',\'yes\')">' + yesLbl + '</button><button class="' + (v === 'no' ? 'on' : '') + '" onclick="svPick(\'' + q + '\',\'no\')">' + noLbl + '</button></div>';
+// ================= LK Toko 第一批改版（2026-11-22 定稿）：5 步流程 =================
+// 上班打卡 → 上班检查（每人每班）→ 下班问卷 → 营业日报（关门时还在店里的人）→ 下班打卡。
+// "下一步做什么"由后台 home.flow 统一算，页面只负责显示。
+var TX2 = {
+  id: {
+    stepN: { absen: 'Absen Masuk', cek: 'Cek Awal Shift', survey: 'Laporan Akhir Shift', report: 'Laporan Penutupan Harian', pulang: 'Absen Pulang' },
+    cekSub: 'Setiap orang, setiap shift, setelah absen masuk', svSub: 'Semua orang', rpSub: 'Hanya yang tutup toko',
+    stayClose: 'Kamu masih di toko saat tutup, isi Laporan Penutupan Harian.',
+    absenNow: 'Absen sekarang', cekGo: 'Mulai cek', cekHint: '6 hal, ±5 menit', workT2: 'Sedang bekerja ✓', workS3: function (x) { return 'Laporan Akhir Shift dibuka jam ' + x; },
+    svGo: 'Isi laporan', svCard: 'Laporan Akhir Shift · ±3 menit', svCardS: 'Boleh diisi sekarang, tapi jam pulang tetap dihitung dari Absen Pulang.',
+    rpGo: 'Isi laporan penutupan', rpCardS: 'Isi setelah transaksi terakhir dan tutup kasir',
+    rpBy: function (n, x) { return '✓ Laporan penutupan sudah dikirim ' + n + ' ' + x + ' · Lihat'; }, rpCannotBy: function (n, x) { return 'Laporan penutupan: ' + n + ' ' + x + ' tidak bisa isi'; },
+    poGo: 'Absen pulang', poCardS: 'Saat kamu benar-benar pulang', notYet: 'Belum selesai! Absen pulang saat kamu benar-benar mau pulang.',
+    stepDone: function (x) { return '✓ Selesai. Langkah berikutnya: ' + x; }, allDone: 'Kerja hari ini selesai ✓', shareWa: 'Bagikan ke grup WhatsApp',
+    notOpen2: 'Shift ini belum bisa dipilih (paling cepat 2 jam sebelum mulai).',
+    earlyLink: 'Harus pulang lebih awal?', gsLink: 'Ganti shift', svAdd: 'Tambah', svAddL: '+ Tambah ke Laporan Akhir Shift', rpEdit: 'Ubah laporan penutupan',
+    // 上班检查
+    stepOf: function (n) { return 'Langkah ' + n + ' dari 6'; }, okL: 'OK', badL: 'Ada masalah', tapFoto: 'Ketuk untuk foto', addFoto: function (n) { return '+ Tambah foto (' + n + '/4)'; },
+    min1: 'Ambil minimal 1 foto.', probQ: 'Apa masalahnya?', fixedY: 'Sudah diperbaiki sekarang', fixedN: 'Tidak bisa diperbaiki sekarang', laporGo: 'Laporkan di Perbaikan', laporDone: '✓ Sudah dilaporkan di Perbaikan',
+    cekT: { depan: 'Depan toko', kasir: 'Kasir & alat', rak: 'Rak & display', tester: 'Meja tester', promo: 'Promo bulan ini', bersih: 'Kebersihan dalam toko' },
+    cekC: { depanOpen: 'Rolling door terbuka penuh, kaca bersih, papan nama menyala.', depan: 'Depan toko rapi dan bersih.', kasir: 'POS, EDC, QRIS, HP toko menyala; kertas struk cukup.', rak: 'Rak penuh & rapi, tempat kosong sudah diisi dari stok.', tester: 'Bersih, ada tisu, liquid tester tidak habis.', promo: 'POSM & label harga promo terpasang.', bersih: 'Lantai bersih, lampu & AC menyala.' },
+    cekF: { depan: 'Foto dari luar toko.', kasir: 'Foto meja kasir, layar POS harus kelihatan.', rak: '1 foto per rak (maks. 4).', tester: 'Foto seluruh meja tester.', promo: 'Foto area promo.', bersih: 'Foto dari pintu ke dalam toko.' },
+    ready: 'Toko READY', issue: 'Toko buka, ada masalah', cekSend: 'Kirim cek', cekRev: 'Periksa lagi sebelum kirim', cekRevS: 'Ketuk salah satu untuk mengubah.',
+    pickOk: 'Pilih OK atau Ada masalah.', needProb: 'Tulis apa masalahnya.', needFix: 'Pilih sudah diperbaiki atau belum.',
+    cashAsk: function (a) { return 'Kemarin masih ada Rp ' + a + ' tunai belum disetor. Sudah disetor?'; }, sudah: 'Sudah', belum: 'Belum', whyNot: 'Kenapa belum?', cashT: 'Uang tunai kemarin',
+    nextB: 'Lanjut', prevB: '‹ Sebelumnya',
+    upNow: function (a, b) { return 'Mengunggah foto ' + a + '/' + b + '…'; }, upFail: 'Gagal unggah. Ketuk untuk coba lagi', upSlow: 'Jaringan lambat? Coba pindah ke Wi-Fi / data lain. Foto yang sudah terunggah tetap aman.', upWait: 'Tunggu foto selesai diunggah dulu.',
+    // 下班问卷
+    q2T2: 'Produk yang ditanya, tapi kita tidak jual', q2H2: 'Produk yang belum pernah dijual di toko ini. Tulis nama lengkap.', catL: 'Kategori', askHow: 'Berapa pelanggan yang tanya?',
+    q3T2: 'Info kompetitor dan harga', q3H2: 'Lebih murah di tempat lain, promo, atau toko baru di dekat sini.', fixHint: 'Kalau ada alat rusak, laporkan juga di Perbaikan.',
+    q6T: 'Satu ide supaya toko ini jual lebih banyak (opsional)', svErr2: 'Jawab semua pertanyaan 1–5. Yang merah belum lengkap.', lineErr: 'Isi nama produk, kategori dan jumlah pelanggan.',
+    svAddT: 'Tambah ke Laporan Akhir Shift', svAddS: 'Isi yang baru saja. Yang sudah dikirim tidak perlu diulang.', svAddEmpty: 'Belum ada yang ditambahkan.', svAddDone: 'Tambahan terkirim',
+    // 营业日报
+    rpTop: 'Isi sesuai laporan harian POS, jangan kira-kira.', rpS1: 'Penjualan hari ini', rpCash: 'Tunai', rpQris: 'QRIS / EDC', rpGrab: 'GrabMart', rpTotal: 'Total',
+    rpShot: 'Foto layar laporan harian POS (1–4 foto, wajib)', zero: 'Tidak ada? Tulis 0.', rpS2: 'Pelanggan hari ini', rpVis: 'Pengunjung masuk toko', rpBuy: 'Pembeli di toko', rpWa: 'Pesanan WhatsApp',
+    rpBuyErr: 'Pembeli di toko tidak boleh lebih banyak dari pengunjung.', rpS3: 'Pelanggan baru & total', rpWaC: 'Kontak WhatsApp toko', rpComm: 'Toko ini punya WhatsApp Community?', rpWc: 'Toko ini punya WeChat?',
+    ya: 'Ya', tdk: 'Tidak', rpGoogle: 'Google Review', newT: 'Baru hari ini', totNow: 'Total sekarang', refL: function (a, b, c) { return 'Total kemarin ' + a + ' + baru hari ini ' + b + ' = ' + c; }, refBad: 'Beda dengan perkiraan, cek lagi ya.',
+    rpS4: 'Uang tunai', rpCashQ: 'Uang tunai yang belum disetor lewat EDC / QRIS toko sampai sekarang?', inclY: function (a) { return 'Termasuk sisa kemarin Rp ' + a; }, cashAll: 'Sudah semua disetor', cashLeft: 'Masih ada',
+    amtL: 'Jumlah (Rp)', whyL: 'Alasan', cashWhy: ['EDC/QRIS gangguan', 'Uang diterima setelah tutup kasir', 'Lainnya'], cashWhyZh: ['EDC/QRIS 有故障', '关账后才收到的现金', '其他'], whenL: 'Kapan disetor?', besok: 'Besok pagi', pickD: 'Pilih tanggal',
+    rpRev: 'Periksa lagi sebelum kirim', rpSend: 'Kirim laporan penutupan', rpEditUntil: 'Bisa diubah sampai jam 23:59 malam ini.', cannotL: 'Tidak bisa isi', cannotWhy: ['POS error', 'Lainnya'], cannotWhyZh: ['POS 故障', '其他'],
+    cannotT: 'Tidak bisa isi Laporan Penutupan Harian', cannotS: 'Hanya untuk orang terakhir di toko. Area Supervisor akan menerima tanda merah, isi besok.', cannotSend: 'Kirim & lanjut absen pulang', noteL: 'Tulis singkat',
+    othersIn: function (n) { return 'Laporan penutupan belum dikirim. ' + n + ' masih tercatat di toko, pastikan dia mengisinya sebelum pulang.'; },
+    lastMust: 'Kamu orang terakhir di toko. Kirim Laporan Penutupan Harian dulu sebelum absen pulang.', rpSent: 'Laporan penutupan terkirim', rpSaved: 'Perubahan tersimpan',
+    tgtD: 'Target harian', mtdL: 'Penjualan MTD (laporan)', pctL: 'Pencapaian target', rpViewT: 'Laporan Penutupan Harian', sendBy: function (n, x) { return 'Dikirim ' + n + ' ' + x; },
+    fixRed: 'Ada yang belum lengkap. Yang merah perlu dicek.',
+    // 下班打卡 / 提前下班 / 改班次
+    selfie2: 'Selfie pulang · wajah kamu dan toko harus kelihatan', lockT: 'Foto toko terkunci', lockS: 'Matikan lampu, AC & alat, kunci pintu / rolling door, lalu foto gemboknya.', poNow: 'Absen pulang sekarang',
+    earlyQ: 'Kenapa pulang lebih awal?', earlyWhy: ['Sakit', 'Urusan keluarga', 'Diminta atasan', 'Lainnya'], earlyWhyZh: ['生病', '家里有事', '主管安排', '其他'], izinQ: 'Sudah izin ke siapa?', izinNo: 'Belum',
+    earlyNote: 'Laporan Akhir Shift dan Absen Pulang tetap wajib. Jam pulang dihitung pulang lebih awal.', earlyGo: 'Lanjut ke Laporan Akhir Shift', earlyNeed: 'Pilih alasan dan sudah izin ke siapa.',
+    gsT: 'Ganti shift', gsPick: 'Pilih shift baru', gsWhy: 'Alasan ganti shift (wajib)', gsEx: 'Contoh: Dimas izin sakit, saya ganti full day',
+    gsNote: 'Jam pulang dihitung dari shift baru. Perubahan ini tercatat dan bisa dilihat HR & Operations Manager.', gsSend: 'Simpan shift baru', gsDone: 'Shift sudah diganti', gsNow: 'Shift sekarang',
+    inApp: 'Halaman ini dibuka di dalam aplikasi (misalnya WhatsApp). Kamera dan lokasi bisa tidak jalan. Buka di Chrome / Safari: ketuk ⋮ atau ⋯ → Buka di browser.',
+    calCek: 'Cek Awal Shift', calRp: 'Laporan Penutupan Harian',
+    shPrep: 'Menyiapkan foto…', shHint: 'Teks juga sudah disalin. Kalau teks tidak ikut terkirim, tekan lama di kolom chat lalu Tempel.'
+  },
+  zh: {
+    stepN: { absen: '上班打卡', cek: '上班检查', survey: '下班问卷', report: '营业日报', pulang: '下班打卡' },
+    cekSub: '每个人每班都做，打完上班卡就做', svSub: '所有人', rpSub: '只有关店的人',
+    stayClose: '你关门时还在店里，请填营业日报。',
+    absenNow: '现在打卡', cekGo: '开始检查', cekHint: '6 项，约 5 分钟', workT2: '上班中 ✓', workS3: function (x) { return '下班问卷 ' + x + ' 开放'; },
+    svGo: '填问卷', svCard: '下班问卷 · 约 3 分钟', svCardS: '现在可以先填，但下班时间还是按下班打卡算。',
+    rpGo: '填营业日报', rpCardS: '最后一单卖完、收银结账后再填',
+    rpBy: function (n, x) { return '✓ 营业日报已由 ' + n + ' ' + x + ' 提交 · 查看'; }, rpCannotBy: function (n, x) { return '营业日报：' + n + ' ' + x + ' 选了填不了'; },
+    poGo: '下班打卡', poCardS: '真要走的时候再打', notYet: '还没完！真要走的时候再打下班卡。',
+    stepDone: function (x) { return '✓ 完成。下一步：' + x; }, allDone: '今天的工作完成了 ✓', shareWa: '分享到 WhatsApp 群',
+    notOpen2: '这个班次现在还不能选（最早开始前 2 小时）。',
+    earlyLink: '要提前走？', gsLink: '改班次', svAdd: '补充', svAddL: '+ 补充下班问卷', rpEdit: '修改营业日报',
+    stepOf: function (n) { return '第 ' + n + ' 步 / 共 6 步'; }, okL: '正常', badL: '有问题', tapFoto: '点这里拍照', addFoto: function (n) { return '+ 再拍一张（' + n + '/4）'; },
+    min1: '至少拍 1 张。', probQ: '是什么问题？', fixedY: '已经当场改好', fixedN: '现在改不了', laporGo: '去报修', laporDone: '✓ 已经报修',
+    cekT: { depan: '门店正面', kasir: '收银台和设备', rak: '货架和陈列', tester: '试吸台', promo: '本月促销', bersih: '店内卫生' },
+    cekC: { depanOpen: '卷帘门全开、玻璃干净、门头灯亮。', depan: '门店正面整洁干净。', kasir: 'POS、EDC、QRIS、门店手机都开着，小票纸够。', rak: '货架摆满、整齐，空位已经从库存补上。', tester: '干净，有纸巾，试吸 liquid 没空。', promo: 'POSM 和促销价格牌都放好了。', bersih: '地面干净，灯和 AC 都开着。' },
+    cekF: { depan: '站在店外拍正面。', kasir: '拍收银台，POS 屏幕要看得到。', rak: '每排货架一张（最多 4 张）。', tester: '拍整个试吸台。', promo: '拍促销陈列的位置。', bersih: '从门口往里拍整个店内。' },
+    ready: '门店准备好了', issue: '门店已开，有问题', cekSend: '提交检查', cekRev: '提交前再核对一遍', cekRevS: '点某一项可以回去改。',
+    pickOk: '请选正常还是有问题。', needProb: '写一下是什么问题。', needFix: '请选改好了没有。',
+    cashAsk: function (a) { return '昨天还有 Rp ' + a + ' 现金没转，现在转了吗？'; }, sudah: '转了', belum: '还没', whyNot: '为什么还没转？', cashT: '昨天的现金',
+    nextB: '下一步', prevB: '‹ 上一步',
+    upNow: function (a, b) { return '正在上传照片 ' + a + '/' + b + '…'; }, upFail: '上传失败，点这里重试', upSlow: '网络慢？试试换 Wi-Fi 或流量。已经传好的照片不会丢。', upWait: '请等照片上传完再提交。',
+    q2T2: '顾客问了，但我们不卖的产品', q2H2: '本店从来没卖过的产品，写全名。', catL: '品类', askHow: '几个顾客问过？',
+    q3T2: '竞品和价格', q3H2: '别家更便宜、有促销，或者附近开了新店。', fixHint: '如果有东西坏了，也去报修。',
+    q6T: '一个让这家店卖更多的想法（选填）', svErr2: '第 1–5 题都要答，红色的还没填完。', lineErr: '请填产品名、品类和顾客人数。',
+    svAddT: '补充下班问卷', svAddS: '只填新的情况，已经交过的不用重复。', svAddEmpty: '还没有要补充的内容。', svAddDone: '补充已提交',
+    rpTop: '照 POS 日报填，不要估。', rpS1: '今天的销售', rpCash: '现金', rpQris: 'QRIS / EDC', rpGrab: 'GrabMart', rpTotal: '合计',
+    rpShot: 'POS 日报截图（1–4 张，必须）', zero: '没有就写 0。', rpS2: '今天的顾客', rpVis: '进店人数', rpBuy: '到店购买人数', rpWa: 'WhatsApp 订单',
+    rpBuyErr: '到店购买人数不能多于进店人数。', rpS3: '新增和总数', rpWaC: '门店 WhatsApp 联系人', rpComm: '本店有 WhatsApp Community 吗？', rpWc: '本店有微信吗？',
+    ya: '有', tdk: '没有', rpGoogle: 'Google 评价', newT: '今天新增', totNow: '当前总数', refL: function (a, b, c) { return '昨天总数 ' + a + ' + 今天新增 ' + b + ' = ' + c; }, refBad: '和理论数不一样，请再核对一下。',
+    rpS4: '现金', rpCashQ: '到现在还没转进门店 EDC 或收款码的现金还有多少？', inclY: function (a) { return '包括昨天剩的 Rp ' + a; }, cashAll: '全部转了', cashLeft: '还有没转的',
+    amtL: '金额（Rp）', whyL: '原因', cashWhy: ['EDC/QRIS gangguan', 'Uang diterima setelah tutup kasir', 'Lainnya'], cashWhyZh: ['EDC/QRIS 有故障', '关账后才收到的现金', '其他'], whenL: '什么时候转？', besok: '明天上午', pickD: '选日期',
+    rpRev: '提交前再核对一遍', rpSend: '提交营业日报', rpEditUntil: '今晚 23:59 前还可以改。', cannotL: '填不了', cannotWhy: ['POS error', 'Lainnya'], cannotWhyZh: ['POS 故障', '其他'],
+    cannotT: '填不了营业日报', cannotS: '只给店里最后一个人用。区域主管会看到红色标记，第二天补交。', cannotSend: '提交并去下班打卡', noteL: '写一句',
+    othersIn: function (n) { return '营业日报还没交。' + n + ' 还显示在店里，请确认他走前会交。'; },
+    lastMust: '你是店里最后一个人，先交营业日报再打下班卡。', rpSent: '营业日报已提交', rpSaved: '修改已保存',
+    tgtD: '每日目标', mtdL: '本月累计（日报口径）', pctL: '目标完成', rpViewT: '营业日报', sendBy: function (n, x) { return n + ' ' + x + ' 提交'; },
+    fixRed: '有没填完的地方，红色的要再看一下。',
+    selfie2: '下班自拍 · 脸和店都要拍到', lockT: '锁门照', lockS: '关灯、关 AC 和设备，锁好门或卷帘门，再拍挂锁。', poNow: '现在打下班卡',
+    earlyQ: '为什么要提前走？', earlyWhy: ['Sakit', 'Urusan keluarga', 'Diminta atasan', 'Lainnya'], earlyWhyZh: ['生病', '家里有事', '主管安排', '其他'], izinQ: '已经告诉了谁？', izinNo: '还没',
+    earlyNote: '下班问卷和下班打卡还是要做，按早退算。', earlyGo: '去填下班问卷', earlyNeed: '请选原因和已经告诉了谁。',
+    gsT: '改班次', gsPick: '选新班次', gsWhy: '改班次原因（必填）', gsEx: '例：Dimas 请病假，我改上全天',
+    gsNote: '下班时间按新班次算。改班次会留记录，HR 和运营经理能看到。', gsSend: '保存新班次', gsDone: '班次已改好', gsNow: '现在的班次',
+    inApp: '现在是在 App 里面（例如 WhatsApp）打开的，相机和定位可能用不了。请点右上角 ⋮ 或 ⋯ → 在浏览器中打开（Chrome / Safari）。',
+    calCek: '上班检查', calRp: '营业日报',
+    shPrep: '准备照片中…', shHint: '文字也已经复制好了。如果文字没跟着发出去，在聊天框长按粘贴就行。'
+  }
+};
+(function () { for (var l in TX2) for (var k in TX2[l]) TX[l][k] = TX2[l][k]; })();
+
+// ---------- 小工具 ----------
+function oc(fn) { var a = [].slice.call(arguments, 1).map(function (x) { return JSON.stringify(x); }); return esc(fn + '(' + a.join(',') + ')'); }
+function n0(v) { return Number(String(v == null ? '' : v).replace(/[^0-9]/g, '')) || 0; }
+function fmtN(v) { return n0(v).toLocaleString('en-US'); }
+function dmy(d) { var p = String(d || '').split('-'); return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : d; }
+function zl(arr, arrZh, v) { var i = arr.indexOf(v); return L === 'zh' && i >= 0 ? arrZh[i] : v; }
+function inAppBar() { return a2hsEnv() === 'inapp' ? '<div class="alert" style="margin:0 0 10px">' + t('inApp') + '</div>' : ''; }
+function flow() { return (S.home && S.home.flow) || null; }
+function stepName(k) { return t('stepN')[k] || k; }
+function nextGoV(k) { return { absen: 'absen', cek: 'cek', survey: 'survey', report: 'report', pulang: 'pulang', work: 'home', done: 'home' }[k] || 'home'; }
+function today2() { return (S.home && S.home.local && S.home.local.date) || todayStr(); }
+function pageTop(title, back) { return '<div class="page"><button class="back" onclick="' + (back || "go('home')") + '">' + t('back') + '</button><h2>' + title + '</h2>' + inAppBar(); }
+function errLine(m) { return m ? '<div style="color:var(--r);font-size:13px;margin-top:6px;font-weight:600">' + m + '</div>' : ''; }
+function segBtns(items, cur, fn) { return '<div class="seg" style="margin-top:8px">' + items.map(function (x) { return '<button class="' + (cur === x[0] ? 'on' : '') + '" onclick="' + oc(fn, x[0]) + '">' + x[1] + '</button>'; }).join('') + '</div>'; }
+
+// ---------- 草稿：只存文字和已上传照片的编号，不存照片本身 ----------
+function dKey(kind) { var H = S.home || {}; return 'tk_d_' + kind + '_' + ((S.sess && S.sess.user.nick) || '').toLowerCase() + '_' + ((H.store && H.store.id) || '') + '_' + today2(); }
+function dSave(kind, obj) { try { localStorage.setItem(dKey(kind), JSON.stringify(obj, function (k, v) { return k === 'd' ? undefined : v; })); } catch (e) {} }
+function dLoad(kind) { try { return JSON.parse(localStorage.getItem(dKey(kind)) || 'null'); } catch (e) { return null; } }
+function dDel(kind) { try { localStorage.removeItem(dKey(kind)); } catch (e) {} }
+// 清掉以前日期的草稿
+(function () { try { var td = todayStr(); Object.keys(localStorage).forEach(function (k) { if (k.indexOf('tk_d_') === 0 && k.slice(-10) < td && /\d{4}-\d{2}-\d{2}$/.test(k)) localStorage.removeItem(k); }); } catch (e) {} })();
+
+// ---------- 照片：拍完马上上传（长边 1280），显示进度，失败可重试 ----------
+// slot = { id: 已上传编号, url: 显示用, st: 'up' | 'ok' | 'err', d: 本机照片（不进草稿）}
+S.ph = S.ph || {};
+function phOwner(key) { var p = key.split('.'); return p[0] === 'cek' ? S.ck : p[0] === 'rp' ? S.rp : S.po2; }
+function phList(key) { var o = phOwner(key); if (!o) return []; o.ph = o.ph || {}; return (o.ph[key] = o.ph[key] || []); }
+function phSaveOwner(key) { var k = key.split('.')[0]; if (k === 'cek') dSave('cek', S.ck); else if (k === 'rp') dSave('rp', S.rp); }
+function phUp(key, slot, meta) {
+  slot.st = 'up'; slot.at = Date.now(); render();
+  var b64 = slot.d.split(',')[1], name = meta.step + '_' + S.sess.user.nick + '_' + Date.now() + '.jpg';
+  api('uploadPhoto', [S.sess.token, name, 'image/jpeg', b64, meta], 3).then(function (r) {
+    if (!r || !r.ok) throw new Error(r && r.err || 'UP');
+    slot.id = r.id; slot.url = r.url || r.id; slot.st = 'ok'; phSaveOwner(key); render();
+  }).catch(function () { slot.st = 'err'; render(); });
 }
-function svPick(q, v) {
-  S.sv.a[q] = v; delete S.sv.bad[q];
-  if (v === 'yes' && q === 'q1' && !S.sv.a.lost.length) S.sv.a.lost.push({ cat: '', why: WHY[0][0], n: 1 });
-  if (v === 'yes' && q === 'q4' && !S.sv.a.quality.length) S.sv.a.quality.push({ type: QT[0][0], n: 1 });
+function phMeta(key) { var p = key.split('.'), H = S.home || {}, o = phOwner(key); o.phN = o.phN || {}; var n = o.phN[key] = Math.min(9, (o.phN[key] || 0) + 1);
+  var step = p[0] === 'cek' ? 'cek' : p[0] === 'rp' ? 'pos' : p[1] === 'lock' ? 'kunci' : 'pulang';
+  return { step: step, store: H.store && H.store.id, date: today2(), item: p[0] === 'cek' ? p[1] : '', n: n }; }
+function phLabel(key) { var p = key.split('.'), zh = L === 'zh';
+  if (p[0] === 'cek') return 'L:' + (zh ? '上班检查 · ' : 'Cek Awal Shift · ') + t('cekT')[p[1]];
+  if (p[0] === 'rp') return 'shot'; return p[1] === 'lock' ? 'lock' : 'selfie'; }
+function phPick(inp, key, max) {
+  var f = inp.files && inp.files[0]; inp.value = ''; if (!f) return;
+  var list = phList(key); if (list.length >= max) return;
+  busy('…');
+  compress(f, phLabel(key)).then(function (d) {
+    busy(); var slot = { d: d, st: 'up' }; list.push(slot); if (key.indexOf('cek.') === 0) S.ck.err = null; phUp(key, slot, phMeta(key));
+  }).catch(function () { busy(); toast(t('err')); });
+}
+function phRetry(key, i) { var s = phList(key)[i]; if (!s || !s.d) return; phUp(key, s, phMeta(key)); }
+function phDel(key, i) { phList(key).splice(i, 1); phSaveOwner(key); render(); }
+function phIds(key) { return phList(key).filter(function (s) { return s.st === 'ok' && s.id; }).map(function (s) { return s.id; }); }
+function phAll() { var out = []; [S.ck, S.rp, S.po2].forEach(function (o) { if (o && o.ph) for (var k in o.ph) o.ph[k].forEach(function (s) { out.push(s); }); }); return out; }
+function phStat(keys) { var a = [], up = 0, err = 0, old = 0; keys.forEach(function (k) { phList(k).forEach(function (s) { a.push(s); if (s.st === 'up') { up++; if (Date.now() - (s.at || 0) > 60000) old++; } if (s.st === 'err') err++; }); });
+  return { n: a.length, ok: a.length - up - err, up: up, err: err, slow: old > 0 }; }
+function phBar(keys) { var s = phStat(keys); if (!s.up && !s.err) return '';
+  return '<div class="info" style="margin:10px 0">' + (s.up ? t('upNow')(s.ok, s.n) : '') + (s.err ? (s.up ? '<br>' : '') + '<b style="color:var(--r)">⚠ ' + t('upFail') + '</b>' : '') + (s.slow ? '<br>' + t('upSlow') : '') + '</div>'; }
+// 拍照格子：1–4 张，显示「n/4」和「+ Tambah foto」，只能现场拍
+function phGrid(key, max, cap, hint) {
+  var list = phList(key), id = 'f_' + key.replace(/\./g, '_');
+  var inp = '<input id="' + id + '" type="file" accept="image/*" capture="' + (cap || 'environment') + '" style="display:none" onchange="' + oc('phPick', '__I__', key, max).replace('&quot;__I__&quot;', 'this') + '">';
+  if (!list.length) return '<label class="photo" for="' + id + '" style="aspect-ratio:4/3"><span style="padding:0 20px;text-align:center">📷 ' + (hint || t('tapFoto')) + '</span></label>' + inp;
+  var cells = list.map(function (s, i) {
+    var src = s.d || s.url || '';
+    var ov = s.st === 'up' ? '<div style="position:absolute;inset:0;background:rgba(0,0,0,.45);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px">⏳</div>'
+      : s.st === 'err' ? '<div onclick="' + oc('phRetry', key, i) + '" style="position:absolute;inset:0;background:rgba(179,38,30,.75);color:#fff;display:flex;align-items:center;justify-content:center;text-align:center;font-size:12px;padding:4px;cursor:pointer">⚠ ' + t('upFail') + '</div>' : '';
+    return '<div style="position:relative;width:calc(50% - 4px);aspect-ratio:3/4;border-radius:10px;overflow:hidden;background:#222">' +
+      (src ? '<img src="' + esc(src) + '" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display=\'none\'">' : '') +
+      '<div style="position:absolute;left:0;top:0;color:#fff;font-size:12px;padding:3px 7px;background:rgba(0,0,0,.5);border-bottom-right-radius:8px">' + (i + 1) + '/' + max + (s.st === 'ok' ? ' ✓' : '') + '</div>' + ov +
+      '<button onclick="' + oc('phDel', key, i) + '" style="position:absolute;right:4px;top:4px;width:28px;height:28px;border-radius:14px;border:0;background:#fff;font-size:18px;line-height:1">×</button></div>';
+  }).join('');
+  return '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px">' + cells + '</div>' +
+    (list.length < max ? '<label for="' + id + '" class="add" style="display:inline-block;margin-top:10px">' + (max > 1 ? t('addFoto')(list.length) : t('tapFoto')) + '</label>' : '') + inp;
+}
+
+// ---------- 首页：一个大按钮，由 home.flow 决定 ----------
+function nxCard(title, sub, btn, onc, opt) {
+  opt = opt || {};
+  return '<div class="next"' + (opt.color ? ' style="border-left:8px solid ' + opt.color + '"' : '') + '><div class="lbl">' + (opt.lbl || t('next')) + '</div><div class="t">' + title + '</div>' + (sub ? '<div class="s">' + sub + '</div>' : '') +
+    (opt.extra || '') + (btn ? '<button class="btn' + (opt.red ? ' red' : '') + '" onclick="' + onc + '">' + btn + '</button>' : '') + (opt.links || '') + '</div>';
+}
+function lnks(arr) { return '<div style="display:flex;gap:18px;flex-wrap:wrap;margin-top:12px">' + arr.map(function (x) { return '<a href="#" style="color:var(--y);font-size:14px;font-weight:600" onclick="' + x[1] + ';return false">' + x[0] + ' ›</a>'; }).join('') + '</div>'; }
+function flowCard(H) {
+  var F = H.flow, u = S.sess.user;
+  if (!F) return '';
+  var dayLinks = [];
+  if (F.next !== 'done' && F.next !== 'absen') { dayLinks.push([t('earlyLink'), "go('early')"]); if ((H.store.shifts || []).length > 1) dayLinks.push([t('gsLink'), "go('gshift')"]); }
+  var rpLine = '';
+  if (F.report && !F.report.mine) rpLine = '<div class="s" style="margin-top:10px;color:#9be79b;cursor:pointer" onclick="go(\'report\')">' + (F.report.cannot ? t('rpCannotBy')(esc(firstName(F.report.name)), F.report.time) : t('rpBy')(esc(firstName(F.report.name)), F.report.time)) + '</div>';
+  if (F.next === 'absen') {
+    if (!H.shift) return nxCard(t('stepN').absen, ckMulti() ? t('pickSM') : t('pickS'), t('absenNow'), "go('absen')");
+    if (H.lateBy > 0) return '<div class="next late"><div class="lbl">' + t('next') + '</div><div class="t">' + t('lateT')(H.lateBy) + '</div><div class="s">' + t('lateS')() + '</div><button class="btn red" onclick="go(\'absen\')">' + t('absenNow') + '</button></div>';
+    return nxCard(t('stepN').absen + ' · Shift ' + H.shift.start + '–' + H.shift.end, '', t('absenNow'), "go('absen')");
+  }
+  if (F.next === 'cek') return nxCard(t('stepN').cek, t('cekHint'), t('cekGo'), "go('cek')", { links: lnks(dayLinks) });
+  if (F.next === 'work') return nxCard(t('workT2'), F.surveyOpenAt ? t('workS3')(F.surveyOpenAt) : '', '', '', { lbl: t('today'), links: lnks(dayLinks) });
+  if (F.next === 'survey') return nxCard(t('svCard'), t('svCardS'), t('svGo'), "go('survey')", { color: 'var(--y)', links: lnks(dayLinks) });
+  if (F.next === 'report') return nxCard(t('stepN').report, (!F.closer ? '<b style="color:var(--y)">' + t('stayClose') + '</b><br>' : '') + t('rpCardS'), t('rpGo'), "go('report')", { color: '#4a90e2', links: lnks(dayLinks) });
+  if (F.next === 'pulang') {
+    var ex = rpLine;
+    if (F.report && F.report.mine && F.reportOpen) ex += '<div class="s" style="margin-top:8px"><a href="#" style="color:var(--y)" onclick="go(\'report\');return false">' + t('rpEdit') + ' ›</a></div>';
+    if (F.survey) ex += '<div style="margin-top:12px;font-size:17px;font-weight:700;color:var(--y)">' + t('notYet') + '</div>';
+    var l2 = dayLinks.filter(function (x) { return x[1] !== "go('early')"; }); if (F.survey) l2.unshift([t('svAddL'), "go('survey')"]);
+    return nxCard(t('stepN').pulang, t('poCardS'), t('poGo'), "go('pulang')", { extra: ex, links: lnks(l2) });
+  }
+  // done
+  return '<div class="next" style="background:var(--okb);color:#000"><div class="lbl" style="color:var(--ok)">' + t('today') + '</div><div class="t">' + t('allDone') + '</div><div class="s" style="color:#3c4043">' + t('doneS')(F.done ? F.done.time : '') + '</div>' +
+    '<button class="btn" onclick="doneShare()">' + t('shareWa') + '</button></div>';
+}
+function flowSteps(H) {
+  var F = H.flow; if (!F) return '';
+  var cur = F.next === 'work' ? 'survey' : F.next;
+  var subs = { survey: t('svSub'), report: t('rpSub') };
+  var ic = { survey: '📝', report: '🧾' };
+  return '<div class="steps">' + F.steps.map(function (s, i) {
+    var cls = s.done ? 'ok' : (s.k === cur ? 'now' : '');
+    return '<div class="st ' + cls + '"><div class="dot"' + (s.k === 'report' && !s.done ? ' style="border-color:#4a90e2"' : '') + '>' + (s.done ? '✓' : (ic[s.k] || i + 1)) + '</div>' + stepName(s.k) +
+      (s.done ? '<span class="tm">' + esc(s.done) + '</span>' : subs[s.k] ? '<span class="tm">' + subs[s.k] + '</span>' : '') + '</div>';
+  }).join('') + '</div>';
+}
+function lastShareKey() { return 'tk_share_' + ((S.sess && S.sess.user.nick) || '').toLowerCase() + '_' + today2(); }
+function doneShare() {
+  var txt = null; try { txt = localStorage.getItem(lastShareKey()); } catch (e) {}
+  if (txt) return shareTxt(txt);
+  var H = S.home, F = H.flow, a = F && F.steps && F.steps[0];
+  shareTxt(briefText({ date: today2(), store: H.store.name, name: S.sess.user.fullName, in: a ? a.done : '', out: F && F.done ? F.done.time : '', survey: !!(F && F.survey) }));
+}
+// 2026-11-22 Victory 定：每一步提交完就在完成页转发到门店群，文字全发（按填写顺序，不概括），照片一起发。
+// 文字同时复制好：有的手机 WhatsApp 会把文字丢掉只发照片，员工在群里长按粘贴就行
+function copyTxt(text) { try { if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).catch(function () {}); } catch (e) {} }
+function shareTxt(text, files) {
+  copyTxt(text);
+  files = files || [];
+  if (files.length && navigator.canShare && navigator.canShare({ files: files })) { navigator.share({ text: text, files: files }).catch(function () {}); return; }
+  if (navigator.share) { navigator.share({ text: text }).catch(function () {}); return; }
+  location.href = 'https://wa.me/?text=' + encodeURIComponent(text);
+}
+function shPhSrc(list) { return (list || []).map(function (s) { return s.d || s.url || s.id || ''; }).filter(function (u) { return /^(data:|https:)/.test(u); }); }
+function shBlob(src) {
+  if (/^data:/.test(src)) { try { var b = atob(src.split(',')[1]), a = new Uint8Array(b.length); for (var i = 0; i < b.length; i++) a[i] = b.charCodeAt(i); return Promise.resolve(new Blob([a], { type: 'image/jpeg' })); } catch (e) { return Promise.reject(e); } }
+  return fetch(src).then(function (r) { if (!r.ok) throw new Error('IMG'); return r.blob(); });
+}
+function shImg(src) { return shBlob(src).then(function (b) { return new Promise(function (ok, no) { var u = URL.createObjectURL(b), im = new Image(); im.onload = function () { im._u = u; ok(im); }; im.onerror = function (e) { URL.revokeObjectURL(u); no(e); }; im.src = u; }); }); }
+// 一张一张做（便宜安卓手机内存小，不一次解开 24 张照片）
+function shSeq(list, fn) { var out = []; return list.reduce(function (p, x, i) { return p.then(function () { return fn(x, i); }).then(function (r) { out.push(r); }, function () { out.push(null); }); }, Promise.resolve()).then(function () { return out; }); }
+function shFile(blob, name) { try { return new File([blob], name, { type: 'image/jpeg' }); } catch (e) { blob.name = name; return blob; } }
+// 上班检查一项拼成一张图：顶部字幕（第几项 · 状态 · 问题），下面这一项的 1–4 张照片（原照片的水印保留）
+function shCollage(title, sub, bad, srcs) {
+  return shSeq(srcs, function (u) { return shImg(u); }).then(function (ims) {
+    ims = ims.filter(Boolean);
+    var W = 1080, cols = ims.length > 1 ? 2 : 1, rows = Math.max(1, Math.ceil(ims.length / cols)), cw = W / cols, ch = cols === 1 ? 1440 : 720, head = sub ? 150 : 100;
+    var c = document.createElement('canvas'); c.width = W; c.height = head + rows * ch; var x = c.getContext('2d');
+    x.fillStyle = '#111'; x.fillRect(0, 0, W, c.height);
+    x.fillStyle = bad ? '#b3261e' : '#000'; x.fillRect(0, 0, W, head);
+    x.fillStyle = '#FDCD17'; x.font = 'bold 44px Arial'; x.fillText(title, 24, 62);
+    if (sub) { x.fillStyle = '#fff'; x.font = '34px Arial'; var t2 = sub; while (x.measureText(t2).width > W - 48 && t2.length > 4) t2 = t2.slice(0, -2); x.fillText(t2 === sub ? sub : t2 + '…', 24, 118); }
+    ims.forEach(function (im, i) {
+      var cx = (i % cols) * cw, cy = head + Math.floor(i / cols) * ch, k = Math.min(cw / im.width, ch / im.height), w = im.width * k, h = im.height * k;
+      x.drawImage(im, cx + (cw - w) / 2, cy + (ch - h) / 2, w, h);
+    });
+    ims.forEach(function (im) { URL.revokeObjectURL(im._u); });
+    return new Promise(function (ok) { c.toBlob(function (b) { c.width = c.height = 1; ok(b); }, 'image/jpeg', 0.82); });
+  });
+}
+// 完成页先显示「准备照片中…」，照片准备好再能点（iPhone 要在点按钮那一下直接分享，不能点了再去下载）
+function shPrep(job) {
+  S.shFiles = null; S.shBusy = 1;
+  job().then(function (files) { S.shFiles = files.filter(Boolean); }).catch(function () { S.shFiles = []; }).then(function () { S.shBusy = 0; if (S.view === 'res2') render(); });
+}
+function briefText(b, x) {
+  var a = ['ABSEN PULANG', 'Tanggal: ' + dmy(b.date), 'Toko: ' + b.store, 'Vaporista: ' + b.name, 'Masuk: ' + (b.in || '-') + ' · Pulang: ' + (b.out || '-'), 'Laporan Akhir Shift: ' + (b.survey ? 'sudah dikirim' : 'belum')];
+  x = x || {};
+  if (x.early && x.early.why) a.push('Pulang lebih awal: ' + x.early.why + (x.early.note ? ' – ' + x.early.note : '') + ' · Izin ke: ' + (x.early.none || !(x.early.izin || []).length ? 'belum' : x.early.izin.join(', ')));
+  if (x.last) a.push('Orang terakhir, toko sudah dikunci (foto kunci terlampir)');
+  return a.join('\n');
+}
+function cekLine(n, k, it) { return n + '. ' + TX.id.cekT[k] + ': ' + (it.ok ? 'OK' : 'ADA MASALAH – ' + it.problem + ' (' + (it.fixed ? 'sudah diperbaiki' : 'belum bisa diperbaiki' + (it.laporId ? ', sudah lapor perbaikan' : '')) + ')'); }
+function cekText(r, items, cash) {
+  var a = ['CEK AWAL SHIFT', 'Tanggal: ' + dmy(r.date), 'Toko: ' + r.store, 'Vaporista: ' + r.name, 'Jam hadir: ' + r.absen, 'Selesai cek: ' + r.time,
+    'Status: ' + (r.status === 'READY' ? 'READY' : 'BUKA, ADA MASALAH'), ''];
+  CK_ITEMS.forEach(function (k, i) { a.push(cekLine(i + 1, k, items[k])); });
+  if (cash) a.push('', 'Uang tunai kemarin Rp ' + fmtN(cash.amount) + ': ' + (cash.done ? 'sudah disetor' : 'belum disetor – ' + (cash.reason || '')));
+  return a.join('\n');
+}
+function closeText(c) {
+  if (!c) return ''; var r = c.r, m = c.mtd || {}, rp = function (n) { return 'Rp ' + n0(n).toLocaleString('en-US'); };
+  var a = ['LAPORAN PENUTUPAN HARIAN', 'Tanggal: ' + dmy(c.date), 'Toko: ' + c.store, 'Vaporista: ' + (c.staff || []).join(', '), 'Diisi oleh: ' + (r.name || '') + ' ' + (r.time || ''), 'Target harian: ' + rp(m.daily), 'Tunai: ' + rp(r.cash), 'QRIS/EDC: ' + rp(r.qris), 'GrabMart: ' + rp(r.grab),
+    'Penjualan hari ini: ' + rp(r.total), 'Penjualan MTD (laporan): ' + rp(m.mtd), 'Pencapaian target: ' + (m.pct == null ? '-' : m.pct + '%'), '', 'LAPORAN PELANGGAN', 'Jumlah pengunjung: ' + r.visitors, 'Pembeli di toko: ' + r.buyers, 'Pesanan WhatsApp: ' + r.waOrder,
+    'Google Review: ' + r.googleNew + ' orang (Total: ' + r.googleTotal + ')', 'Kontak WA toko: ' + r.waNew + ' orang (Total: ' + r.waTotal + ')'];
+  if (r.commHas) a.push('WA Community: ' + r.commNew + ' orang (Total: ' + r.commTotal + ')');
+  if (r.wechatHas) a.push('WeChat toko: ' + r.wechatNew + ' orang (Total: ' + r.wechatTotal + ')');
+  a.push(''); a.push('Uang tunai belum disetor: ' + (r.cashStatus === 'LEFT' && r.cashLeft > 0 ? 'Rp ' + fmtN(r.cashLeft) + (r.cashReason ? ' – ' + r.cashReason : '') + (r.cashWhen ? ' (disetor ' + (/^\d{4}-/.test(r.cashWhen) ? dmy(r.cashWhen) : 'besok pagi') + ')' : '') : 'Rp 0'));
+  return a.join('\n');
+}
+
+// ---------- 每一步做完：✓ Selesai. Langkah berikutnya ----------
+function afterStep(title, sub, share, job) {
+  busy(t('loading'));
+  if (job) shPrep(job); else { S.shFiles = []; S.shBusy = 0; }
+  var fin = function () { busy(); S.res2 = { title: title, sub: sub, share: share || null }; S.view = 'res2'; render(); window.scrollTo(0, 0); };
+  loadHome().then(fin, fin);
+}
+XV.res2 = function () {
+  var R = S.res2 || {}, F = flow() || {}, nx = F.next;
+  var nxt = nx && nx !== 'done' && nx !== 'work' ? '<div style="font-size:16px;margin:14px 0 4px">' + t('stepDone')('<b>' + stepName(nx === 'work' ? 'survey' : nx) + '</b>') + '</div>' : '';
+  if (nx === 'work') nxt = '<div style="font-size:16px;margin:14px 0 4px">' + t('stepDone')('<b>' + stepName('survey') + '</b>') + (F.surveyOpenAt ? '<br><small style="color:var(--g)">' + t('workS3')(F.surveyOpenAt) + '</small>' : '') + '</div>';
+  if (nx === 'pulang' && F.survey) nxt += '<div style="font-size:17px;font-weight:700;margin:8px 0">' + t('notYet') + '</div>';
+  var btn = nx && nx !== 'done' && nx !== 'work' ? '<button class="btn" onclick="go(\'' + nextGoV(nx) + '\')">' + stepName(nx) + '</button>' : '';
+  return '<div class="res"><div class="big"' + (nx === 'done' ? ' style="color:var(--ok)"' : '') + '>✓</div><div style="font-size:20px;font-weight:700">' + (R.title || '') + '</div>' + (R.sub ? '<div style="color:var(--g);margin-top:6px">' + R.sub + '</div>' : '') + nxt +
+    (R.share ? '<button class="btn" style="margin-top:18px"' + (S.shBusy ? ' disabled' : '') + ' onclick="shareTxt(S.res2.share, S.shFiles)">' + (S.shBusy ? t('shPrep') : '📤 ' + t('shareWa') + ((S.shFiles || []).length ? ' (' + S.shFiles.length + ' foto)' : '')) + '</button><div style="font-size:12px;color:var(--g);margin-top:6px">' + t('shHint') + '</div>' : '') + btn.replace('class="btn"', R.share ? 'class="btn ghost"' : 'class="btn"') +
+    '<button class="btn ghost" onclick="go(\'home\')">' + t('nav')[0] + '</button></div>';
+};
+
+// ---------- ② 上班检查：6 项，每项一屏；可以回到前面改；关掉再打开从草稿接着做 ----------
+function ckNew() { var it = {}; CK_ITEMS.forEach(function (k) { it[k] = { ok: null, problem: '', fixed: null, laporId: '' }; }); return { i: 0, items: it, ph: {}, phN: {}, cash: null, startedAt: new Date().toISOString() }; }
+var CK_ITEMS = ['depan', 'kasir', 'rak', 'tester', 'promo', 'bersih'];
+function ckEnter() {
+  if (!S.ck) {
+    var d = dLoad('cek'); S.ck = d && d.items ? d : ckNew();
+    S.ck.ph = S.ck.ph || {}; for (var k in S.ck.ph) S.ck.ph[k] = S.ck.ph[k].filter(function (s) { return s.st === 'ok'; });
+  }
+  if (S.ci) return;
+  api('cekInfo', [S.sess.token, { storeId: S.home.store.id }]).then(function (r) { if (!r.ok) { toast(t('err')); return go('home'); } S.ci = r; if (r.done) { dDel('cek'); S.ck = null; S.ci = null; return go('home'); } if (S.view === 'cek') render(); })
+    .catch(function () { S.ci = { ok: true, front: 'opened', cashAsk: null }; if (S.view === 'cek') render(); });
+}
+function ckScreens() { var a = []; if (S.ci && S.ci.cashAsk) a.push('cash'); CK_ITEMS.forEach(function (k) { a.push(k); }); a.push('rev'); return a; }
+function ckSet(k, f, v) { var it = S.ck.items[k]; it[f] = v; if (f === 'ok' && v === true) { it.problem = ''; it.fixed = null; } S.ck.err = null; dSave('cek', S.ck); render(); }
+function ckTxt(k, v) { S.ck.items[k].problem = v; dSave('cek', S.ck); }
+function ckCash(f, v) { S.ck.cash = S.ck.cash || {}; S.ck.cash[f] = v; S.ck.err = null; dSave('cek', S.ck); if (f !== 'reason') render(); }
+function ckItemErr(k) { var it = S.ck.items[k]; if (it.ok !== true && it.ok !== false) return t('pickOk'); if (!phIds('cek.' + k).length && !phList('cek.' + k).length) return t('min1');
+  if (it.ok === false && !String(it.problem || '').trim()) return t('needProb'); if (it.ok === false && it.fixed !== true && it.fixed !== false) return t('needFix'); return ''; }
+function ckGo(i) { S.ck.i = i; S.ck.err = null; dSave('cek', S.ck); render(); window.scrollTo(0, 0); }
+function ckNext() {
+  var sc = ckScreens(), k = sc[S.ck.i];
+  if (k === 'cash') { var c = S.ck.cash || {}; if (c.done !== true && c.done !== false) { S.ck.err = t('pickOk'); return render(); } if (c.done === false && !String(c.reason || '').trim()) { S.ck.err = t('whyNot'); return render(); } }
+  else if (k !== 'rev') { var e = ckItemErr(k); if (e) { S.ck.err = e; return render(); } }
+  ckGo(Math.min(sc.length - 1, S.ck.i + 1));
+}
+function ckLapor(k) {
+  var it = S.ck.items[k];
+  S.lfFrom = { view: 'cek', item: k };
+  lpNew('repair');
+  S.lf.body = 'Cek Awal Shift · ' + TX.id.cekT[k] + ': ' + (it.problem || '');
+  S.lf.photos = phList('cek.' + k).filter(function (s) { return s.d; }).map(function (s) { return s.d; }).slice(0, 4);
   render();
 }
-function qCard(n, title, hint, body) {
-  return '<div class="q' + (S.sv.bad['q' + n] ? ' bad' : '') + '" id="q' + n + '"><div class="qh"><span class="qn">' + n + '</span><div><div class="qt">' + title + '</div><div class="qs">' + hint + '</div></div></div>' + body + '</div>';
-}
-function inp(path, val, ph, extra) { return '<input class="in sm" value="' + esc(val || '') + '" placeholder="' + esc(ph || '') + '" oninput="svSet(\'' + path + '\',this.value)"' + (extra || '') + '>'; }
-function sel(path, val, opts) { return '<select class="in sm" onchange="svSet(\'' + path + '\',this.value)">' + opts.map(function (o) { var v = typeof o === 'string' ? o : o[0]; return '<option value="' + esc(v) + '"' + (v === val ? ' selected' : '') + '>' + esc(typeof o === 'string' ? o : lbl2(o)) + '</option>'; }).join('') + '</select>'; }
-function stepper(path, val) { return '<div class="qty"><button onclick="svSet(\'' + path + '\',Math.max(1,(' + (val || 1) + ')-1));render()">−</button><b>' + (val || 1) + '</b><button onclick="svSet(\'' + path + '\',' + (val || 1) + '+1);render()">+</button></div>'; }
-function rm(list, i) { return '<button class="rm" onclick="S.sv.a.' + list + '.splice(' + i + ',1);render()">×</button>'; }
-function vSurvey() {
-  var a = S.sv.a, O = S.home.out || {}, h = '<div class="page"><button class="back" onclick="go(\'home\')">' + t('back') + '</button><h2>' + t('svT') + '</h2>' +
-    '<div class="guide">' + t('svIntro') + '</div>' + (S.svEarly && !O.open ? '<div class="alert" style="margin:10px 0 0">' + t('svEarly')(O.end) + '</div>' : '');
-  // 1 没买成
-  var b1 = svYN('q1', t('yes'), t('no'));
-  if (a.q1 === 'yes') b1 += a.lost.map(function (r, i) { var p = 'lost.' + i + '.';
-    return '<div class="rowb">' + rm('lost', i) + '<label class="f">' + t('prod') + '</label>' + inp(p + 'product', r.product, t('ph1')) +
-      '<div class="two"><div><label class="f">' + t('cat') + '</label>' + sel(p + 'cat', r.cat, [['', '—']].concat(CATS)) + '</div>' +
-      '<div><label class="f">' + t('why') + '</label>' + sel(p + 'why', r.why, WHY) + '</div></div><label class="f">' + t('howMany') + '</label>' + stepper(p + 'n', r.n) + '</div>'; }).join('') +
-    '<button class="add" onclick="S.sv.a.lost.push({cat:\'\',why:WHY[0][0],n:1});render()">' + t('addProd') + '</button>' +
-    '<label class="f">' + t('n1L') + '</label><textarea class="in" placeholder="' + esc(t('ph1n')) + '" oninput="svSet(\'n1\',this.value)">' + esc(a.n1 || '') + '</textarea>';
-  // 2 竞品
-  var b2 = svYN('q2', t('yes'), t('no')) + (a.q2 === 'yes' ? '<label class="f">' + t('n2L') + '</label><textarea class="in" placeholder="' + esc(t('ph2')) + '" oninput="svSet(\'n2\',this.value)">' + esc(a.n2 || '') + '</textarea>' : '');
-  // 3 影响销售
-  var b3 = svYN('q3', t('yes'), t('normalDay'));
-  if (a.q3 === 'yes') b3 += '<div class="chips">' + FACT.map(function (f) { var on = a.factors.indexOf(f[0]) >= 0; return '<button class="' + (on ? 'on' : '') + '" onclick="svFact(\'' + esc(f[0]).replace(/'/g, '\\\'') + '\')">' + esc(lbl2(f)) + '</button>'; }).join('') + '</div>' +
-    '<label class="f">' + t('n3L') + '</label><textarea class="in" placeholder="' + esc(t('ph3')) + '" oninput="svSet(\'n3\',this.value)">' + esc(a.n3 || '') + '</textarea>';
-  // 4 质量 / 退换
-  var b4 = svYN('q4', t('yes'), t('no'));
-  if (a.q4 === 'yes') b4 += a.quality.map(function (r, i) { var p = 'quality.' + i + '.';
-    return '<div class="rowb">' + rm('quality', i) + '<label class="f">' + t('prod') + '</label>' + inp(p + 'product', r.product, t('ph4')) +
-      '<div class="two"><div><label class="f">' + t('problem') + '</label>' + sel(p + 'type', r.type, QT) + '</div><div><label class="f">' + t('qtyL') + '</label>' + stepper(p + 'n', r.n) + '</div></div>' +
-      '<label class="f">' + t('whatHap') + '</label>' + inp(p + 'note', r.note, t('ph4n')) + '</div>'; }).join('') +
-    '<button class="add" onclick="S.sv.a.quality.push({type:QT[0][0],n:1});render()">' + t('addOne') + '</button>';
-  var b5 = '<textarea class="in" style="margin-top:10px" placeholder="' + esc(t('ph5')) + '" oninput="svSet(\'n5\',this.value)">' + esc(a.n5 || '') + '</textarea>';
-  return h + qCard(1, t('q1T'), t('q1H'), b1) + qCard(2, t('q2T'), t('q2H'), b2) + qCard(3, t('q3T'), t('q3H'), b3) + qCard(4, t('q4T'), t('q4H'), b4) + qCard(5, t('q5T'), t('q5H'), b5) +
-    (Object.keys(S.sv.bad).length ? '<div class="alert" style="margin:0 0 4px">' + t('svErr') + '</div>' : '') +
-    '<button class="btn" onclick="sendSurvey()">' + t('svSend') + '</button></div>';
-}
-function svFact(f) { var x = S.sv.a.factors, i = x.indexOf(f); if (i >= 0) x.splice(i, 1); else x.push(f); render(); }
-function sendSurvey() {
-  var a = S.sv.a, bad = {}, has = function (v) { return String(v || '').trim() !== ''; };
-  ['q1', 'q2', 'q3', 'q4'].forEach(function (q) { if (a[q] !== 'yes' && a[q] !== 'no') bad[q] = 1; });
-  if (a.q1 === 'yes' && !a.lost.some(function (r) { return has(r.product); })) bad.q1 = 1;
-  if (a.q2 === 'yes' && !has(a.n2)) bad.q2 = 1;
-  if (a.q3 === 'yes' && (!a.factors.length || !has(a.n3))) bad.q3 = 1;
-  if (a.q4 === 'yes' && !a.quality.some(function (r) { return has(r.product); })) bad.q4 = 1;
-  S.sv.bad = bad;
-  if (Object.keys(bad).length) { render(); var el = document.getElementById(['q1', 'q2', 'q3', 'q4'].filter(function (q) { return bad[q]; })[0]); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
+XV.cek = function () {
+  var h = pageTop(t('stepN').cek);
+  if (!S.ck) ckEnter();
+  if (!S.ci || !S.ck) return h + '<div class="card">' + t('loading') + '</div></div>';
+  var sc = ckScreens(); if (S.ck.i >= sc.length) S.ck.i = sc.length - 1; var k = sc[S.ck.i], e = S.ck.err;
+  var nav = function (nextLbl, nextFn) { return '<div style="display:flex;gap:10px;margin-top:16px">' + (S.ck.i > 0 ? '<button class="btn ghost" style="flex:1;margin:0" onclick="ckGo(' + (S.ck.i - 1) + ')">' + t('prevB') + '</button>' : '') +
+    '<button class="btn" style="flex:2;margin:0" onclick="' + nextFn + '">' + nextLbl + '</button></div>'; };
+  if (k === 'cash') {
+    var c = S.ck.cash || {};
+    return h + '<div class="q"><div class="qt">' + t('cashT') + '</div><div style="font-size:16px;margin:8px 0">' + t('cashAsk')(fmtN(S.ci.cashAsk.amount)) + '</div>' +
+      segBtns([[true, t('sudah')], [false, t('belum')]], c.done, 'ckCashDone') +
+      (c.done === false ? '<label class="f">' + t('whyNot') + '</label><textarea class="in" oninput="ckCash(\'reason\',this.value)">' + esc(c.reason || '') + '</textarea>' : '') + errLine(e) + '</div>' + nav(t('nextB'), 'ckNext()') + '</div>';
+  }
+  if (k === 'rev') {
+    var issue = false, rows = CK_ITEMS.map(function (x, n) { var it = S.ck.items[x], er = ckItemErr(x), np = phList('cek.' + x).length; if (it.ok === false && it.fixed === false) issue = true;
+      return '<div onclick="ckGo(' + sc.indexOf(x) + ')" style="display:flex;justify-content:space-between;gap:10px;padding:12px 0;border-top:1px solid #eee;cursor:pointer"><div><b>' + (n + 1) + '. ' + t('cekT')[x] + '</b>' +
+        (it.ok === false ? '<div style="font-size:13px;color:' + (it.fixed ? 'var(--g)' : 'var(--r)') + '">' + esc(it.problem) + ' · ' + (it.fixed ? t('fixedY') : t('fixedN')) + (it.laporId ? ' · ' + t('laporDone') : '') + '</div>' : '') +
+        (er ? '<div style="font-size:13px;color:var(--r);font-weight:600">' + er + '</div>' : '') + '</div><div style="white-space:nowrap;font-size:14px">' + (it.ok === true ? '✓ OK' : it.ok === false ? '⚠' : '—') + ' · 📷 ' + np + '</div></div>'; }).join('');
+    var ps = phStat(CK_ITEMS.map(function (x) { return 'cek.' + x; }));
+    return h + '<div class="guide">' + t('cekRevS') + '</div><div class="card" style="margin:0 0 10px;padding:4px 14px">' + rows + '</div>' +
+      '<div style="font-size:18px;font-weight:700;margin:6px 0">Status: ' + (issue ? '<span style="color:var(--r)">' + t('issue') + '</span>' : '<span style="color:var(--ok)">' + t('ready') + '</span>') + '</div>' +
+      phBar(CK_ITEMS.map(function (x) { return 'cek.' + x; })) + geoStat() + errLine(e) +
+      nav(t('cekSend'), 'ckSend()').replace('<button class="btn" style', '<button class="btn"' + (ps.up ? ' disabled' : '') + ' style') + '</div>';
+  }
+  var it = S.ck.items[k], n = CK_ITEMS.indexOf(k) + 1, chk = k === 'depan' && S.ci.front === 'open' ? t('cekC').depanOpen : t('cekC')[k];
+  var b = '<div style="font-size:13px;color:var(--g);font-weight:700">' + t('stepOf')(n) + '</div><div style="height:6px;background:#eee;border-radius:3px;margin:6px 0 12px"><div style="height:6px;width:' + Math.round(n / 6 * 100) + '%;background:#000;border-radius:3px"></div></div>' +
+    '<div class="q"><div class="qt" style="font-size:20px">' + t('cekT')[k] + '</div><div style="font-size:16px;margin:8px 0">' + chk + '</div><div class="qs">📷 ' + t('cekF')[k] + '</div>' +
+    segBtns([[true, t('okL')], [false, t('badL')]], it.ok, 'ckOk' + '') +
+    phGrid('cek.' + k, 4, 'environment') + phBar(['cek.' + k]);
+  if (it.ok === false) {
+    b += '<label class="f">' + t('probQ') + '</label><textarea class="in" oninput="' + oc('ckTxt', k, '__V__').replace('&quot;__V__&quot;', 'this.value') + '">' + esc(it.problem || '') + '</textarea>' +
+      segBtns([[true, t('fixedY')], [false, t('fixedN')]], it.fixed, 'ckFix');
+    if (it.fixed === false) b += it.laporId ? '<div style="margin-top:10px;color:var(--ok);font-weight:700">' + t('laporDone') + '</div>' : '<button class="add" style="margin-top:12px" onclick="' + oc('ckLapor', k) + '">🔧 ' + t('laporGo') + '</button>';
+  }
+  return h + b + errLine(e) + '</div>' + nav(t('nextB'), 'ckNext()') + '</div>';
+};
+function ckOk(v) { ckSet(ckScreens()[S.ck.i], 'ok', v); }
+function ckFix(v) { ckSet(ckScreens()[S.ck.i], 'fixed', v); }
+function ckCashDone(v) { ckCash('done', v); }
+function ckSend() {
+  var sc = ckScreens();
+  for (var j = 0; j < CK_ITEMS.length; j++) { var er = ckItemErr(CK_ITEMS[j]); if (er || !phIds('cek.' + CK_ITEMS[j]).length) { S.ck.err = null; return ckGo(sc.indexOf(CK_ITEMS[j])); } }
+  if (phStat(CK_ITEMS.map(function (x) { return 'cek.' + x; })).up) return toast(t('upWait'));
+  if (!geoOk()) return needGeo(ckSend);
+  var items = CK_ITEMS.map(function (k) { var it = S.ck.items[k]; return { item: k, ok: it.ok, problem: it.problem, fixed: it.fixed, laporId: it.laporId || '', photos: phIds('cek.' + k) }; });
+  var cash = S.ci && S.ci.cashAsk && S.ck.cash ? { done: S.ck.cash.done, reason: S.ck.cash.reason || '' } : null;
   busy(t('sending'));
-  api('submitSurvey', [S.sess.token, { storeId: S.home.store.id, early: !!S.svEarly, a: a }], 2).then(function (r) {
-    busy(); if (!r.ok) return toast(r.err === 'NOT_OPEN' ? t('workS2')(S.home.out.openAt) : r.err === 'INCOMPLETE' ? t('svErr') : t('err'));
-    if (S.home.out) { S.home.out.survey = { time: r.time }; S.home.out.needStore = r.needStore; }
-    S.res = { kind: 'survey', time: r.time, needStore: r.needStore }; S.view = 'res'; render(); window.scrollTo(0, 0); loadHome();
+  api('submitCek', [S.sess.token, { storeId: S.home.store.id, items: items, cash: cash, geo: geoArg(), startedAt: S.ck.startedAt }], 2).then(function (r) {
+    busy();
+    if (!r.ok && r.err === 'NO_GEO') { S.geo = null; return geoFail(ckSend); }
+    if (!r.ok && r.err === 'INCOMPLETE') { var k = (r.items || [])[0]; if (k === 'cash') return ckGo(0); if (k) { S.ck.err = ckItemErr(k) || t('min1'); return ckGo(sc.indexOf(k)); } }
+    if (!r.ok) return toast(t('err'));
+    var CK = S.ck, cashA = S.ci && S.ci.cashAsk && CK.cash ? { amount: S.ci.cashAsk.amount, done: CK.cash.done, reason: CK.cash.reason } : null;
+    var srcs = {}; CK_ITEMS.forEach(function (k) { srcs[k] = shPhSrc(CK.ph['cek.' + k]).slice(0, 1); });   // 2026-11-22 Victory 定：每项只带第一张照片（手机差也不卡），全部照片在 LK Hub 看
+    dDel('cek'); S.ck = null; S.ci = null;
+    if (r.dup) return afterStep(r.status === 'ISSUE' ? t('issue') : t('ready'), r.time);
+    afterStep(r.status === 'ISSUE' ? t('issue') : t('ready'), r.time, cekText(r, CK.items, cashA), function () {
+      return shSeq(CK_ITEMS, function (k, i) { var it = CK.items[k];
+        return shCollage((i + 1) + '. ' + TX.id.cekT[k] + ' · ' + (it.ok ? 'OK' : 'ADA MASALAH'), it.ok ? '' : it.problem + ' (' + (it.fixed ? 'sudah diperbaiki' : 'belum bisa diperbaiki' + (it.laporId ? ', sudah lapor' : '')) + ')', !it.ok && !it.fixed, srcs[k])
+          .then(function (b) { return b ? shFile(b, 'cek_' + (i + 1) + '_' + k + '.jpg') : null; }).catch(function () { return null; }); });
+    });
   }).catch(function () { busy(); toast(t('err')); });
 }
-// 门店数据（关店班）：照 POS 日报填，POS 日报截图必须
-function fld(obj, k, lbl, isMoney) {
-  return '<label class="f">' + lbl + '</label><input class="in" inputmode="numeric" value="' + esc(S.cd[obj][k] !== undefined && S.cd[obj][k] !== '' ? (isMoney ? num(S.cd[obj][k]).toLocaleString('en-US') : S.cd[obj][k]) : '') + '" oninput="S.cd.' + obj + '.' + k + '=this.value' + (isMoney ? ';document.getElementById(\'tot\').textContent=money(num(S.cd.sales.cash)+num(S.cd.sales.qris)+num(S.cd.sales.grab))' : '') + '">';
+
+// ---------- ③ 下班问卷：6 题（1–5 必答），交了以后能「Tambah」补充 ----------
+var SV_CATS = [['Device', 'device'], ['Cartridge', 'cartridge'], ['Liquid', 'liquid'], ['Lainnya', '其他']];
+var LOST_WHY2 = [['Stok habis', '断货'], ['Varian atau nikotin tidak ada', '口味或尼古丁浓度没有'], ['Harga kemahalan', '嫌贵'], ['Lainnya', '其他']];
+function lblZ(x) { return L === 'zh' ? x[1] : x[0]; }
+function svNew2() { return { a: { lost: [], ask: [], quality: [], factors: [] }, bad: {}, startedAt: new Date().toISOString() }; }
+function svEnter() {
+  var F = flow() || {}; S.svApp = !!F.survey;
+  var d = dLoad(S.svApp ? 'svadd' : 'sv'); S.sv = d && d.a ? d : svNew2(); S.sv.bad = {};
 }
-function vStoreData() {
-  var c = S.cd;
-  return '<div class="page"><button class="back" onclick="go(\'home\')">' + t('back') + '</button><h2>' + t('sdT') + '</h2><div class="guide">' + t('sdIntro') + '</div>' +
-    '<div class="q"><div class="qt">' + t('secSales') + '</div><div class="qs">' + t('zeroHint') + '</div>' + fld('sales', 'cash', t('cash'), 1) + fld('sales', 'qris', t('qris'), 1) + fld('sales', 'grab', t('grab'), 1) +
-    '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;font-weight:700"><span>' + t('total') + '</span><span style="font-size:20px" id="tot">' + money(num(c.sales.cash) + num(c.sales.qris) + num(c.sales.grab)) + '</span></div>' +
-    '<label class="f">' + t('shot') + '</label><div style="display:flex;gap:8px">' + c.shots.map(function (d, i) { return '<div style="position:relative;width:30%"><img src="' + d + '" style="width:100%;border-radius:8px;display:block"><button class="rm" style="background:#fff;border-radius:50%" onclick="S.cd.shots.splice(' + i + ',1);render()">×</button></div>'; }).join('') +
-    (c.shots.length < 2 ? '<label for="shot" class="photo" style="width:30%;aspect-ratio:3/4;margin:0;font-size:28px">+</label>' : '') + '</div><input id="shot" type="file" accept="image/*" style="display:none" onchange="pick(this,\'shot\')"></div>' +
-    '<div class="q"><div class="qt">' + t('secCust') + '</div><div class="qs">' + t('zeroHint') + '</div>' + ['visitors', 'buyers', 'googleReview', 'waJoin', 'wechatJoin', 'igFollow'].map(function (k) { return fld('cust', k, t(k)); }).join('') + '</div>' +
-    '<div class="q"><div class="qt">' + t('secSO') + '</div><label class="toggle">' + t('soDone') + '<input type="checkbox" ' + (c.so.done ? 'checked' : '') + ' onchange="S.cd.so.done=this.checked;render()"></label>' +
-    (c.so.done ? '<label class="f">' + t('soBrands') + '</label><input class="in" value="' + esc(c.so.brands || '') + '" oninput="S.cd.so.brands=this.value"><label class="f">' + t('soDiff') + '</label><input class="in" value="' + esc(c.so.diff || '') + '" oninput="S.cd.so.diff=this.value">' : '') + '</div>' +
-    '<button class="btn" onclick="sendStoreData()">' + t('sdSend') + '</button></div>';
+function svSave() { dSave(S.svApp ? 'svadd' : 'sv', S.sv); }
+function svSet(path, v) { var o = S.sv.a, k = path.split('.'); for (var i = 0; i < k.length - 1; i++) o = o[k[i]]; o[k[k.length - 1]] = v; svSave(); }
+function svPick(q, v) {
+  var a = S.sv.a; a[q] = v; delete S.sv.bad[q];
+  if (v === 'yes' && q === 'q1' && !a.lost.length) a.lost.push({ cat: '', why: '', n: 1 });
+  if (v === 'yes' && q === 'q2' && !a.ask.length) a.ask.push({ cat: '', n: 1 });
+  if (v === 'yes' && q === 'q5' && !a.quality.length) a.quality.push({ type: QT[0][0], n: 1 });
+  svSave(); render();
 }
-function sendStoreData() {
-  var c = S.cd, filled = function (o, k) { return String(o[k] == null ? '' : o[k]).trim() !== ''; };
-  if (!['cash', 'qris', 'grab'].every(function (k) { return filled(c.sales, k); }) || !['visitors', 'buyers'].every(function (k) { return filled(c.cust, k); }) || !c.shots.length) return toast(t('sdErr'));
-  if (num(c.cust.buyers) > num(c.cust.visitors)) return toast(t('buyersErr'));
-  if (c.so.done && (!String(c.so.brands || '').trim() || !String(c.so.diff || '').trim())) return toast(t('soErr'));
-  busy(t('upl'));
-  Promise.all(c.shots.map(function (d, i) { return upload(d, 'pos' + i); })).then(function (ids) {
-    busy(t('sending'));
-    return api('submitStoreData', [S.sess.token, { storeId: S.home.store.id, sales: c.sales, salesPhotos: ids, cust: c.cust, so: c.so }], 2);
-  }).then(function (r) {
-    busy(); if (!r.ok) return toast(t('err'));
-    S.lastShare = r.dup ? null : { text: shareText(), files: c.shots.slice() };
-    if (S.home.out) { S.home.out.needStore = false; S.home.out.storeData = { nick: S.sess.user.nick, name: S.sess.user.fullName, time: r.time }; }
-    S.res = { kind: 'store', time: r.time, by: r.dup ? r.by : null }; S.view = 'res'; render(); window.scrollTo(0, 0); loadHome();
+function svYN2(q, noLbl) { var v = S.sv.a[q]; return '<div class="seg" style="margin-top:10px"><button class="' + (v === 'yes' ? 'on' : '') + '" onclick="svPick(\'' + q + '\',\'yes\')">' + t('yes') + '</button><button class="' + (v === 'no' ? 'on' : '') + '" onclick="svPick(\'' + q + '\',\'no\')">' + (noLbl || t('no')) + '</button></div>'; }
+function qCard2(n, title, hint, body) { return '<div class="q' + (S.sv.bad['q' + n] ? ' bad' : '') + '" id="q' + n + '"><div class="qh"><span class="qn">' + n + '</span><div><div class="qt">' + title + '</div>' + (hint ? '<div class="qs">' + hint + '</div>' : '') + '</div></div>' + body + (S.sv.bad['q' + n] ? errLine(S.sv.bad['q' + n] === 2 ? t('lineErr') : '') : '') + '</div>'; }
+function inp2(path, val, ph) { return '<input class="in sm" value="' + esc(val || '') + '" placeholder="' + esc(ph || '') + '" oninput="svSet(\'' + path + '\',this.value)">'; }
+function sel2(path, val, opts) { return '<select class="in sm" onchange="svSet(\'' + path + '\',this.value)"><option value="">—</option>' + opts.map(function (o) { return '<option value="' + esc(o[0]) + '"' + (o[0] === val ? ' selected' : '') + '>' + esc(lblZ(o)) + '</option>'; }).join('') + '</select>'; }
+function step2(path, val) { val = val || 1; return '<div class="qty"><button onclick="svSet(\'' + path + '\',Math.max(1,' + val + '-1));render()">−</button><b>' + val + '</b><button onclick="svSet(\'' + path + '\',' + (val + 1) + ');render()">+</button></div>'; }
+function rm2(list, i) { return '<button class="rm" onclick="S.sv.a.' + list + '.splice(' + i + ',1);svSave();render()">×</button>'; }
+function svLines(list, withWhy) {
+  var a = S.sv.a;
+  return a[list].map(function (r, i) { var p = list + '.' + i + '.';
+    return '<div class="rowb">' + rm2(list, i) + '<label class="f">' + t('prod') + '</label>' + inp2(p + 'product', r.product, t('ph1')) +
+      '<div class="two"><div><label class="f">' + t('catL') + '</label>' + sel2(p + 'cat', r.cat, SV_CATS) + '</div>' +
+      (withWhy ? '<div><label class="f">' + t('why') + '</label>' + sel2(p + 'why', r.why, LOST_WHY2) + '</div>' : '') + '</div>' +
+      '<label class="f">' + (withWhy ? t('howMany') : t('askHow')) + '</label>' + step2(p + 'n', r.n) + '</div>'; }).join('') +
+    '<button class="add" onclick="S.sv.a.' + list + '.push({cat:\'\',why:\'\',n:1});svSave();render()">' + t('addProd') + '</button>';
+}
+function svFact2(i) { var f = FACT[i][0], x = S.sv.a.factors, j = x.indexOf(f); if (j >= 0) x.splice(j, 1); else x.push(f); svSave(); render(); }
+function svQual() {
+  return S.sv.a.quality.map(function (r, i) { var p = 'quality.' + i + '.';
+    return '<div class="rowb">' + rm2('quality', i) + '<label class="f">' + t('prod') + '</label>' + inp2(p + 'product', r.product, t('ph4')) +
+      '<div class="two"><div><label class="f">' + t('problem') + '</label><select class="in sm" onchange="svSet(\'' + p + 'type\',this.value)">' + QT.map(function (o) { return '<option value="' + esc(o[0]) + '"' + (o[0] === r.type ? ' selected' : '') + '>' + esc(lbl2(o)) + '</option>'; }).join('') + '</select></div><div><label class="f">' + t('qtyL') + '</label>' + step2(p + 'n', r.n) + '</div></div>' +
+      '<label class="f">' + t('whatHap') + '</label>' + inp2(p + 'note', r.note, t('ph4n')) + '</div>'; }).join('') +
+    '<button class="add" onclick="S.sv.a.quality.push({type:QT[0][0],n:1});svSave();render()">' + t('addOne') + '</button>';
+}
+function txa(path, val, ph) { return '<textarea class="in" placeholder="' + esc(ph || '') + '" oninput="svSet(\'' + path + '\',this.value)">' + esc(val || '') + '</textarea>'; }
+function factChips() {
+  var a = S.sv.a, hit = a.factors.some(function (f) { return /EDC|Listrik/.test(f); });
+  return '<div class="chips">' + FACT.map(function (f, i) { var on = a.factors.indexOf(f[0]) >= 0; return '<button class="' + (on ? 'on' : '') + '" onclick="svFact2(' + i + ')">' + esc(lbl2(f)) + '</button>'; }).join('') + '</div>' +
+    (hit ? '<div class="info" style="margin:10px 0 0">' + t('fixHint') + ' <button class="add" style="margin-top:6px" onclick="lpNew(\'repair\')">🔧 ' + t('laporGo') + '</button></div>' : '');
+}
+XV.survey = function () {
+  if (!S.sv) svEnter();
+  var a = S.sv.a, F = flow() || {};
+  if (S.svApp) {
+    return pageTop(t('svAddT')) + '<div class="guide">' + t('svAddS') + '</div>' +
+      qCard2(1, t('q1T'), t('q1H'), svLines('lost', true) + '<label class="f">' + t('n1L') + '</label>' + txa('n1', a.n1, t('ph1n'))) +
+      qCard2(2, t('q2T2'), t('q2H2'), svLines('ask', false)) +
+      qCard2(3, t('q3T2'), t('q3H2'), txa('n3', a.n3, t('ph2'))) +
+      qCard2(4, t('q3T'), t('q3H'), factChips() + '<label class="f">' + t('n3L') + '</label>' + txa('n4', a.n4, t('ph3'))) +
+      qCard2(5, t('q4T'), t('q4H'), svQual()) + qCard2(6, t('q6T'), t('q5H'), txa('n6', a.n6, t('ph5'))) +
+      '<button class="btn" onclick="svSend()">' + t('svAdd') + '</button></div>';
+  }
+  var early = F.next === 'work' || !!S.earlyGo;
+  var h = pageTop(t('stepN').survey) + '<div class="guide">' + t('svIntro') + '</div>' + (early && F.end ? '<div class="alert" style="margin:0 0 10px">' + t('svEarly')(F.end) + '</div>' : '');
+  var b1 = svYN2('q1') + (a.q1 === 'yes' ? svLines('lost', true) + '<label class="f">' + t('n1L') + '</label>' + txa('n1', a.n1, t('ph1n')) : '');
+  var b2 = svYN2('q2') + (a.q2 === 'yes' ? svLines('ask', false) : '');
+  var b3 = svYN2('q3') + (a.q3 === 'yes' ? '<label class="f">' + t('n2L') + '</label>' + txa('n3', a.n3, t('ph2')) : '');
+  var b4 = svYN2('q4', t('normalDay')) + (a.q4 === 'yes' ? factChips() + '<label class="f">' + t('n3L') + '</label>' + txa('n4', a.n4, t('ph3')) : '');
+  var b5 = svYN2('q5') + (a.q5 === 'yes' ? svQual() : '');
+  var b6 = txa('n6', a.n6, t('ph5'));
+  return h + qCard2(1, t('q1T'), t('q1H'), b1) + qCard2(2, t('q2T2'), t('q2H2'), b2) + qCard2(3, t('q3T2'), t('q3H2'), b3) + qCard2(4, t('q3T'), t('q3H'), b4) + qCard2(5, t('q4T'), t('q4H'), b5) + qCard2(6, t('q6T'), t('q5H'), b6) +
+    (Object.keys(S.sv.bad).length ? '<div class="alert" style="margin:0 0 4px">' + t('svErr2') + '</div>' : '') + '<button class="btn" onclick="svSend()">' + t('svSend') + '</button></div>';
+};
+function svSend() {
+  var a = S.sv.a, bad = {}, has = function (v) { return String(v || '').trim() !== ''; };
+  var linesOk = function (arr, why) { var f = arr.filter(function (r) { return has(r.product); }); return f.length && f.every(function (r) { return r.cat && r.n > 0 && (!why || r.why); }); };
+  if (!S.svApp) {
+    ['q1', 'q2', 'q3', 'q4', 'q5'].forEach(function (q) { if (a[q] !== 'yes' && a[q] !== 'no') bad[q] = 1; });
+    if (a.q1 === 'yes' && !linesOk(a.lost, true)) bad.q1 = 2;
+    if (a.q2 === 'yes' && !linesOk(a.ask, false)) bad.q2 = 2;
+    if (a.q3 === 'yes' && !has(a.n3)) bad.q3 = 1;
+    if (a.q4 === 'yes' && (!a.factors.length || !has(a.n4))) bad.q4 = 1;
+    if (a.q5 === 'yes' && !a.quality.some(function (r) { return has(r.product); })) bad.q5 = 1;
+  } else {
+    if (a.lost.some(function (r) { return has(r.product); }) && !linesOk(a.lost, true)) bad.q1 = 2;
+    if (a.ask.some(function (r) { return has(r.product); }) && !linesOk(a.ask, false)) bad.q2 = 2;
+  }
+  S.sv.bad = bad;
+  if (Object.keys(bad).length) { render(); var el = document.getElementById(Object.keys(bad)[0]); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
+  var F = flow() || {}, early = F.next === 'work' || !!S.earlyGo;
+  busy(t('sending'));
+  api('submitSurvey', [S.sess.token, { storeId: S.home.store.id, early: early, append: S.svApp, a: a, startedAt: S.sv.startedAt }], 2).then(function (r) {
+    busy();
+    if (!r.ok) return toast(r.err === 'NOT_OPEN' ? t('workS3')(F.surveyOpenAt || '') : r.err === 'EMPTY' ? t('svAddEmpty') : r.err === 'INCOMPLETE' ? t('svErr2') : t('err'));
+    dDel(S.svApp ? 'svadd' : 'sv'); var app = S.svApp; S.sv = null; S.earlyGo = 0;
+    afterStep(app ? t('svAddDone') : t('svDone'), r.time);
   }).catch(function () { busy(); toast(t('err')); });
 }
-// 下班打卡：自拍；关店班加锁门照。这个时间就是下班时间
-function vPulang() {
-  var O = S.home.out || {}, c = S.po;
-  return '<div class="page"><button class="back" onclick="go(\'home\')">' + t('back') + '</button><h2>' + t('poT') + '</h2><div class="guide">' + t('poIntro')(O.end || '') + '</div>' + geoStat() +
-    '<label class="f">' + t('selfieOut') + '</label><label class="photo" for="cam" style="aspect-ratio:1">' + (c.selfie ? '<img src="' + c.selfie + '">' : '<span style="padding:0 24px;text-align:center">' + t('selfieHint') + '</span>') + '</label><input id="cam" type="file" accept="image/*" capture="user" style="display:none" onchange="pick(this,\'selfie\')">' +
-    (O.closing ? '<label class="f">' + t('lock') + '</label><label class="photo" for="lk" style="aspect-ratio:4/3">' + (c.lock ? '<img src="' + c.lock + '">' : '<span style="padding:0 24px;text-align:center">' + t('lockHint') + '</span>') + '</label><input id="lk" type="file" accept="image/*" capture="environment" style="display:none" onchange="pick(this,\'lock\')">' : '') +
-    '<button class="btn" onclick="sendPulang()"' + (c.selfie && (!O.closing || c.lock) ? '' : ' disabled') + '>' + t('poSend') + '</button></div>';
+
+// ---------- ④ 营业日报：每屏一组，最后「Periksa lagi」；交的人当晚 23:59 前能改 ----------
+function rpNew() { return { i: 0, sales: {}, cust: {}, fans: {}, cash: {}, ph: {}, phN: {}, startedAt: new Date().toISOString() }; }
+function rpEnter() {
+  S.ri = null; S.rp = null; S.rpCan = null;
+  api('reportInfo', [S.sess.token, { storeId: S.home.store.id }]).then(function (r) {
+    if (!r.ok) { toast(r.err === 'NO_ABSEN' ? t('err') : t('err')); return go('home'); }
+    S.ri = r;
+    var d = dLoad('rp');
+    if (r.mine && !(d && d.edit)) { var m = r.mine; d = rpNew(); d.edit = true;
+      d.sales = { cash: m.cash, qris: m.qris, grab: m.grab }; d.cust = { visitors: m.visitors, buyers: m.buyers, waOrder: m.waOrder };
+      d.fans = { waNew: m.waNew, waTotal: m.waTotal, commHas: m.commHas, commNew: m.commNew, commTotal: m.commTotal, wechatHas: m.wechatHas, wechatNew: m.wechatNew, wechatTotal: m.wechatTotal, googleNew: m.googleNew, googleTotal: m.googleTotal };
+      d.cash = { status: m.cashStatus, amount: m.cashLeft, reason: (m.cashReason || '').split(':')[0], note: (m.cashReason || '').split(': ').slice(1).join(': '), when: m.cashWhen === 'besok' ? 'Besok pagi' : m.cashWhen };
+      d.ph = { 'rp.pos': m.photos.map(function (u) { return { id: u, url: u, st: 'ok' }; }) }; }
+    if (!d || !d.sales) d = rpNew();
+    for (var k in (d.ph || {})) d.ph[k] = d.ph[k].filter(function (s) { return s.st === 'ok'; });
+    if (d.fans.commHas == null && r.commHas != null) d.fans.commHas = r.commHas;
+    if (d.fans.wechatHas == null && r.wechatHas != null) d.fans.wechatHas = r.wechatHas;
+    S.rp = d; if (S.view === 'report') render();
+  }).catch(function () { toast(t('err')); go('home'); });
 }
-function sendPulang() {
-  var c = S.po, O = S.home.out || {};
-  if (!c.selfie) return toast(t('needPhoto')); if (O.closing && !c.lock) return toast(t('needLock'));
-  if (!geoOk()) return needGeo(sendPulang);
-  busy(t('upl'));
-  var ups = [upload(c.selfie, 'pulang')]; if (O.closing) ups.push(upload(c.lock, 'kunci'));
-  Promise.all(ups).then(function (ids) { busy(t('sending')); return api('checkOut', [S.sess.token, { storeId: S.home.store.id, photo: ids[0], lockPhoto: ids[1] || '', geo: geoArg() }], 2); })
-    .then(function (r) {
-      busy(); if (!r.ok && r.err === 'NO_GEO') { S.geo = null; return geoFail(sendPulang); } if (!r.ok) return toast(r.err === 'NEED_STORE' ? t('sdNeed') : r.err === 'NO_SURVEY' ? t('svNeed') : t('err'));
-      if (S.home.out) S.home.out.done = { time: r.time };
-      S.res = { kind: 'pulang', time: r.time }; S.view = 'res'; render(); window.scrollTo(0, 0); loadHome();
-    }).catch(function () { busy(); toast(t('err')); });
+function rpSet(g, k, v) { S.rp[g][k] = v; S.rp.err = null; dSave('rp', S.rp); }
+function rpNum(el, g, k, money) { var v = String(el.value).replace(/[^0-9]/g, ''); el.value = v === '' ? '' : (money ? Number(v).toLocaleString('en-US') : String(Number(v))); rpSet(g, k, v); rpLive(); }
+function rpPick(g, k, v) { S.rp[g][k] = v; S.rp.err = null; dSave('rp', S.rp); render(); }
+function rpTot() { var s = S.rp.sales; return n0(s.cash) + n0(s.qris) + n0(s.grab); }
+function rpLive() { var e = document.getElementById('rpTot'); if (e) e.textContent = money(rpTot()); ['wa', 'comm', 'wechat', 'google'].forEach(function (x) { var r = document.getElementById('ref_' + x); if (r) r.outerHTML = rpRef(x); }); }
+function rpField(g, k, lbl, money, hint) {
+  var v = S.rp[g][k], val = v === undefined || v === null || v === '' ? '' : (money ? fmtN(v) : String(n0(v)));
+  return '<label class="f">' + lbl + '</label><input class="in" inputmode="numeric" pattern="[0-9]*" value="' + val + '" oninput="' + oc('rpNum', '__E__', g, k, !!money).replace('&quot;__E__&quot;', 'this') + '">' + (hint || '');
 }
-// 分享到 WhatsApp 门店群：门店数据按门店现在的日报格式排好，POS 截图一起带上（手机支持时）
-function shareText() {
-  var c = S.cd, H = S.home, u = S.sess.user;
-  return ['🌙 LAPORAN PENUTUPAN HARIAN', '', '📅 Tanggal : ' + H.local.date, '📍 Toko : ' + H.store.name, '👤 Vaporista : ' + u.fullName, '',
-    '💵 Tunai : ' + money(c.sales.cash), '• GRAB MERCHANT : ' + money(c.sales.grab), '📱 QRIS/EDC : ' + money(c.sales.qris), '💰 Penjualan Hari Ini : ' + money(num(c.sales.cash) + num(c.sales.qris) + num(c.sales.grab)), '',
-    '👥 LAPORAN PELANGGAN', '• Jumlah Pengunjung : ' + num(c.cust.visitors), '• Jumlah Customer Membeli : ' + num(c.cust.buyers), '• Google Review : ' + num(c.cust.googleReview),
-    '• Customer Bergabung WA Toko : ' + num(c.cust.waJoin), '• Customer Bergabung WeChat Toko : ' + num(c.cust.wechatJoin), '• Follow Instagram : ' + num(c.cust.igFollow), '',
-    '📋 Stock opname : ' + (c.so.done ? (c.so.brands || '-') + ' · Selisih : ' + (c.so.diff || '0') : '-')].join('\n');
+function rpRef(x) {
+  var P = S.ri && S.ri.prev, f = S.rp.fans, nw = f[x + 'New'], tot = f[x + 'Total'], prev = P ? P[x] : null;
+  if (prev == null || nw === undefined || nw === '' || nw === null) return '<div id="ref_' + x + '"></div>';
+  var c = Number(prev) + n0(nw), bad = tot !== undefined && tot !== '' && tot !== null && n0(tot) !== c;
+  return '<div id="ref_' + x + '" style="font-size:13px;margin-top:4px;' + (bad ? 'color:#8a6d00;background:#fff3c4;padding:4px 8px;border-radius:6px' : 'color:var(--g)') + '">' + t('refL')(fmtN(prev), n0(nw), fmtN(c)) + (bad ? '<br>' + t('refBad') : '') + '</div>';
 }
-function share() {
-  var sh = S.lastShare; if (!sh) return;
-  var files = [];
-  try { files = sh.files.map(function (d, i) { var b = atob(d.split(',')[1]), a = new Uint8Array(b.length); for (var j = 0; j < b.length; j++) a[j] = b.charCodeAt(j); return new File([a], 'foto' + (i + 1) + '.jpg', { type: 'image/jpeg' }); }); } catch (e) { files = []; }
-  if (navigator.canShare && files.length && navigator.canShare({ files: files })) { navigator.share({ text: sh.text, files: files }).catch(function () {}); return; }
-  if (navigator.share) { navigator.share({ text: sh.text }).catch(function () {}); return; }
-  location.href = 'https://wa.me/?text=' + encodeURIComponent(sh.text);
+function rpFan(x, lbl) { return '<div style="margin-top:12px;font-weight:700">' + lbl + '</div><div class="two"><div>' + rpField('fans', x + 'New', t('newT')) + '</div><div>' + rpField('fans', x + 'Total', t('totNow')) + '</div></div>' + rpRef(x); }
+function rpErrs() {
+  var r = S.rp, s = r.sales, c = r.cust, f = r.fans, ca = r.cash, e = {}, has = function (v) { return v !== undefined && v !== null && String(v) !== ''; };
+  if (!has(s.cash) || !has(s.qris) || !has(s.grab)) e[0] = t('zero');
+  else if (!phIds('rp.pos').length) e[0] = t('rpShot');
+  if (!has(c.visitors) || !has(c.buyers) || !has(c.waOrder)) e[1] = t('zero'); else if (n0(c.buyers) > n0(c.visitors)) e[1] = t('rpBuyErr');
+  if (!has(f.waNew) || !has(f.waTotal) || !has(f.googleNew) || !has(f.googleTotal) || f.commHas == null || f.wechatHas == null || (f.commHas && (!has(f.commNew) || !has(f.commTotal))) || (f.wechatHas && (!has(f.wechatNew) || !has(f.wechatTotal)))) e[2] = t('fixRed');
+  if (ca.status !== 'ALL' && ca.status !== 'LEFT') e[3] = t('fixRed');
+  else if (ca.status === 'LEFT' && (n0(ca.amount) <= 0 || !ca.reason || (ca.reason === 'Lainnya' && !String(ca.note || '').trim()) || !ca.when || ca.when === 'pick')) e[3] = t('fixRed');
+  return e;
 }
+function rpGo(i) { S.rp.i = i; S.rp.err = null; dSave('rp', S.rp); render(); window.scrollTo(0, 0); }
+function rpNext() { var e = rpErrs(); if (e[S.rp.i]) { S.rp.err = e[S.rp.i]; return render(); } rpGo(S.rp.i + 1); }
+function rpView(V, title) {
+  var row = function (a, b) { return '<div style="display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid #f0efeb;font-size:15px"><span style="color:var(--g)">' + a + '</span><b style="text-align:right">' + b + '</b></div>'; };
+  var fan = function (lbl, n, tot) { return row(lbl, n0(n) + ' · Total ' + fmtN(tot)); };
+  return '<div class="card" style="margin:0 0 10px">' + (title ? '<h3>' + title + '</h3>' : '') + row(t('rpCash'), money(V.cash)) + row(t('rpQris'), money(V.qris)) + row(t('rpGrab'), money(V.grab)) + row('<b>' + t('rpTotal') + '</b>', money(V.total)) +
+    row(t('rpVis'), n0(V.visitors)) + row(t('rpBuy'), n0(V.buyers)) + row(t('rpWa'), n0(V.waOrder)) + fan(t('rpWaC'), V.waNew, V.waTotal) +
+    (V.commHas ? fan('WA Community', V.commNew, V.commTotal) : row('WA Community', t('tdk'))) + (V.wechatHas ? fan('WeChat', V.wechatNew, V.wechatTotal) : row('WeChat', t('tdk'))) + fan(t('rpGoogle'), V.googleNew, V.googleTotal) +
+    row(t('rpS4'), V.cashStatus === 'LEFT' ? money(V.cashLeft) + (V.cashWhen ? ' · ' + esc(V.cashWhen === 'besok' ? t('besok') : V.cashWhen) : '') : t('cashAll')) +
+    ((V.photos || []).length ? '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">' + V.photos.map(function (u) { return '<img src="' + esc(u) + '" style="width:30%;border-radius:8px">'; }).join('') + '</div>' : '') + '</div>';
+}
+XV.report = function () {
+  var h = pageTop(t('stepN').report);
+  if (!S.ri || !S.rp) return h + '<div class="card">' + t('loading') + '</div></div>';
+  var R = S.ri, F = flow() || {};
+  if (R.by) return h + '<div class="info" style="margin:0 0 10px">' + t('sendBy')(esc(R.by.name), R.by.time) + '</div>' + (R.view ? rpView(R.view) : '') + '<button class="btn ghost" onclick="go(\'home\')">' + t('back') + '</button></div>';
+  if (S.rpCan) return h + rpCannotForm() + '</div>';
+  var r = S.rp, e = r.err, i = r.i, tabs = [t('rpS1'), t('rpS2'), t('rpS3'), t('rpS4'), t('rpRev')];
+  var top = '<div style="display:flex;gap:4px;margin:0 0 12px">' + tabs.map(function (x, n) { return '<div style="flex:1;height:6px;border-radius:3px;background:' + (n <= i ? '#000' : '#e6e4df') + '"></div>'; }).join('') + '</div>' +
+    (r.edit ? '<div class="info" style="margin:0 0 10px">' + t('rpEditUntil') + '</div>' : '');
+  var nav = function (lbl, fn) { return '<div style="display:flex;gap:10px;margin-top:16px">' + (i > 0 ? '<button class="btn ghost" style="flex:1;margin:0" onclick="rpGo(' + (i - 1) + ')">' + t('prevB') + '</button>' : '') + '<button class="btn" style="flex:2;margin:0" onclick="' + fn + '">' + lbl + '</button></div>'; };
+  var can = F.mustReport && !r.edit ? '<div style="text-align:center;margin-top:16px"><a href="#" style="color:var(--r);font-weight:600" onclick="S.rpCan={};render();return false">' + t('cannotL') + ' ›</a></div>' : '';
+  var b = '';
+  if (i === 0) b = '<div class="guide">' + t('rpTop') + '</div><div class="q"><div class="qt">' + t('rpS1') + '</div><div class="qs">' + t('zero') + '</div>' +
+    rpField('sales', 'cash', t('rpCash'), 1) + rpField('sales', 'qris', t('rpQris'), 1) + rpField('sales', 'grab', t('rpGrab'), 1) +
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;font-weight:700"><span>' + t('rpTotal') + '</span><span style="font-size:20px" id="rpTot">' + money(rpTot()) + '</span></div>' +
+    '<label class="f">' + t('rpShot') + '</label>' + phGrid('rp.pos', 4, 'environment') + phBar(['rp.pos']) + errLine(e) + '</div>';
+  if (i === 1) b = '<div class="q"><div class="qt">' + t('rpS2') + '</div><div class="qs">' + t('zero') + '</div>' + rpField('cust', 'visitors', t('rpVis')) + rpField('cust', 'buyers', t('rpBuy')) + rpField('cust', 'waOrder', t('rpWa')) + errLine(e) + '</div>';
+  if (i === 2) { var f = r.fans;
+    b = '<div class="q"><div class="qt">' + t('rpS3') + '</div>' + rpFan('wa', t('rpWaC')) +
+      '<div style="margin-top:14px;font-weight:700">' + t('rpComm') + '</div>' + segBtns([[true, t('ya')], [false, t('tdk')]], f.commHas, 'rpComm') + (f.commHas ? rpFan('comm', 'WhatsApp Community') : '') +
+      '<div style="margin-top:14px;font-weight:700">' + t('rpWc') + '</div>' + segBtns([[true, t('ya')], [false, t('tdk')]], f.wechatHas, 'rpWc') + (f.wechatHas ? rpFan('wechat', 'WeChat') : '') +
+      rpFan('google', t('rpGoogle')) + errLine(e) + '</div>'; }
+  if (i === 3) { var c = r.cash, zh = L === 'zh';
+    b = '<div class="q"><div class="qt">' + t('rpS4') + '</div><div style="font-size:15px;margin:6px 0">' + t('rpCashQ') + '</div>' + (R.cashCarry > 0 ? '<div class="info" style="margin:6px 0">' + t('inclY')(fmtN(R.cashCarry)) + '</div>' : '') +
+      segBtns([['ALL', t('cashAll')], ['LEFT', t('cashLeft')]], c.status, 'rpCashSt');
+    if (c.status === 'LEFT') {
+      b += rpField('cash', 'amount', t('amtL'), 1) + '<label class="f">' + t('whyL') + '</label>' + segBtns(TX.id.cashWhy.map(function (x, n) { return [x, zh ? TX.zh.cashWhyZh[n] : x]; }), c.reason, 'rpCashWhy') +
+        (c.reason === 'Lainnya' ? '<input class="in" style="margin-top:8px" placeholder="' + t('noteL') + '" value="' + esc(c.note || '') + '" oninput="rpSet(\'cash\',\'note\',this.value)">' : '') +
+        '<label class="f">' + t('whenL') + '</label>' + segBtns([['Besok pagi', t('besok')], ['pick', t('pickD')]], c.when === 'Besok pagi' ? 'Besok pagi' : c.when ? 'pick' : null, 'rpWhen') +
+        (c.when && c.when !== 'Besok pagi' ? '<input class="in" type="date" style="margin-top:8px" min="' + today2() + '" value="' + esc(/^\d{4}/.test(c.when) ? c.when : '') + '" onchange="rpSet(\'cash\',\'when\',this.value||\'pick\')">' : '');
+    }
+    b += errLine(e) + '</div>'; }
+  if (i === 4) {
+    var errs = rpErrs(), bad = Object.keys(errs), m = R.mtd || {}, tot = rpTot(), base = n0(m.base), mtd = base + tot, pct = m.target ? Math.round(mtd / m.target * 100) : null;
+    var V = { cash: r.sales.cash, qris: r.sales.qris, grab: r.sales.grab, total: tot, visitors: r.cust.visitors, buyers: r.cust.buyers, waOrder: r.cust.waOrder, waNew: r.fans.waNew, waTotal: r.fans.waTotal,
+      commHas: r.fans.commHas, commNew: r.fans.commNew, commTotal: r.fans.commTotal, wechatHas: r.fans.wechatHas, wechatNew: r.fans.wechatNew, wechatTotal: r.fans.wechatTotal, googleNew: r.fans.googleNew, googleTotal: r.fans.googleTotal,
+      cashStatus: r.cash.status, cashLeft: r.cash.amount, cashWhen: r.cash.when === 'Besok pagi' ? t('besok') : r.cash.when, photos: phList('rp.pos').map(function (s) { return s.d || s.url; }) };
+    b = '<div class="guide">' + t('rpRev') + '</div>' + rpView(V) +
+      (m.target ? '<div class="card" style="margin:0 0 10px">' + '<div style="display:flex;justify-content:space-between;padding:4px 0"><span>' + t('tgtD') + '</span><b>' + money(m.daily) + '</b></div><div style="display:flex;justify-content:space-between;padding:4px 0"><span>' + t('mtdL') + '</span><b>' + money(mtd) + '</b></div><div style="display:flex;justify-content:space-between;padding:4px 0"><span>' + t('pctL') + '</span><b>' + (pct == null ? '-' : pct + '%') + '</b></div></div>' : '') +
+      (bad.length ? '<div class="alert" style="margin:0 0 10px">' + t('fixRed') + '<br>' + bad.map(function (n) { return '<a href="#" style="color:var(--r);font-weight:700" onclick="rpGo(' + n + ');return false">' + tabs[n] + ' ›</a>'; }).join(' · ') + '</div>' : '') +
+      phBar(['rp.pos']) + errLine(e);
+    return h + top + b + nav(t('rpSend'), 'rpSend()') + can + '</div>';
+  }
+  return h + top + b + nav(t('nextB'), 'rpNext()') + can + '</div>';
+};
+function rpComm(v) { rpPick('fans', 'commHas', v); }
+function rpWc(v) { rpPick('fans', 'wechatHas', v); }
+function rpCashSt(v) { rpPick('cash', 'status', v); }
+function rpCashWhy(v) { rpPick('cash', 'reason', v); }
+function rpWhen(v) { rpPick('cash', 'when', v === 'pick' ? (/^\d{4}/.test(S.rp.cash.when || '') ? S.rp.cash.when : 'pick') : v); }
+function rpSend() {
+  var errs = rpErrs(), k = Object.keys(errs);
+  if (k.length) { S.rp.err = errs[k[0]]; return rpGo(Number(k[0])); }
+  if (phStat(['rp.pos']).up) return toast(t('upWait'));
+  if (S.rp.cash.when === 'pick') { S.rp.err = t('fixRed'); return rpGo(3); }
+  var r = S.rp, c = r.cash;
+  busy(t('sending'));
+  api('submitReport', [S.sess.token, { storeId: S.home.store.id, sales: r.sales, salesPhotos: phIds('rp.pos'), cust: r.cust, fans: r.fans,
+    cash: c.status === 'LEFT' ? { status: 'LEFT', amount: n0(c.amount), reason: c.reason, note: c.note || '', when: c.when === 'Besok pagi' ? 'besok' : c.when } : { status: 'ALL' }, startedAt: r.startedAt }], 2).then(function (x) {
+    busy();
+    if (!x.ok) { if (x.err === 'INCOMPLETE') { var it = (x.items || [])[0], map = { sales: 0, photos: 0, cust: 1, buyers: 1, fans: 2, cash: 3 }; S.rp.err = it === 'buyers' ? t('rpBuyErr') : t('fixRed'); return rpGo(map[it] || 0); }
+      return toast(x.err === 'NOT_OPEN' ? t('err') : x.err === 'ALREADY_OUT' ? t('err') : t('err')); }
+    var edited = r.edit, pos = shPhSrc(r.ph['rp.pos']); dDel('rp'); S.rp = null; S.ri = null;
+    if (x.dup) { toast(t('sendBy')(x.by || '', x.time || '')); return go('home'); }
+    var job = function () { return Promise.all(pos.map(function (u, i) { return shBlob(u).then(function (b) { return shFile(b, 'pos_' + (i + 1) + '.jpg'); }).catch(function () { return null; }); })); };
+    api('reportShare', [S.sess.token, { storeId: S.home.store.id }]).then(function (s) { var txt = s && s.share ? closeText(s.share) : null; afterStep(edited ? t('rpSaved') : t('rpSent'), x.time, txt, txt ? job : null); }).catch(function () { afterStep(edited ? t('rpSaved') : t('rpSent'), x.time, null); });
+  }).catch(function () { busy(); toast(t('err')); });
+}
+function rpCannotForm() {
+  var c = S.rpCan, zh = L === 'zh';
+  return '<div class="q"><div class="qt">' + t('cannotT') + '</div><div class="qs">' + t('cannotS') + '</div>' +
+    segBtns(TX.id.cannotWhy.map(function (x, n) { return [x, zh ? TX.zh.cannotWhyZh[n] : x]; }), c.why, 'rpCanWhy') +
+    '<label class="f">' + t('noteL') + (c.why === 'Lainnya' ? '' : ' (opsional)') + '</label><input class="in" value="' + esc(c.note || '') + '" oninput="S.rpCan.note=this.value">' + errLine(c.err) + '</div>' +
+    '<button class="btn red" onclick="rpCannotSend()">' + t('cannotSend') + '</button><button class="btn ghost" onclick="S.rpCan=null;render()">' + t('back') + '</button>';
+}
+function rpCanWhy(v) { S.rpCan.why = v; S.rpCan.err = null; render(); }
+function rpCannotSend() {
+  var c = S.rpCan; if (!c.why || (c.why === 'Lainnya' && !String(c.note || '').trim())) { c.err = t('fixRed'); return render(); }
+  busy(t('sending'));
+  api('submitReport', [S.sess.token, { storeId: S.home.store.id, cannot: { why: c.why, note: c.note || '' } }], 2).then(function (x) {
+    busy(); if (!x.ok) { c.err = x.err === 'NOT_LAST' ? t('err') : t('fixRed'); return render(); }
+    S.rpCan = null; S.ri = null; dDel('rp'); loadHome().then(function () { go('pulang'); }, function () { go('pulang'); });
+  }).catch(function () { busy(); toast(t('err')); });
+}
+
+// ---------- ⑤ 下班打卡：自拍；最后一个人拍锁门照；提前走要写原因和报备了谁 ----------
+function poEnter() {
+  S.po2 = { ph: {}, phN: {}, startedAt: new Date().toISOString() }; S.pi = null; S.rpCan = null;
+  var e = null; try { e = JSON.parse(localStorage.getItem(dKey('early')) || 'null'); } catch (x) {} S.po2.early = e || {};
+  api('pulangInfo', [S.sess.token, { storeId: S.home.store.id }]).then(function (r) { if (!r.ok) { toast(t('err')); return go('home'); } S.pi = r; if (S.view === 'pulang') render(); }).catch(function () { toast(t('err')); go('home'); });
+}
+function earlyBox(E, izinTo, store) {
+  var zh = L === 'zh';
+  return '<div class="q"><div class="qt">' + t('earlyQ') + '</div>' + segBtns(TX.id.earlyWhy.map(function (x, n) { return [x, zh ? TX.zh.earlyWhyZh[n] : x]; }), E.why, store + 'Why') +
+    (E.why === 'Lainnya' ? '<input class="in" style="margin-top:8px" placeholder="' + t('noteL') + '" value="' + esc(E.note || '') + '" oninput="' + store + 'Obj().note=this.value">' : '') +
+    '<div style="margin-top:14px;font-weight:700">' + t('izinQ') + '</div>' +
+    '<div class="seg" style="margin-top:8px">' + izinTo.map(function (n) { var on = (E.izin || []).indexOf(n) >= 0; return '<button class="' + (on ? 'on' : '') + '" onclick="' + oc(store + 'Izin', n) + '">' + esc(n) + '</button>'; }).join('') +
+    '<button class="' + (E.none ? 'on' : '') + '" onclick="' + oc(store + 'Izin', '') + '">' + t('izinNo') + '</button></div>' +
+    '<div class="qs" style="margin-top:10px">' + t('earlyNote') + '</div></div>';
+}
+function izinToggle(E, n) { if (!n) { E.none = !E.none; if (E.none) E.izin = []; return; } E.izin = E.izin || []; var i = E.izin.indexOf(n); if (i >= 0) E.izin.splice(i, 1); else E.izin.push(n); if (E.izin.length) E.none = false; }
+function poObj() { return S.po2.early; }
+function poWhy(v) { S.po2.early.why = v; S.po2.err = null; render(); }
+function poIzin(n) { izinToggle(S.po2.early, n); render(); }
+XV.pulang = function () {
+  var h = pageTop(t('stepN').pulang);
+  if (!S.pi) return h + '<div class="card">' + t('loading') + '</div></div>';
+  var P = S.pi, F = flow() || {}, b = '';
+  if (S.rpCan) return h + rpCannotForm() + '</div>';
+  if (P.mustReport) return h + '<div class="alert" style="margin:0 0 12px">' + t('lastMust') + '</div><button class="btn" onclick="go(\'report\')">' + t('rpGo') + '</button>' +
+    '<div style="text-align:center;margin-top:16px"><a href="#" style="color:var(--r);font-weight:600" onclick="S.rpCan={};render();return false">' + t('cannotL') + ' ›</a></div></div>';
+  if (!P.report && P.others.length && F.reportOpen) b += '<div class="info" style="margin:0 0 12px">' + t('othersIn')(esc(P.others.join(', '))) + '</div>';
+  if (P.early) b += earlyBox(S.po2.early, P.izinTo || [], 'po');
+  b += '<div class="guide">' + t('poIntro')(P.end || '') + '</div>' + geoStat();
+  b += '<label class="f">' + t('selfie2') + '</label>' + phGrid('po.selfie', 1, 'user', t('selfie2'));
+  if (P.last) b += '<label class="f">' + t('lockT') + '</label><div class="qs">' + t('lockS') + '</div>' + phGrid('po.lock', 1, 'environment', t('lockS'));
+  b += phBar(['po.selfie', 'po.lock']) + errLine(S.po2.err);
+  var ready = phIds('po.selfie').length && (!P.last || phIds('po.lock').length);
+  return h + b + '<button class="btn" onclick="poSend()"' + (ready ? '' : ' disabled') + '>' + t('poNow') + '</button></div>';
+};
+function poSend() {
+  var P = S.pi, E = S.po2.early || {};
+  if (P.early && (!E.why || (E.why === 'Lainnya' && !String(E.note || '').trim()) || (!(E.izin || []).length && !E.none))) { S.po2.err = t('earlyNeed'); return render(); }
+  if (!geoOk()) return needGeo(poSend);
+  busy(t('sending'));
+  api('checkOut', [S.sess.token, { storeId: S.home.store.id, photo: phIds('po.selfie')[0], lockPhoto: phIds('po.lock')[0] || '', geo: geoArg(), earlyWhy: E.why || '', earlyNote: E.note || '', izin: E.izin || [], izinNone: !!E.none, startedAt: S.po2.startedAt }], 2).then(function (r) {
+    busy();
+    if (!r.ok && r.err === 'NO_GEO') { S.geo = null; return geoFail(poSend); }
+    if (!r.ok && (r.err === 'NEED_REPORT' || r.err === 'NO_LOCK')) { S.pi = null; poReload(); return toast(r.err === 'NEED_REPORT' ? t('lastMust') : t('lockT')); }
+    if (!r.ok && r.err === 'NEED_EARLY_REASON') { S.pi.early = true; S.po2.err = t('earlyNeed'); return render(); }
+    if (!r.ok) return toast(r.err === 'NO_SURVEY' ? t('svNeed') : t('err'));
+    var txt = briefText(r.brief, { early: P.early ? E : null, last: r.last }), ph = shPhSrc(S.po2.ph['po.selfie']).concat(r.last ? shPhSrc(S.po2.ph['po.lock']) : []);
+    try { localStorage.setItem(lastShareKey(), txt); localStorage.removeItem(dKey('early')); } catch (e) {}
+    S.po2 = null; S.pi = null;
+    afterStep(t('allDone'), t('doneS')(r.time), txt, function () { return Promise.all(ph.map(function (u, i) { return shBlob(u).then(function (b) { return shFile(b, (i ? 'kunci' : 'pulang') + '.jpg'); }).catch(function () { return null; }); })); });
+  }).catch(function () { busy(); toast(t('err')); });
+}
+function poReload() { api('pulangInfo', [S.sess.token, { storeId: S.home.store.id }]).then(function (r) { if (r.ok) { S.pi = r; render(); } }).catch(function () {}); }
+
+// ---------- 提前下班：原因 + 报备了谁 → 问卷 → 下班打卡（不拦，只标红）----------
+function erObj() { return S.er; }
+function erWhy(v) { S.er.why = v; S.er.err = null; render(); }
+function erIzin(n) { izinToggle(S.er, n); render(); }
+XV.early = function () {
+  if (!S.er) { try { S.er = JSON.parse(localStorage.getItem(dKey('early')) || 'null'); } catch (e) {} S.er = S.er || {}; }
+  var H = S.home, to = [H.store.sup, H.store.om].filter(Boolean);
+  return pageTop(t('earlyLink').replace('?', '')) + earlyBox(S.er, to, 'er') + errLine(S.er.err) + '<button class="btn" onclick="erGo()">' + t('earlyGo') + '</button></div>';
+};
+function erGo() {
+  var E = S.er; if (!E.why || (E.why === 'Lainnya' && !String(E.note || '').trim()) || (!(E.izin || []).length && !E.none)) { E.err = t('earlyNeed'); return render(); }
+  E.err = null; try { localStorage.setItem(dKey('early'), JSON.stringify(E)); } catch (e) {}
+  var F = flow() || {}; S.er = null;
+  if (F.survey) return go('pulang');
+  S.earlyGo = 1; go('survey');
+}
+
+// ---------- 改班次：不用审批，写原因 ----------
+XV.gshift = function () {
+  var H = S.home, F = flow() || {}, cur = F.shift ? F.shift.code : '', g = S.gs || (S.gs = { to: null, why: '' });
+  return pageTop(t('gsT')) + '<div class="guide">' + t('gsNote') + '</div>' + (F.shift ? '<div style="margin:0 0 8px">' + t('gsNow') + ': <b>' + shiftLbl(F.shift) + '</b></div>' : '') +
+    '<label class="f">' + t('gsPick') + '</label><div class="seg">' + (H.store.shifts || []).filter(function (s) { return s.code !== cur; }).map(function (s) { return '<button class="' + (g.to === s.code ? 'on' : '') + '" onclick="' + oc('gsPick', s.code) + '">' + shiftLbl(s) + '</button>'; }).join('') + '</div>' +
+    '<label class="f">' + t('gsWhy') + '</label><textarea class="in" placeholder="' + esc(t('gsEx')) + '" oninput="S.gs.why=this.value">' + esc(g.why) + '</textarea>' + errLine(g.err) +
+    '<button class="btn" onclick="gsSend()">' + t('gsSend') + '</button></div>';
+};
+function gsPick(c) { S.gs.to = c; S.gs.err = null; render(); }
+function gsSend() {
+  var g = S.gs; if (!g.to) { g.err = t('pickFirst'); return render(); } if (!String(g.why || '').trim()) { g.err = t('gsWhy'); return render(); }
+  busy(t('sending'));
+  api('changeShift', [S.sess.token, { storeId: S.home.store.id, shift: g.to, reason: g.why }], 2).then(function (r) {
+    busy(); if (!r.ok) { g.err = r.err === 'NEED_REASON' ? t('gsWhy') : t('err'); return render(); }
+    S.gs = null; toast(t('gsDone')); loadHome(); go('home');
+  }).catch(function () { busy(); toast(t('err')); });
+}
+
 // ---------- 我的记录：最近 7 天 ----------
 function calLoad(ym) {
   var key = 'tk_cal_' + (S.sess.user.nick || '').toLowerCase() + '_' + (ym || 'cur');
@@ -1468,7 +2045,7 @@ function calPop(dt) {
     if (D.buka) row(t('calBuka'), D.buka.time);
     row(t('calOut'), D.card ? D.card.time + ' · ' + (D.card.early > 10 ? t('calOutEarly')(D.card.early) : t('calOnTime')) : t('calNone'));
     if (D.total) row(t('calSales'), money(D.total));
-    var qt = [t('q1T'), t('q2T'), t('q3T'), t('q4T'), t('q5T')], ns = (D.notes || []).map(function (x, i) { return [qt[i], x]; }).filter(function (x) { return String(x[1] || '').trim(); });
+    var qt = [t('q1T'), t('q2T2'), t('q3T2'), t('q3T'), t('q4T'), t('q6T')], ns = (D.notes || []).map(function (x, i) { return [qt[i], x]; }).filter(function (x) { return String(x[1] || '').trim(); });
     if (D.notes) rows.push('<div style="padding:10px 0 2px;border-top:1px solid #f0efeb;font-size:13px;color:var(--g)">' + t('calNote') + '</div>' + (ns.length ? ns.map(function (x) { return '<div style="font-size:14px;padding:4px 0"><b>' + esc(x[0]) + '</b><br>' + esc(x[1]).replace(/\n/g, '<br>') + '</div>'; }).join('') : '<div style="font-size:14px;padding:4px 0">' + t('calNone') + '</div>'));
   } else if (!P) rows.push('<div style="padding:12px 0;color:var(--g)">' + t('calNoRec') + '</div>');
   if (det && det.ok) rows = dayDetRows(det);
@@ -1515,13 +2092,16 @@ function dayBig(k) {
 function dayOpt(arr, v) { if (L !== 'zh') return v; for (var i = 0; i < arr.length; i++) if (arr[i][0] === v) return arr[i][1]; return v; }
 function dayDetRows(R) {
   var zh = L === 'zh', out = [], yes = '✓', no = '✗';
+  // 2026-11-22：每一步先只显示状态，点一下才展开明细（Victory：一下子全列出来太长）
   var sec = function (n, title, time, sub, body) {
-    out.push('<div style="border-top:1px solid #f0efeb;padding:10px 0">' +
-      '<div style="display:flex;align-items:center;gap:8px"><span style="width:22px;height:22px;border-radius:11px;background:#000;color:#FDCD17;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none">' + n + '</span>' +
-      '<b style="flex:1;font-size:15px">' + title + '</b><b style="font-size:14px">' + (time || '') + '</b></div>' +
-      (sub ? '<div style="font-size:13px;color:#3c4043;padding:4px 0 0 30px">' + sub + '</div>' : '') +
-      (body ? '<div style="padding:2px 0 0 30px">' + body + '</div>' : '') + '</div>');
+    var head = '<div style="display:flex;align-items:center;gap:8px"><span style="width:22px;height:22px;border-radius:11px;background:#000;color:#FDCD17;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none">' + n + '</span>' +
+      '<b style="flex:1;font-size:15px">' + title + '</b><b style="font-size:14px">' + (time || '') + '</b>' + (body ? '<span class="ddArr" style="color:var(--g);font-size:13px;width:14px;text-align:right">›</span>' : '<span style="width:14px"></span>') + '</div>' +
+      (sub ? '<div style="font-size:13px;color:#3c4043;padding:4px 0 0 30px">' + sub + '</div>' : '');
+    out.push(body ? '<details class="dd" style="border-top:1px solid #f0efeb;padding:10px 0"><summary style="list-style:none;cursor:pointer">' + head + '</summary><div style="padding:6px 0 0 30px">' + body + '</div></details>'
+      : '<div style="border-top:1px solid #f0efeb;padding:10px 0">' + head + '</div>');
   };
+  // 上班检查的每一项：先只显示状态，点开才显示照片
+  var itemDd = function (k, v, ph) { return ph ? '<details class="dd" style="border-top:1px dashed #eee"><summary style="list-style:none;cursor:pointer;display:flex;gap:10px;font-size:13px;padding:6px 0"><span style="color:var(--g);width:96px;flex:none">' + k + '</span><span style="flex:1;word-break:break-word">' + v + '</span><span class="ddArr" style="color:var(--g)">›</span></summary>' + ph + '</details>' : kv(k, v); };
   var kv = function (k, v) { return '<div style="display:flex;gap:10px;font-size:13px;padding:5px 0;border-top:1px dashed #eee"><span style="color:var(--g);width:96px;flex:none">' + k + '</span><span style="flex:1;word-break:break-word">' + v + '</span></div>'; };
   var ptsT = function (p) { return p == null ? (zh ? '积分待定' : 'poin menunggu') : (p > 0 ? '+' : '') + totP(p) + (zh ? ' 分' : ' poin'); };
   S.dayPhs = [];
@@ -1529,28 +2109,37 @@ function dayDetRows(R) {
   if (A) sec(1, t('calIn'), A.time, [A.diff == null ? '' : A.diff > 0 ? t('calLate')(A.diff) : A.diff < 0 ? t('calEarly')(-A.diff) : t('calOnTime'), ptsT(A.points)].filter(String).join(' · '),
     kv(zh ? '门店' : 'Toko', esc(R.store)) + kv(zh ? '班次' : 'Shift', esc((t('shiftN')[A.shift] || '') + (A.start ? ' ' + A.start + '–' + A.end : ''))) + dayPh([A.photo]));
   var B = R.buka;
-  if (B) sec(2, t('calBuka'), B.time, B.byMe ? (zh ? '我做的 · 门店 READY ✓' : 'Saya yang cek · Toko READY ✓') : (zh ? '由 ' + esc(B.by) + ' 做的 · 门店 READY ✓' : 'Dicek oleh ' + esc(B.by) + ' · Toko READY ✓'),
-    kv(zh ? '3 项检查' : '3 cek', (zh ? '设备 ' : 'Alat ') + (B.alat ? yes : no) + (zh ? ' · 卫生 ' : ' · Bersih ') + (B.bersih ? yes : no) + (zh ? ' · 陈列 ' : ' · Display ') + (B.display ? yes : no)) + (B.note ? kv(zh ? '备注' : 'Catatan', esc(B.note)) : '') + dayPh([B.photo]));
-  else if (A) sec(2, t('calBuka'), '', zh ? '这一天门店没有开店检查记录' : 'Tidak ada catatan cek buka toko hari ini', '');
+  if (B && B.ver === 2) {
+    sec(2, t('stepN').cek, B.time, B.status === 'ISSUE' ? '<span style="color:var(--r)">' + t('issue') + '</span>' : t('ready'),
+      (B.items || []).map(function (x) { return itemDd(esc(t('cekT')[x.item] || x.item), x.ok ? '✓ OK' : '⚠ ' + esc(x.problem) + ' · ' + (x.fixed ? t('fixedY') : t('fixedN')) + (x.lapor ? ' · ' + t('laporDone') : ''), dayPh(x.photos || [])); }).join(''));
+  } else if (B) sec(2, t('calBuka'), B.time, B.byMe ? (zh ? '我做的 · 门店 READY ✓' : 'Saya yang cek · Toko READY ✓') : (zh ? '由 ' + esc(B.by) + ' 做的 · 门店 READY ✓' : 'Dicek oleh ' + esc(B.by) + ' · Toko READY ✓'), dayPh([B.photo]));
+  else if (A) sec(2, t('stepN').cek, '', t('calNone'), '');
   var V = R.survey;
   if (V) {
-    var yn = function (b) { return b ? t('yes') : t('no'); }, b = '';
-    b += kv(esc(t('q1T')), yn(V.q1) + (V.lost || []).map(function (x) { return '<br>• ' + esc(x[0]) + (x[1] ? ' · ' + esc(x[1]) : '') + (x[2] ? ' · ' + esc(dayOpt(WHY, x[2])) : '') + (x[3] ? ' · ' + esc(x[3]) + (zh ? ' 个顾客' : ' pelanggan') : ''); }).join('') + (V.said ? '<br>' + esc(V.said).replace(/\n/g, '<br>') : ''));
-    b += kv(esc(t('q2T')), yn(V.q2) + (V.comp ? '<br>' + esc(V.comp).replace(/\n/g, '<br>') : ''));
+    var yn = function (b) { return b ? t('yes') : t('no'); }, b = '', ln = function (x, why) { return '<br>• ' + esc(x[0]) + (x[1] ? ' · ' + esc(x[1]) : '') + (why && x[2] ? ' · ' + esc(dayOpt(WHY, x[2])) : '') + (x[why ? 3 : 2] ? ' · ' + esc(x[why ? 3 : 2]) + (zh ? ' 个顾客' : ' pelanggan') : ''); };
+    b += kv(esc(t('q1T')), yn(V.q1) + (V.lost || []).map(function (x) { return ln(x, true); }).join('') + (V.said ? '<br>' + esc(V.said).replace(/\n/g, '<br>') : ''));
+    if (V.ver === 2) b += kv(esc(t('q2T2')), yn(V.ask) + (V.askLines || []).map(function (x) { return ln(x, false); }).join(''));
+    b += kv(esc(t('q3T2')), yn(V.q2) + (V.comp ? '<br>' + esc(V.comp).replace(/\n/g, '<br>') : ''));
     b += kv(esc(t('q3T')), (V.q3 ? t('yes') : t('normalDay')) + (V.factors || []).map(function (f) { return '<br>• ' + esc(dayOpt(FACT, f)); }).join('') + (V.hurt ? '<br>' + esc(V.hurt).replace(/\n/g, '<br>') : ''));
     b += kv(esc(t('q4T')), yn(V.q4) + (V.qual || []).map(function (x) { return '<br>• ' + x.map(function (z) { return esc(dayOpt(QT, z)); }).join(' · '); }).join(''));
-    b += kv(esc(t('q5T')), V.idea ? esc(V.idea).replace(/\n/g, '<br>') : '—');
-    sec(3, t('svT'), V.time, V.early ? (zh ? '提前填写' : 'Diisi lebih awal') : '', b);
+    b += kv(esc(t('q6T')), V.idea ? esc(V.idea).replace(/\n/g, '<br>') : '—');
+    (V.adds || []).forEach(function (x) { var a = x.a || {}, parts = [];
+      (a.lost || []).forEach(function (l) { parts.push(esc(l.product) + ' · ' + esc(l.cat) + ' · ' + esc(l.why) + ' · ' + l.n); });
+      (a.ask || []).forEach(function (l) { parts.push(esc(l.product) + ' · ' + esc(l.cat) + ' · ' + l.n); });
+      ['n1', 'n3', 'n4', 'n6'].forEach(function (k) { if (a[k]) parts.push(esc(a[k])); }); (a.factors || []).forEach(function (f) { parts.push(esc(dayOpt(FACT, f))); });
+      (a.quality || []).forEach(function (q) { parts.push(esc(q.product) + ' · ' + esc(dayOpt(QT, q.type))); });
+      b += kv(t('svAdd') + ' ' + x.time, parts.join('<br>') || '—'); });
+    sec(3, t('stepN').survey, V.time, V.early ? (zh ? '提前填写' : 'Diisi lebih awal') : '', b);
   }
   var M = R.store_;
-  if (M && M.byMe) sec('3+', t('sdT'), M.time, zh ? '关店班 · 我填的' : 'Shift tutup · saya yang isi',
-    kv(t('cash'), money(M.cash)) + kv(t('qris'), money(M.qris)) + kv(t('grab'), money(M.grab)) + kv('<b>' + t('total') + '</b>', '<b>' + money(M.total) + '</b>') +
-    kv(t('visitors'), M.visitors) + kv(t('buyers'), M.buyers) + kv(t('googleReview'), M.googleReview) + kv(t('waJoin'), M.waJoin) + kv(t('wechatJoin'), M.wechatJoin) + kv(t('igFollow'), M.igFollow) +
-    kv('Stock opname', M.soDone ? esc(M.soBrands || '-') + ' · ' + (zh ? '差异 ' : 'Selisih ') + esc(M.soDiff || '0') : (zh ? '没做' : 'Tidak dilakukan')) + dayPh(M.photos));
-  else if (M) sec('3+', t('sdT'), M.time, zh ? '由 ' + esc(M.by) + ' 填写' : 'Diisi oleh ' + esc(M.by), '');
+  if (M && M.byMe && M.ver === 2 && M.cannot) sec('4', t('stepN').report, M.time, t('cannotL') + ': ' + esc(M.cannotReason), '');
+  else if (M && M.byMe && M.ver === 2) sec('4', t('stepN').report, M.time, zh ? '我填的' : 'Saya yang isi', rpView({ cash: M.cash, qris: M.qris, grab: M.grab, total: M.total, visitors: M.visitors, buyers: M.buyers, waOrder: M.waOrder, waNew: M.waNew, waTotal: M.waTotal,
+      commHas: M.commHas, commNew: M.commNew, commTotal: M.commTotal, wechatHas: M.wechatHas, wechatNew: M.wechatNew, wechatTotal: M.wechatTotal, googleNew: M.googleNew, googleTotal: M.googleTotal, cashStatus: M.cashStatus, cashLeft: M.cashLeft, cashWhen: M.cashWhen, photos: [] }) + dayPh(M.photos));
+  else if (M && M.byMe) sec('4', t('stepN').report, M.time, zh ? '旧版 · 我填的' : 'Versi lama · saya yang isi', kv(t('rpCash'), money(M.cash)) + kv(t('rpQris'), money(M.qris)) + kv(t('rpGrab'), money(M.grab)) + kv('<b>' + t('rpTotal') + '</b>', '<b>' + money(M.total) + '</b>') + kv(t('rpVis'), M.visitors) + kv(t('rpBuy'), M.buyers) + dayPh(M.photos));
+  else if (M) sec('4', t('stepN').report, M.time, zh ? '由 ' + esc(M.by) + ' 填写' : 'Diisi oleh ' + esc(M.by), '');
   var O = R.pulang;
-  if (O) sec(4, t('calOut'), O.time, [O.early == null ? '' : O.early > 10 ? t('calOutEarly')(O.early) : t('calOnTime'), ptsT(O.points)].filter(String).join(' · '), dayPh([O.photo, O.lockPhoto]));
-  else if (A) sec(4, t('calOut'), '', t('calNone'), '');
+  if (O) sec(5, t('calOut'), O.time, [O.early == null ? '' : O.early > 10 ? t('calOutEarly')(O.early) : t('calOnTime'), ptsT(O.points)].filter(String).join(' · '), (O.earlyReason ? kv(t('earlyQ'), esc(O.earlyReason)) + kv(t('izinQ'), O.izinNone ? t('izinNo') : esc(O.izin)) : '') + dayPh([O.photo, O.lockPhoto]));
+  else if (A) sec(5, t('calOut'), '', t('calNone'), '');
   return out;
 }
 render();
