@@ -123,6 +123,7 @@ textarea.in{min-height:72px;resize:vertical}
 table.r{width:100%;border-collapse:collapse;font-size:14px}table.r td{padding:8px 4px;border-bottom:1px solid var(--line)}table.r td:last-child{text-align:right;font-weight:700}
 .login{padding:28px 22px 40px}
 .login .logo{width:84px;height:84px;border-radius:20px;display:block;margin:0 auto 16px}
+details.dd>summary::-webkit-details-marker{display:none}details.dd[open]>summary .ddArr{transform:rotate(90deg);display:inline-block}
 </style>
 </head>
 <body>
@@ -161,7 +162,7 @@ window.addEventListener('unhandledrejection', function (e) { var r = e && e.reas
 </script>
 <script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261122175756';
+var APP_VER = '20261122200124';
 function chkVer() { fetch('preview/version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
@@ -2035,13 +2036,16 @@ function dayBig(k) {
 function dayOpt(arr, v) { if (L !== 'zh') return v; for (var i = 0; i < arr.length; i++) if (arr[i][0] === v) return arr[i][1]; return v; }
 function dayDetRows(R) {
   var zh = L === 'zh', out = [], yes = '✓', no = '✗';
+  // 2026-11-22：每一步先只显示状态，点一下才展开明细（Victory：一下子全列出来太长）
   var sec = function (n, title, time, sub, body) {
-    out.push('<div style="border-top:1px solid #f0efeb;padding:10px 0">' +
-      '<div style="display:flex;align-items:center;gap:8px"><span style="width:22px;height:22px;border-radius:11px;background:#000;color:#FDCD17;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none">' + n + '</span>' +
-      '<b style="flex:1;font-size:15px">' + title + '</b><b style="font-size:14px">' + (time || '') + '</b></div>' +
-      (sub ? '<div style="font-size:13px;color:#3c4043;padding:4px 0 0 30px">' + sub + '</div>' : '') +
-      (body ? '<div style="padding:2px 0 0 30px">' + body + '</div>' : '') + '</div>');
+    var head = '<div style="display:flex;align-items:center;gap:8px"><span style="width:22px;height:22px;border-radius:11px;background:#000;color:#FDCD17;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none">' + n + '</span>' +
+      '<b style="flex:1;font-size:15px">' + title + '</b><b style="font-size:14px">' + (time || '') + '</b>' + (body ? '<span class="ddArr" style="color:var(--g);font-size:13px;width:14px;text-align:right">›</span>' : '<span style="width:14px"></span>') + '</div>' +
+      (sub ? '<div style="font-size:13px;color:#3c4043;padding:4px 0 0 30px">' + sub + '</div>' : '');
+    out.push(body ? '<details class="dd" style="border-top:1px solid #f0efeb;padding:10px 0"><summary style="list-style:none;cursor:pointer">' + head + '</summary><div style="padding:6px 0 0 30px">' + body + '</div></details>'
+      : '<div style="border-top:1px solid #f0efeb;padding:10px 0">' + head + '</div>');
   };
+  // 上班检查的每一项：先只显示状态，点开才显示照片
+  var itemDd = function (k, v, ph) { return ph ? '<details class="dd" style="border-top:1px dashed #eee"><summary style="list-style:none;cursor:pointer;display:flex;gap:10px;font-size:13px;padding:6px 0"><span style="color:var(--g);width:96px;flex:none">' + k + '</span><span style="flex:1;word-break:break-word">' + v + '</span><span class="ddArr" style="color:var(--g)">›</span></summary>' + ph + '</details>' : kv(k, v); };
   var kv = function (k, v) { return '<div style="display:flex;gap:10px;font-size:13px;padding:5px 0;border-top:1px dashed #eee"><span style="color:var(--g);width:96px;flex:none">' + k + '</span><span style="flex:1;word-break:break-word">' + v + '</span></div>'; };
   var ptsT = function (p) { return p == null ? (zh ? '积分待定' : 'poin menunggu') : (p > 0 ? '+' : '') + totP(p) + (zh ? ' 分' : ' poin'); };
   S.dayPhs = [];
@@ -2051,7 +2055,7 @@ function dayDetRows(R) {
   var B = R.buka;
   if (B && B.ver === 2) {
     sec(2, t('stepN').cek, B.time, B.status === 'ISSUE' ? '<span style="color:var(--r)">' + t('issue') + '</span>' : t('ready'),
-      (B.items || []).map(function (x) { return kv(esc(t('cekT')[x.item] || x.item), x.ok ? '✓ OK' : '⚠ ' + esc(x.problem) + ' · ' + (x.fixed ? t('fixedY') : t('fixedN')) + (x.lapor ? ' · ' + t('laporDone') : '')) + dayPh(x.photos || []); }).join(''));
+      (B.items || []).map(function (x) { return itemDd(esc(t('cekT')[x.item] || x.item), x.ok ? '✓ OK' : '⚠ ' + esc(x.problem) + ' · ' + (x.fixed ? t('fixedY') : t('fixedN')) + (x.lapor ? ' · ' + t('laporDone') : ''), dayPh(x.photos || [])); }).join(''));
   } else if (B) sec(2, t('calBuka'), B.time, B.byMe ? (zh ? '我做的 · 门店 READY ✓' : 'Saya yang cek · Toko READY ✓') : (zh ? '由 ' + esc(B.by) + ' 做的 · 门店 READY ✓' : 'Dicek oleh ' + esc(B.by) + ' · Toko READY ✓'), dayPh([B.photo]));
   else if (A) sec(2, t('stepN').cek, '', t('calNone'), '');
   var V = R.survey;
