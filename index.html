@@ -127,13 +127,13 @@ table.r{width:100%;border-collapse:collapse;font-size:14px}table.r td{padding:8p
 <div class="app" id="app"></div>
 <script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261121102109';
+var APP_VER = '20261122150756';
 function chkVer() { fetch('version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
-var API = 'https://okzfaepdfeolsmurwtft.supabase.co/functions/v1/lk-api/toko';
+var API = 'https://okzfaepdfeolsmurwtft.supabase.co/functions/v1/toko-api';
 // 2026-11-19 起只用数据库版接口（Supabase），旧后台已停用
-API='https://okzfaepdfeolsmurwtft.supabase.co/functions/v1/lk-api/toko';try{localStorage.removeItem('lk_db');}catch(e){}
+API='https://okzfaepdfeolsmurwtft.supabase.co/functions/v1/toko-api';try{localStorage.removeItem('lk_db');}catch(e){}
 
 var L = localStorage.getItem('tk_lang') || 'id';
 var S = { view: 'home' };
@@ -870,9 +870,9 @@ function sayaRows(H) {
 }
 
 // ---------- 本店货品（2026-11-21，决策记录 624–636）：看这一轮补货单、写备注；货到了确认收货或拒收（只能拒一次）----------
-var GD_API = 'https://okzfaepdfeolsmurwtft.supabase.co/functions/v1/lk-goods';
+var GD_API = 'https://okzfaepdfeolsmurwtft.supabase.co/functions/v1/toko-api'; // 2026-11-22 起货品接口也走 toko-api，接口名前加 goods.
 function gdApi(fn, args) {
-  return fetch(GD_API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ fn: fn, args: [S.sess.token].concat(args || []) }) })
+  return fetch(GD_API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ fn: 'goods.' + fn, args: [S.sess.token].concat(args || []) }) })
     .then(function (r) { return r.json(); }).then(function (j) { if (j.err) { if (/SESSION_EXPIRED/.test(j.err)) logout(); throw new Error(j.err); } return j.data; });
 }
 function gdT(zh, id) { return L === 'zh' ? zh : id; }
@@ -959,10 +959,11 @@ function gdBanner() { gdPeek(); var o = S.gdp && S.gdp.o; if (o && o.stage === '
 // LK School：学习 / 考试 / 我的记录；必学要考过才算完成，推到「任务」和首页
 // 照片满 12 个月按规定删除后（决策记录 646），原来的位置显示说明，不显示破图
 document.addEventListener('error', function (e) { var el = e.target; if (!el || el.tagName !== 'IMG' || el.dataset.gone) return; var s = el.getAttribute('src') || ''; if (s.indexOf('/storage/v1/') < 0 && s !== '') return; el.dataset.gone = 1; var d = document.createElement('div'); var zh = (typeof L !== 'undefined' ? L : 'id') === 'zh'; d.textContent = zh ? '照片已按规定删除（超过 12 个月）或暂时打不开' : 'Foto sudah dihapus sesuai aturan (lebih dari 12 bulan) atau belum bisa dibuka'; d.style.cssText = 'display:flex;align-items:center;justify-content:center;text-align:center;background:#f3f3f1;color:#6b6b6b;font-size:11px;line-height:1.3;padding:6px;border-radius:8px;box-sizing:border-box;width:' + (el.width || 96) + 'px;min-height:' + (el.height || 64) + 'px'; el.replaceWith(d); }, true);
-var LP_API = 'https://okzfaepdfeolsmurwtft.supabase.co/functions/v1/lk-lapor', SC_API = 'https://okzfaepdfeolsmurwtft.supabase.co/functions/v1/lk-school';
+// 2026-11-22 起上报、培训都走 toko-api：LP_API / SC_API 现在是接口名前缀（lapor. / school.）
+var LP_API = 'lapor.', SC_API = 'school.';
 function zi(zh, id) { return L === 'zh' ? zh : id; }
-function xApi(url, fn, args) {
-  return fetch(url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ fn: fn, app: 'toko', args: [S.sess.token].concat(args || []) }) })
+function xApi(pre, fn, args) {
+  return fetch(API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ fn: pre + fn, app: 'toko', args: [S.sess.token].concat(args || []) }) })
     .then(function (r) { return r.json(); }).then(function (j) { if (j.err) throw new Error(j.err); return j.data; })
     .catch(function (e) { if (/SESSION_EXPIRED/.test(e.message)) logout(); throw e; });
 }
