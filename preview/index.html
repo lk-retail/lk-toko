@@ -162,7 +162,7 @@ window.addEventListener('unhandledrejection', function (e) { var r = e && e.reas
 </script>
 <script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261122204611';
+var APP_VER = '20261122204754';
 function chkVer() { fetch('preview/version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
@@ -410,9 +410,9 @@ function render() {
 // 2026-11-22：登录过期跳回登录页时，提示固定显示在登录框上方（通用原因，分点）
 var EXPIRED = 0;
 function vLogin() {
-  // 有过期提示时不显示大图标，登录框位置和平时差不多（手机上不用往下滑）
-  return '<div class="login">' + (EXPIRED ? '' : '<img class="logo" src="img/icon-192.png?v=2" alt="">') + '<h2 style="text-align:center;margin-bottom:6px">LK Toko</h2>' +
-    (EXPIRED ? '<div style="background:#fff8d6;border:1px solid #f0dc8a;border-radius:12px;padding:10px 12px;font-size:14px;line-height:1.6;margin:8px 0 6px">' + (L === 'zh' ? '<b>需要重新登录。</b>可能原因：<br>1. 每天要重新登录一次<br>2. 账号在别处登录了<br>3. 密码被改了' : '<b>Silakan masuk lagi.</b> Kemungkinan:<br>1. Wajib masuk ulang setiap hari<br>2. Akun dipakai masuk di tempat lain<br>3. Password sudah diganti') + '</div>' : '') +
+  // 登录过期跳回来时：标题下面一行小字（红色"需要重新登录" + 灰色原因），不占地方；第一次打开、自己退出都不显示
+  return '<div class="login"><img class="logo" src="img/icon-192.png?v=2" alt=""><h2 style="text-align:center;margin-bottom:6px">LK Toko</h2>' +
+    (EXPIRED ? '<div style="text-align:center;font-size:13px;line-height:1.5;margin:0 0 6px"><b style="color:var(--r)">' + (L === 'zh' ? '需要重新登录' : 'Silakan masuk lagi') + '</b><span style="color:#6b6b6b"> · ' + (L === 'zh' ? '① 每天要重新登录一次 ② 账号在别处登录了 ③ 密码被改了' : '① Wajib masuk ulang setiap hari ② Akun masuk di tempat lain ③ Password sudah diganti') + '</span></div>' : '') +
     '<label class="f">' + t('eid') + '</label><input class="in" id="eid" autocapitalize="characters" autocomplete="username" placeholder="ID-2026-…">' +
     '<label class="f">' + t('pw') + '</label><input class="in" id="pw" type="password" autocomplete="current-password">' +
     '<button class="btn" onclick="doLogin()">' + t('login') + '</button>' +
