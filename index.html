@@ -1552,7 +1552,7 @@ function closeText(c) {
     'Google Review: ' + r.googleNew + ' orang (Total: ' + r.googleTotal + ')', 'Kontak WA toko: ' + r.waNew + ' orang (Total: ' + r.waTotal + ')'];
   if (r.commHas) a.push('WA Community: ' + r.commNew + ' orang (Total: ' + r.commTotal + ')');
   if (r.wechatHas) a.push('WeChat toko: ' + r.wechatNew + ' orang (Total: ' + r.wechatTotal + ')');
-  a.push(''); a.push('Uang tunai belum disetor: ' + (r.cashStatus === 'LEFT' && r.cashLeft > 0 ? 'Rp ' + fmtN(r.cashLeft) + (r.cashReason ? ' – ' + r.cashReason : '') + (r.cashWhen ? ' (disetor ' + (/^\d{4}-/.test(r.cashWhen) ? dmy(r.cashWhen) : 'besok pagi') + ')' : '') : 'Rp 0'));
+  a.push(''); a.push('Uang tunai belum disetor: ' + (r.cashStatus === 'LEFT' && r.cashLeft > 0 ? 'Rp ' + fmtN(r.cashLeft) + (r.cashReason ? ' – ' + r.cashReason : '') + (r.cashWhen ? ' (disetor ' + cwLbl(r.cashWhen, 'id').toLowerCase() + ')' : '') : 'Rp 0'));
   return a.join('\n');
 }
 
@@ -1778,7 +1778,7 @@ function rpEnter() {
     if (r.mine && !(d && d.edit)) { var m = r.mine; d = rpNew(); d.edit = true;
       d.sales = { cash: m.cash, qris: m.qris, grab: m.grab }; d.cust = { visitors: m.visitors, buyers: m.buyers, waOrder: m.waOrder };
       d.fans = { waNew: m.waNew, waTotal: m.waTotal, commHas: m.commHas, commNew: m.commNew, commTotal: m.commTotal, wechatHas: m.wechatHas, wechatNew: m.wechatNew, wechatTotal: m.wechatTotal, googleNew: m.googleNew, googleTotal: m.googleTotal };
-      d.cash = { status: m.cashStatus, amount: m.cashLeft, reason: (m.cashReason || '').split(':')[0], note: (m.cashReason || '').split(': ').slice(1).join(': '), when: m.cashWhen === 'besok' ? 'Besok pagi' : m.cashWhen };
+      d.cash = { status: m.cashStatus, amount: m.cashLeft, reason: (m.cashReason || '').split(':')[0], note: (m.cashReason || '').split(': ').slice(1).join(': '), when: m.cashWhen === 'besok' ? 'BESOK_PAGI' : (CW.indexOf(m.cashWhen) >= 0 ? m.cashWhen : '') };
       d.ph = { 'rp.pos': m.photos.map(function (u) { return { id: u, url: u, st: 'ok' }; }) }; }
     if (!d || !d.sales) d = rpNew();
     for (var k in (d.ph || {})) d.ph[k] = d.ph[k].filter(function (s) { return s.st === 'ok'; });
@@ -1810,7 +1810,7 @@ function rpErrs() {
   if (!has(c.visitors) || !has(c.buyers) || !has(c.waOrder)) e[1] = t('zero'); else if (n0(c.buyers) > n0(c.visitors)) e[1] = t('rpBuyErr');
   if (!has(f.waNew) || !has(f.waTotal) || !has(f.googleNew) || !has(f.googleTotal) || f.commHas == null || f.wechatHas == null || (f.commHas && (!has(f.commNew) || !has(f.commTotal))) || (f.wechatHas && (!has(f.wechatNew) || !has(f.wechatTotal)))) e[2] = t('fixRed');
   if (ca.status !== 'ALL' && ca.status !== 'LEFT') e[3] = t('fixRed');
-  else if (ca.status === 'LEFT' && (n0(ca.amount) <= 0 || !ca.reason || (ca.reason === 'Lainnya' && !String(ca.note || '').trim()) || !ca.when || ca.when === 'pick')) e[3] = t('fixRed');
+  else if (ca.status === 'LEFT' && (n0(ca.amount) <= 0 || !ca.reason || (ca.reason === 'Lainnya' && !String(ca.note || '').trim()) || CW.indexOf(ca.when) < 0)) e[3] = t('fixRed');
   return e;
 }
 function rpGo(i) { S.rp.i = i; S.rp.err = null; dSave('rp', S.rp); render(); window.scrollTo(0, 0); }
@@ -1821,7 +1821,7 @@ function rpView(V, title) {
   return '<div class="card" style="margin:0 0 10px">' + (title ? '<h3>' + title + '</h3>' : '') + row(t('rpCash'), money(V.cash)) + row(t('rpQris'), money(V.qris)) + row(t('rpGrab'), money(V.grab)) + row('<b>' + t('rpTotal') + '</b>', money(V.total)) +
     row(t('rpVis'), n0(V.visitors)) + row(t('rpBuy'), n0(V.buyers)) + row(t('rpWa'), n0(V.waOrder)) + fan(t('rpWaC'), V.waNew, V.waTotal) +
     (V.commHas ? fan('WA Community', V.commNew, V.commTotal) : row('WA Community', t('tdk'))) + (V.wechatHas ? fan('WeChat', V.wechatNew, V.wechatTotal) : row('WeChat', t('tdk'))) + fan(t('rpGoogle'), V.googleNew, V.googleTotal) +
-    row(t('rpS4'), V.cashStatus === 'LEFT' ? money(V.cashLeft) + (V.cashWhen ? ' · ' + esc(V.cashWhen === 'besok' ? t('besok') : V.cashWhen) : '') : t('cashAll')) +
+    row(t('rpS4'), V.cashStatus === 'LEFT' ? money(V.cashLeft) + (V.cashWhen ? ' · ' + esc(cwLbl(V.cashWhen)) : '') : t('cashAll')) +
     ((V.photos || []).length ? '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">' + V.photos.map(function (u) { return '<img src="' + esc(u) + '" style="width:30%;border-radius:8px">'; }).join('') + '</div>' : '') + '</div>';
 }
 XV.report = function () {
@@ -1852,15 +1852,14 @@ XV.report = function () {
     if (c.status === 'LEFT') {
       b += rpField('cash', 'amount', t('amtL'), 1) + '<label class="f">' + t('whyL') + '</label>' + segBtns(TX.id.cashWhy.map(function (x, n) { return [x, zh ? TX.zh.cashWhyZh[n] : x]; }), c.reason, 'rpCashWhy') +
         (c.reason === 'Lainnya' ? '<input class="in" style="margin-top:8px" placeholder="' + t('noteL') + '" value="' + esc(c.note || '') + '" oninput="rpSet(\'cash\',\'note\',this.value)">' : '') +
-        '<label class="f">' + t('whenL') + '</label>' + segBtns([['Besok pagi', t('besok')], ['pick', t('pickD')]], c.when === 'Besok pagi' ? 'Besok pagi' : c.when ? 'pick' : null, 'rpWhen') +
-        (c.when && c.when !== 'Besok pagi' ? '<input class="in" type="date" style="margin-top:8px" min="' + today2() + '" value="' + esc(/^\d{4}/.test(c.when) ? c.when : '') + '" onchange="rpSet(\'cash\',\'when\',this.value||\'pick\')">' : '');
+        '<label class="f">' + t('whenL') + '</label>' + segBtns(CW.map(function (k) { return [k, cwLbl(k)]; }), CW.indexOf(c.when) >= 0 ? c.when : null, 'rpWhen');
     }
     b += errLine(e) + '</div>'; }
   if (i === 4) {
     var errs = rpErrs(), bad = Object.keys(errs), m = R.mtd || {}, tot = rpTot(), base = n0(m.base), mtd = base + tot, pct = m.target ? Math.round(mtd / m.target * 100) : null;
     var V = { cash: r.sales.cash, qris: r.sales.qris, grab: r.sales.grab, total: tot, visitors: r.cust.visitors, buyers: r.cust.buyers, waOrder: r.cust.waOrder, waNew: r.fans.waNew, waTotal: r.fans.waTotal,
       commHas: r.fans.commHas, commNew: r.fans.commNew, commTotal: r.fans.commTotal, wechatHas: r.fans.wechatHas, wechatNew: r.fans.wechatNew, wechatTotal: r.fans.wechatTotal, googleNew: r.fans.googleNew, googleTotal: r.fans.googleTotal,
-      cashStatus: r.cash.status, cashLeft: r.cash.amount, cashWhen: r.cash.when === 'Besok pagi' ? t('besok') : r.cash.when, photos: phList('rp.pos').map(function (s) { return s.d || s.url; }) };
+      cashStatus: r.cash.status, cashLeft: r.cash.amount, cashWhen: r.cash.when, photos: phList('rp.pos').map(function (s) { return s.d || s.url; }) };
     b = '<div class="guide">' + t('rpRev') + '</div>' + rpView(V) +
       (m.target ? '<div class="card" style="margin:0 0 10px">' + '<div style="display:flex;justify-content:space-between;padding:4px 0"><span>' + t('tgtD') + '</span><b>' + money(m.daily) + '</b></div><div style="display:flex;justify-content:space-between;padding:4px 0"><span>' + t('mtdL') + '</span><b>' + money(mtd) + '</b></div><div style="display:flex;justify-content:space-between;padding:4px 0"><span>' + t('pctL') + '</span><b>' + (pct == null ? '-' : pct + '%') + '</b></div></div>' : '') +
       (bad.length ? '<div class="alert" style="margin:0 0 10px">' + t('fixRed') + '<br>' + bad.map(function (n) { return '<a href="#" style="color:var(--r);font-weight:700" onclick="rpGo(' + n + ');return false">' + tabs[n] + ' ›</a>'; }).join(' · ') + '</div>' : '') +
@@ -1873,16 +1872,19 @@ function rpComm(v) { rpPick('fans', 'commHas', v); }
 function rpWc(v) { rpPick('fans', 'wechatHas', v); }
 function rpCashSt(v) { rpPick('cash', 'status', v); }
 function rpCashWhy(v) { rpPick('cash', 'reason', v); }
-function rpWhen(v) { rpPick('cash', 'when', v === 'pick' ? (/^\d{4}/.test(S.rp.cash.when || '') ? S.rp.cash.when : 'pick') : v); }
+// 现金什么时候转：只给三个选项（待开发第 21 行，最晚三天内转进 EDC）；旧记录里的「besok」和具体日期照常显示
+var CW = ['BESOK_PAGI', 'BESOK_SORE', 'LUSA'];
+function cwLbl(v, lang) { var zh = (lang || L) === 'zh'; if (v === 'BESOK_PAGI' || v === 'besok') return zh ? '明天上午' : 'Besok pagi'; if (v === 'BESOK_SORE') return zh ? '明天下午' : 'Besok sore'; if (v === 'LUSA') return zh ? '后天' : 'Lusa'; return /^\d{4}-/.test(v || '') ? dmy(v) : String(v || ''); }
+function rpWhen(v) { rpPick('cash', 'when', v); }
 function rpSend() {
   var errs = rpErrs(), k = Object.keys(errs);
   if (k.length) { S.rp.err = errs[k[0]]; return rpGo(Number(k[0])); }
   if (phStat(['rp.pos']).up) return toast(t('upWait'));
-  if (S.rp.cash.when === 'pick') { S.rp.err = t('fixRed'); return rpGo(3); }
+  if (S.rp.cash.status === 'LEFT' && CW.indexOf(S.rp.cash.when) < 0) { S.rp.err = t('fixRed'); return rpGo(3); }
   var r = S.rp, c = r.cash;
   busy(t('sending'));
   api('submitReport', [S.sess.token, { storeId: S.home.store.id, sales: r.sales, salesPhotos: phIds('rp.pos'), cust: r.cust, fans: r.fans,
-    cash: c.status === 'LEFT' ? { status: 'LEFT', amount: n0(c.amount), reason: c.reason, note: c.note || '', when: c.when === 'Besok pagi' ? 'besok' : c.when } : { status: 'ALL' }, startedAt: r.startedAt }], 2).then(function (x) {
+    cash: c.status === 'LEFT' ? { status: 'LEFT', amount: n0(c.amount), reason: c.reason, note: c.note || '', when: c.when } : { status: 'ALL' }, startedAt: r.startedAt }], 2).then(function (x) {
     busy();
     if (!x.ok) { if (x.err === 'INCOMPLETE') { var it = (x.items || [])[0], map = { sales: 0, photos: 0, cust: 1, buyers: 1, fans: 2, cash: 3 }; S.rp.err = it === 'buyers' ? t('rpBuyErr') : t('fixRed'); return rpGo(map[it] || 0); }
       return toast(x.err === 'NOT_OPEN' ? t('err') : x.err === 'ALREADY_OUT' ? t('err') : t('err')); }
