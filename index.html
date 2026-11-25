@@ -587,7 +587,8 @@ function vHome() {
 }
 function vNav() {
   var items = [['home', IC.home], ['tugas', IC.task], ['poin', IC.star], ['saya', IC.user]];
-  return '<div class="nav">' + items.map(function (x, k) { return '<a href="#" class="' + (S.view === x[0] ? 'on' : '') + '" onclick="go(\'' + x[0] + '\');return false">' + x[1] + t('nav')[k] + '</a>'; }).join('') + '</div>';
+  var dot = (S.gdp && S.gdp.task) || (S.scp && (S.scp.todo || []).length);
+  return '<div class="nav">' + items.map(function (x, k) { return '<a href="#" class="' + (S.view === x[0] ? 'on' : '') + '" onclick="go(\'' + x[0] + '\');return false" style="position:relative">' + x[1] + t('nav')[k] + (x[0] === 'tugas' && dot ? '<span style="position:absolute;top:4px;right:calc(50% - 16px);width:9px;height:9px;border-radius:5px;background:#e5322d"></span>' : '') + '</a>'; }).join('') + '</div>';
 }
 function go(v) {
   S.view = v;
@@ -838,9 +839,13 @@ function poinChart(N, sel) {
 }
 function vTugas() {
   // 「任务」：现在先放 LK School 的必学（新的必学发布后自动出现在这里和首页），门店任务以后再加（2026-11-21）
-  var k0 = S.tkTab || 0; scPeek(); var P = S.scp || {}, list = k0 ? (P.done || []) : (P.todo || []);
+  var k0 = S.tkTab || 0; scPeek(); gdPeek(); var P = S.scp || {}, list = k0 ? (P.done || []) : (P.todo || []);
+  // 门店任务「确认收货」（待开发第 7 行）：仓库发出 / 拒收处理完就出现，本店谁做都行，做完全店消失
+  var gk = !k0 && S.gdp && S.gdp.task, gkRow = gk ? '<div class="card" onclick="S.gd=null;go(\'goods\')" style="cursor:pointer;display:flex;gap:12px;align-items:center;border:2px solid var(--y)"><div style="width:40px;height:40px;border-radius:10px;background:var(--y);display:flex;align-items:center;justify-content:center;flex:none">' + GD_BOX + '</div><div style="flex:1;min-width:0"><b>' + (L === 'zh' ? '确认收货' : 'Konfirmasi terima barang') + '</b><div style="font-size:13px;color:#666">DMS ' + esc(gk.to_no || '') + (gk.courier ? ' · ' + esc(gk.courier) : '') + (L === 'zh' ? ' · 确认 +3 分' : ' · +3 poin') + '</div></div><span style="font-size:22px">›</span></div>' : '';
   var h = '<div class="top" style="padding:8px 18px 10px"><div class="name">' + t('taskT') + '</div></div>' +
     '<div style="padding:12px 14px 8px"><div style="display:flex;background:#e6e4df;border-radius:12px;padding:3px">' + t('taskTabs').map(function (n, k) { return '<button onclick="S.tkTab=' + k + ';render()" style="flex:1;border:0;border-radius:10px;padding:9px 2px;font-size:13px;font-weight:' + (k === k0 ? '700;background:#fff;color:#000;box-shadow:0 1px 3px rgba(0,0,0,.12)' : '500;background:transparent;color:#6b6b6b') + '">' + n + '</button>'; }).join('') + '</div></div>';
+  h += gkRow;
+  if (!list.length && gk) return h;
   if (!list.length) return h + '<div class="card" style="text-align:center;padding:28px 18px"><div style="width:52px;height:52px;margin:0 auto 10px;color:#b0b0ab">' + IC.task + '</div><div style="font-size:17px;font-weight:700">' + t(k0 ? 'taskLogT' : 'taskSoonT') + '</div><div style="font-size:14px;color:var(--g);margin-top:8px;line-height:1.5">' + t(k0 ? 'taskLogS' : 'taskSoonS') + '</div></div>';
   return h + '<div class="card" style="padding:0">' + list.map(function (x, i) {
     var go_ = x.type === 'mat' ? 'scOpen(' + x.id + ')' : 'scGo(1)';
@@ -876,24 +881,34 @@ function gdApi(fn, args) {
 }
 function gdT(zh, id) { return L === 'zh' ? zh : id; }
 var GDS = { open: ['系统已分配，周一 12:00 前运营还可能调整', 'Sudah dialokasi, Ops masih bisa ubah s/d Senin 12:00'], locked: ['已锁定，仓库在备货', 'Sudah dikunci, gudang sedang menyiapkan'], confirmed: ['仓库已确认，准备发出', 'Gudang sudah konfirmasi, siap dikirim'],
-  shipped: ['货已发出，到了请核对后确认', 'Barang dikirim — cek lalu konfirmasi'], rejected: ['你们已拒收，等仓库核实', 'Kamu menolak, tunggu cek gudang'], returned: ['仓库已核实，请再确认收货', 'Gudang sudah cek, konfirmasi lagi'], received: ['已确认收货', 'Sudah diterima'] };
+  shipped: ['货已发出，到了请核对后确认', 'Barang dikirim — cek lalu konfirmasi'], rejected: ['你们已拒收，等仓库处理', 'Kamu menolak, tunggu gudang'], redo: ['仓库在处理拒收', 'Gudang sedang memproses penolakan'], returned: ['仓库已处理，请在 POS 确认收货', 'Gudang sudah proses, terima di POS lalu konfirmasi'], received: ['已确认收货', 'Sudah diterima'] };
+var GD_RK = { qty: ['数量不对', 'Jumlah tidak sesuai'], damaged: ['有损坏', 'Ada yang rusak'], wrong: ['发错货', 'Barang salah'], other: ['其他', 'Lainnya'] };
 function gdStg(s) { var x = GDS[s] || [s, s]; return L === 'zh' ? x[0] : x[1]; }
-function gdLoad(sid) { S.gd = S.gd || {}; S.gd.loading = 1; gdApi('tkGoods', [sid || S.gd.store || '']).then(function (r) { S.gd = { d: r, store: r.store, notes: {}, rj: null, tab: (S.gd && S.gd.tab) || 'order' }; if (S.view === 'goods') render(); }).catch(function (e) { S.gd = { err: e.message }; if (S.view === 'goods') render(); }); }
+function gdLoad(sid) { S.gd = S.gd || {}; S.gd.loading = 1; gdApi('tkGoods', [sid || S.gd.store || '']).then(function (r) { S.gd = { d: r, store: r.store, notes: {}, rj: null, cf: null, tab: (S.gd && S.gd.tab) || 'order' }; S.gdp = { at: Date.now(), o: r.order, task: r.task }; if (S.view === 'goods') render(); }).catch(function (e) { S.gd = { err: e.message }; if (S.view === 'goods') render(); }); }
 function gdNote(code, v) { S.gd.notes[code] = v; }
 function gdSaveNote(code) { var G = S.gd, v = G.notes[code]; if (v === undefined) return; busy('…'); gdApi('tkNote', [G.d.order.id, code, v]).then(function () { busy(); toast(gdT('已保存', 'Tersimpan')); }).catch(function (e) { busy(); toast(/LOCKED/.test(e.message) ? gdT('已锁定，不能再写', 'Sudah dikunci') : t('err')); }); }
-function gdConfirm(again) {
-  var G = S.gd, note = '';
-  if (again) { note = (document.getElementById('gdrn') || {}).value || ''; }
-  if (!confirm(gdT('确认这批货已经收到？确认后不能再拒收。', 'Konfirmasi barang sudah diterima? Setelah ini tidak bisa menolak.'))) return;
-  busy('…'); gdApi('tkReceive', [G.d.order.id, 'confirm', '', [], note.trim()]).then(function () { busy(); toast(gdT('已确认收货', 'Sudah dikonfirmasi')); gdLoad(); }).catch(function (e) { busy(); toast(/BAD_STAGE/.test(e.message) ? gdT('状态变了，请刷新', 'Status berubah, muat ulang') : t('err')); gdLoad(); });
+// 拍照：k = 'cf' 确认的 POS 截图 / 'rjpos' 拒收的 POS 截图 / 'rj' 货品照片
+function gdPick(inp, k) { var f = inp.files && inp.files[0]; if (!f) return; busy('…'); compress(f, 'goods').then(function (d) { busy(); var G = S.gd; if (k === 'cf') G.cf.pos = d; else if (k === 'rjpos') G.rj.pos = d; else if (G.rj.photos.length < 6) G.rj.photos.push(d); render(); }).catch(function () { busy(); toast(t('err')); }); }
+function gdShot(src, k, lbl) { return src ? '<img src="' + src + '" style="width:96px;height:96px;object-fit:cover;border-radius:8px;margin-top:6px" onclick="' + (k === 'cf' ? 'S.gd.cf.pos=null' : 'S.gd.rj.pos=null') + ';render()">' : '<label style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:6px;height:56px;border:2px dashed #bbb;border-radius:10px;color:#666;font-size:14px">📷 ' + lbl + '<input type="file" accept="image/*" capture="environment" style="display:none" onchange="gdPick(this,\'' + k + '\')"></label>'; }
+function gdConfirm() {
+  var G = S.gd, C = G.cf, note = (document.getElementById('gdcn') || {}).value || '';
+  if (!C.pos) return toast(gdT('先拍 POS 屏幕：显示已确认收货', 'Foto layar POS dulu (sudah diterima)'));
+  busy('…'); gdApi('tkReceive', [G.d.order.id, 'confirm', { posPhoto: C.pos, note: note.trim() }]).then(function () { busy(); toast(gdT('已确认收货 +3 分', 'Sudah dikonfirmasi +3 poin')); gdLoad(); }).catch(function (e) { busy(); toast(/BAD_STAGE/.test(e.message) ? gdT('状态变了，请刷新', 'Status berubah, muat ulang') : /NEED_PHOTO/.test(e.message) ? gdT('要拍 POS 屏幕', 'Perlu foto POS') : t('err')); gdLoad(); });
 }
-function gdRejPick(inp) { var f = inp.files && inp.files[0]; if (!f) return; busy('…'); compress(f, 'reject').then(function (d) { busy(); if (S.gd.rj.photos.length < 6) S.gd.rj.photos.push(d); render(); }).catch(function () { busy(); toast(t('err')); }); }
+function gdRjItem(code, f, v) { var R = S.gd.rj; R.items[code] = R.items[code] || {}; R.items[code][f] = v; }
 function gdReject() {
-  var G = S.gd, R = G.rj, why = (document.getElementById('gdrw') || {}).value || '';
-  if (!why.trim()) return toast(gdT('写一下哪里不对（少了什么、多了什么、坏了什么）', 'Tulis apa yang salah (kurang / lebih / rusak)'));
-  if (!R.photos.length) return toast(gdT('拍一张照片', 'Ambil minimal 1 foto'));
-  if (!confirm(gdT('只能拒收一次，确定拒收？', 'Penolakan hanya bisa sekali. Yakin menolak?'))) return;
-  busy(gdT('上传中…', 'Mengunggah…')); gdApi('tkReceive', [G.d.order.id, 'reject', why.trim(), R.photos]).then(function () { busy(); toast(gdT('已提交，等仓库核实', 'Terkirim, tunggu cek gudang')); gdLoad(); }).catch(function (e) { busy(); toast(t('err') + ' ' + e.message.slice(0, 40)); });
+  var G = S.gd, R = G.rj, note = (document.getElementById('gdrw') || {}).value || '';
+  if (!R.kind) return toast(gdT('选一个原因', 'Pilih alasan'));
+  var items = [];
+  if (R.kind === 'qty' || R.kind === 'damaged') {
+    Object.keys(R.items).forEach(function (c) { var x = R.items[c]; if (x.on && x.recv !== undefined && x.recv !== '') items.push({ code: c, recv: Number(x.recv), dmg: Number(x.dmg || 0) }); });
+    if (!items.length) return toast(gdT('勾选不对的商品，填实际收到几件', 'Centang produk yang salah, isi jumlah diterima'));
+  }
+  if (R.kind === 'other' && !note.trim()) return toast(gdT('写一下原因', 'Tulis alasannya'));
+  if (!R.pos) return toast(gdT('拍 POS 拒收截图', 'Foto layar POS penolakan'));
+  if (!R.photos.length) return toast(gdT('拍货品照片', 'Foto barangnya'));
+  if (!confirm(gdT('先在 POS 整单拒收了吗？最多拒收 2 次，确定提交？', 'Sudah tolak seluruh kiriman di POS? Maksimal 2 kali tolak. Kirim?'))) return;
+  busy(gdT('上传中…', 'Mengunggah…')); gdApi('tkReceive', [G.d.order.id, 'reject', { kind: R.kind, items: items, note: note.trim(), posPhoto: R.pos, photos: R.photos }]).then(function () { busy(); toast(gdT('已提交，等仓库处理', 'Terkirim, tunggu gudang')); gdLoad(); }).catch(function (e) { busy(); toast(/MAX_REJECT/.test(e.message) ? gdT('已经拒收 2 次，只能确认收货', 'Sudah 2x tolak, hanya bisa terima') : t('err') + ' ' + e.message.slice(0, 40)); });
 }
 function vGoods() {
   var G = S.gd, zh = L === 'zh';
@@ -925,13 +940,22 @@ function vGoods() {
   if (!o) return h + '<div class="card" style="text-align:center;color:#777">' + gdT('现在没有补货单。补货开轮后这里会出现本店这一轮的货。', 'Belum ada kiriman. Akan muncul di sini saat putaran replenishment dibuka.') + '</div>';
   var ls = D.lines || [], tot = ls.reduce(function (s, l) { return s + Number(l.qty); }, 0), hl = o.stage === 'shipped' || o.stage === 'returned';
   h += '<div class="card"' + (hl ? ' style="border:2px solid var(--y)"' : '') + '><div style="font-size:13px;color:#777">' + gdT('补货 · ', 'Kiriman · ') + esc(o.round_date) + (o.to_no ? ' · ' + esc(o.to_no) : '') + '</div><div style="font-size:19px;font-weight:800;margin:4px 0">' + gdStg(o.stage) + '</div><div style="font-size:14px">' + tot + gdT(' 件 · ', ' pcs · ') + ls.filter(function (l) { return Number(l.qty) > 0; }).length + ' SKU</div>';
-  if (o.stage === 'returned') h += '<div class="info" style="margin-top:10px">' + gdT('仓库的回复：', 'Jawaban gudang: ') + (o.resolve_kind === 'warehouse' ? gdT('是仓库的问题，已改数量重新发。', 'Kesalahan gudang, jumlah sudah diperbaiki.') : gdT('仓库核实没有少发，原单发回。', 'Gudang sudah cek, kiriman sesuai.')) + ' ' + esc(o.resolve_note || '') + '</div>';
-  if (o.stage === 'rejected') h += '<div class="info" style="margin-top:10px">' + gdT('你写的原因：', 'Alasanmu: ') + esc(o.reject_reason || '') + '</div>';
-  if (o.stage === 'shipped' && !G.rj) h += '<div style="font-size:13px;color:#666;margin-top:10px">' + gdT('对着箱子里的配货单（Surat Jalan）点一遍，数量全对就确认；有不对的就拒收，只能拒一次。', 'Cek barang sesuai Surat Jalan. Kalau semua sesuai, terima; kalau tidak, tolak (hanya sekali).') + '</div><button class="btn" onclick="gdConfirm(0)">' + gdT('数量对，确认收货', 'Jumlah sesuai, terima') + '</button><button class="btn ghost" onclick="S.gd.rj={photos:[]};render()">' + gdT('不对，拒收', 'Tidak sesuai, tolak') + '</button>';
-  if (o.stage === 'shipped' && G.rj) h += '<div style="margin-top:12px"><label class="f">' + gdT('哪里不对（只能拒收一次）', 'Apa yang salah (hanya bisa sekali)') + '</label><textarea id="gdrw" class="in" rows="3" placeholder="' + gdT('例：少了 5 个 FOOM X 薄荷', 'Contoh: kurang 5 pcs FOOM X Mint') + '"></textarea>'
-    + '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">' + G.rj.photos.map(function (p, i) { return '<img src="' + p + '" style="width:72px;height:72px;object-fit:cover;border-radius:8px" onclick="S.gd.rj.photos.splice(' + i + ',1);render()">'; }).join('') + (G.rj.photos.length < 6 ? '<label style="width:72px;height:72px;border:2px dashed #bbb;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:28px;color:#999">+<input type="file" accept="image/*" capture="environment" style="display:none" onchange="gdRejPick(this)"></label>' : '') + '</div>'
-    + '<button class="btn red" onclick="gdReject()">' + gdT('提交拒收', 'Kirim penolakan') + '</button><button class="btn ghost" onclick="S.gd.rj=null;render()">' + t('back') + '</button></div>';
-  if (o.stage === 'returned') h += '<label class="f" style="margin-top:12px">' + gdT('还有问题就写在这里（会转给稽查）', 'Kalau masih ada masalah, tulis di sini (diteruskan ke audit)') + '</label><textarea id="gdrn" class="in" rows="2"></textarea><button class="btn" onclick="gdConfirm(1)">' + gdT('确认收货', 'Terima') + '</button>';
+  if (o.courier || o.to_no) h += '<div style="font-size:13px;color:#555;margin-top:8px;line-height:1.6">' + (o.to_no ? 'DMS: <b>' + esc(o.to_no) + '</b><br>' : '') + (o.courier ? gdT('快递：', 'Kurir: ') + esc(o.courier) + (o.awb ? ' · ' + esc(o.awb) : '') + '<br>' : '') + (o.shipped ? gdT('发出：', 'Dikirim: ') + esc(o.shipped) : '') + '</div>';
+  if (o.stage === 'returned' && o.resolve_kind) h += '<div class="info" style="margin-top:10px">' + gdT('仓库的处理：', 'Hasil cek gudang: ') + (o.resolve_kind === 'store_right' ? gdT('你们说得对，数量已改成实际收到的数。', 'Laporan kamu benar, jumlah sudah disesuaikan.') : gdT('核实下来没有问题，数量不改。', 'Sudah dicek, jumlah tidak berubah.')) + ' ' + esc(o.resolve_note || '') + '<br>' + gdT('请按新的 DMS 单号在 POS 确认收货。', 'Terima di POS dengan nomor DMS yang baru.') + '</div>';
+  if (o.stage === 'rejected' || o.stage === 'redo') h += '<div class="info" style="margin-top:10px">' + gdT('你们拒收的原因：', 'Alasan penolakan: ') + (o.reject_kind && GD_RK[o.reject_kind] ? (L === 'zh' ? GD_RK[o.reject_kind][0] : GD_RK[o.reject_kind][1]) + esc(String(o.reject_reason || '').split('：').slice(1).join('：').replace(/^(.)/, ' · $1')) : esc(o.reject_reason || '')) + '</div>';
+  var rjLeft = 2 - Number(o.reject_count || 0);
+  if (hl && !G.rj && !G.cf) h += '<div style="font-size:13px;color:#666;margin-top:10px">' + gdT('对着配货单（Surat Jalan）点一遍。全对：先在 POS 确认收货，再回这里拍 POS 屏幕确认。不对：先在 POS 整单拒收，再回这里拒收。', 'Cek sesuai Surat Jalan. Sesuai: terima di POS dulu, lalu foto layar POS di sini. Tidak sesuai: tolak seluruh kiriman di POS dulu, lalu tolak di sini.') + '</div><button class="btn" onclick="S.gd.cf={pos:null};render()">' + gdT('数量对，确认收货', 'Sesuai, terima') + '</button>'
+    + (rjLeft > 0 ? '<button class="btn ghost" onclick="S.gd.rj={kind:\'\',pos:null,photos:[],items:{}};render()">' + gdT('不对，拒收', 'Tidak sesuai, tolak') + (rjLeft < 2 ? gdT('（还能拒 1 次）', ' (sisa 1x)') : '') + '</button>' : '<div style="font-size:13px;color:#b3261e;margin-top:8px">' + gdT('已经拒收 2 次，这次只能确认收货；还有问题找运营经理。', 'Sudah 2x ditolak, sekarang hanya bisa terima; masalah lain hubungi Ops Manager.') + '</div>');
+  if (hl && G.cf) h += '<div style="margin-top:12px"><label class="f">' + gdT('拍 POS 屏幕（显示已确认收货）', 'Foto layar POS (sudah diterima)') + '</label>' + gdShot(G.cf.pos, 'cf', gdT('拍 POS', 'Foto POS')) + '<label class="f" style="margin-top:10px">' + gdT('备注（可选）', 'Catatan (opsional)') + '</label><textarea id="gdcn" class="in" rows="2"></textarea><button class="btn" onclick="gdConfirm()">' + gdT('确认收货', 'Konfirmasi terima') + '</button><button class="btn ghost" onclick="S.gd.cf=null;render()">' + t('back') + '</button></div>';
+  if (hl && G.rj) {
+    var R = G.rj;
+    h += '<div style="margin-top:12px"><label class="f">' + gdT('哪里不对', 'Apa yang salah') + '</label><div style="display:flex;gap:6px;flex-wrap:wrap">' + Object.keys(GD_RK).map(function (k) { var on = R.kind === k; return '<button onclick="S.gd.rj.kind=\'' + k + '\';render()" style="border:0;border-radius:16px;padding:8px 12px;font-family:inherit;font-size:14px;' + (on ? 'background:#111;color:#fff' : 'background:#e6e4df') + '">' + (L === 'zh' ? GD_RK[k][0] : GD_RK[k][1]) + '</button>'; }).join('') + '</div>';
+    if (R.kind === 'qty' || R.kind === 'damaged') h += '<div style="font-size:13px;color:#666;margin:10px 0 4px">' + gdT('勾选不对的商品，填实际收到几件' + (R.kind === 'damaged' ? '、坏了几件' : ''), 'Centang produk yang salah, isi jumlah diterima' + (R.kind === 'damaged' ? ' & rusak' : '')) + '</div><div style="border:1px solid var(--line);border-radius:10px;max-height:320px;overflow:auto">' + ls.filter(function (l) { return Number(l.qty) > 0; }).map(function (l) { var x = R.items[l.code] || {}; return '<div style="padding:8px 10px;border-bottom:1px solid var(--line);font-size:13px"><label style="display:flex;gap:8px;align-items:flex-start"><input type="checkbox"' + (x.on ? ' checked' : '') + ' onchange="gdRjItem(\'' + l.code + '\',\'on\',this.checked);render()"><span><b>' + esc(l.name) + '</b><br><span style="color:#888">' + esc(l.code) + gdT(' · 发了 ', ' · dikirim ') + Number(l.qty) + '</span></span></label>' + (x.on ? '<div style="display:flex;gap:8px;margin-top:6px"><input class="in" type="number" min="0" inputmode="numeric" style="padding:6px" placeholder="' + gdT('实际收到', 'Diterima') + '" value="' + esc(x.recv === undefined ? '' : x.recv) + '" oninput="gdRjItem(\'' + l.code + '\',\'recv\',this.value)">' + (R.kind === 'damaged' ? '<input class="in" type="number" min="0" inputmode="numeric" style="padding:6px" placeholder="' + gdT('坏了几件', 'Rusak') + '" value="' + esc(x.dmg === undefined ? '' : x.dmg) + '" oninput="gdRjItem(\'' + l.code + '\',\'dmg\',this.value)">' : '') + '</div>' : '') + '</div>'; }).join('') + '</div>';
+    h += '<label class="f" style="margin-top:10px">' + gdT('补充说明' + (R.kind === 'other' ? '（必填）' : '（可选）'), 'Keterangan' + (R.kind === 'other' ? ' (wajib)' : ' (opsional)')) + '</label><textarea id="gdrw" class="in" rows="2"></textarea>'
+      + '<label class="f" style="margin-top:10px">' + gdT('POS 拒收截图', 'Foto layar POS penolakan') + '</label>' + gdShot(R.pos, 'rjpos', gdT('拍 POS', 'Foto POS'))
+      + '<label class="f" style="margin-top:10px">' + gdT('货品照片', 'Foto barang') + '</label><div style="display:flex;gap:8px;flex-wrap:wrap">' + R.photos.map(function (p, i) { return '<img src="' + p + '" style="width:72px;height:72px;object-fit:cover;border-radius:8px" onclick="S.gd.rj.photos.splice(' + i + ',1);render()">'; }).join('') + (R.photos.length < 6 ? '<label style="width:72px;height:72px;border:2px dashed #bbb;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:28px;color:#999">+<input type="file" accept="image/*" capture="environment" style="display:none" onchange="gdPick(this,\'rj\')"></label>' : '') + '</div>'
+      + '<button class="btn red" onclick="gdReject()">' + gdT('提交拒收', 'Kirim penolakan') + '</button><button class="btn ghost" onclick="S.gd.rj=null;render()">' + t('back') + '</button></div>';
+  }
   h += '</div>';
   var canNote = o.stage === 'open';
   if (canNote) h += '<div style="margin:0 14px 8px;font-size:13px;color:#666">' + gdT('数量由系统按销量算，运营会调整，周一 12:00 锁定。觉得哪个要多要少，写在备注里。', 'Jumlah dihitung sistem dari penjualan, bisa diubah Ops, terkunci Senin 12:00. Kalau perlu lebih/kurang, tulis di catatan.') + '</div>';
@@ -946,11 +970,11 @@ function vGoods() {
 }
 var GD_BOX = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5 9 5 9-5zM3 8v8l9 5 9-5V8M12 13v8"/></svg>';
 // 「我的」副标题和「今天」顶部提醒：每 10 分钟最多查一次
-function gdPeek() { var P = S.gdp; if (!S.sess || (P && Date.now() - P.at < 600000)) return; S.gdp = { at: Date.now(), o: P && P.o }; gdApi('tkGoods', ['']).then(function (r) { S.gdp = { at: Date.now(), o: r.order }; if (S.view === 'home' || S.view === 'saya') render(); }).catch(function () {}); }
+function gdPeek() { var P = S.gdp; if (!S.sess || (P && Date.now() - P.at < 600000)) return; S.gdp = { at: Date.now(), o: P && P.o }; gdApi('tkGoods', ['']).then(function (r) { S.gdp = { at: Date.now(), o: r.order, task: r.task }; if (S.view === 'home' || S.view === 'saya') render(); }).catch(function () {}); }
 function gdSub() { gdPeek(); var o = S.gdp && S.gdp.o; return o ? gdStg(o.stage) : (L === 'zh' ? '补货单 · 收货' : 'Kiriman · terima barang'); }
 function gdBanner() { gdPeek(); var o = S.gdp && S.gdp.o; if (o && o.stage === 'open') return '<div class="card" onclick="S.gd=null;go(\'goods\')" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;border:2px solid var(--y)"><div><b>' + (L === 'zh' ? '这一轮补货单出来了' : 'Daftar kiriman putaran ini sudah keluar') + '</b><div style="font-size:13px;color:#666">' + Number(o.q) + (L === 'zh' ? ' 件 · 周一 12:00 前可以看、写备注' : ' pcs · bisa dicek & diberi catatan s/d Senin 12:00') + '</div></div><span style="font-size:22px">›</span></div>';
-  if (!o || (o.stage !== 'shipped' && o.stage !== 'returned')) return '';
-  return '<div class="card" onclick="S.gd=null;go(\'goods\')" style="cursor:pointer;background:var(--y);border:0;display:flex;justify-content:space-between;align-items:center"><div><b>' + (L === 'zh' ? '补货到了，请核对后确认收货' : 'Kiriman barang datang — cek & konfirmasi') + '</b><div style="font-size:13px">' + esc(o.to_no || '') + ' · ' + Number(o.q) + (L === 'zh' ? ' 件' : ' pcs') + '</div></div><span style="font-size:22px">›</span></div>'; }
+  var k = S.gdp && S.gdp.task; if (!k) return '';
+  return '<div class="card" onclick="S.gd=null;go(\'goods\')" style="cursor:pointer;background:var(--y);border:0;display:flex;justify-content:space-between;align-items:center"><div><b>' + (k.stage === 'returned' ? (L === 'zh' ? '拒收已处理，请在 POS 确认收货' : 'Penolakan sudah diproses — terima di POS') : (L === 'zh' ? '补货发出了，到了请核对后确认收货' : 'Kiriman barang dikirim — cek & konfirmasi')) + '</b><div style="font-size:13px">DMS ' + esc(k.to_no || '') + (k.courier ? ' · ' + esc(k.courier) + (k.awb ? ' ' + esc(k.awb) : '') : '') + '</div></div><span style="font-size:22px">›</span></div>'; }
 
 // ---------- 报修与反馈 + LK School（2026-11-21，决策记录 642）----------
 // 报修：大类 → 小类 → 影响营业吗 → 描述 → 照片 1–4 张，交给维修负责人；本店同类单子还没关时先问「是同一个问题吗」
