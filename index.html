@@ -957,8 +957,8 @@ function vGoods() {
       + '<button class="btn red" onclick="gdReject()">' + gdT('提交拒收', 'Kirim penolakan') + '</button><button class="btn ghost" onclick="S.gd.rj=null;render()">' + t('back') + '</button></div>';
   }
   h += '</div>';
-  var canNote = o.stage === 'open';
-  if (canNote) h += '<div style="margin:0 14px 8px;font-size:13px;color:#666">' + gdT('数量由系统按销量算，运营会调整，周一 12:00 锁定。觉得哪个要多要少，写在备注里。', 'Jumlah dihitung sistem dari penjualan, bisa diubah Ops, terkunci Senin 12:00. Kalau perlu lebih/kurang, tulis di catatan.') + '</div>';
+  var canNote = false;   // 门店不再写备注，只能看（待开发第 7 行①）
+  if (o.stage === 'open') h += '<div style="margin:0 14px 8px;font-size:13px;color:#666">' + gdT('数量由系统按销量算，运营会调整，锁定后会发通知。', 'Jumlah dihitung sistem dari penjualan, bisa diubah Ops; setelah dikunci akan ada pemberitahuan.') + '</div>';
   var lastC = null;
   h += '<div class="card" style="padding:0;overflow:hidden">' + ls.map(function (l) {
     var head = ''; if (l.category !== lastC) { lastC = l.category; head = '<div style="background:#f3f3f1;padding:6px 16px;font-size:12px;font-weight:700;color:#666">' + esc(l.category || '—') + '</div>'; }
@@ -972,9 +972,8 @@ var GD_BOX = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-
 // 「我的」副标题和「今天」顶部提醒：每 10 分钟最多查一次
 function gdPeek() { var P = S.gdp; if (!S.sess || (P && Date.now() - P.at < 600000)) return; S.gdp = { at: Date.now(), o: P && P.o }; gdApi('tkGoods', ['']).then(function (r) { S.gdp = { at: Date.now(), o: r.order, task: r.task }; if (S.view === 'home' || S.view === 'saya') render(); }).catch(function () {}); }
 function gdSub() { gdPeek(); var o = S.gdp && S.gdp.o; return o ? gdStg(o.stage) : (L === 'zh' ? '补货单 · 收货' : 'Kiriman · terima barang'); }
-function gdBanner() { gdPeek(); var o = S.gdp && S.gdp.o; if (o && o.stage === 'open') return '<div class="card" onclick="S.gd=null;go(\'goods\')" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;border:2px solid var(--y)"><div><b>' + (L === 'zh' ? '这一轮补货单出来了' : 'Daftar kiriman putaran ini sudah keluar') + '</b><div style="font-size:13px;color:#666">' + Number(o.q) + (L === 'zh' ? ' 件 · 周一 12:00 前可以看、写备注' : ' pcs · bisa dicek & diberi catatan s/d Senin 12:00') + '</div></div><span style="font-size:22px">›</span></div>';
-  var k = S.gdp && S.gdp.task; if (!k) return '';
-  return '<div class="card" onclick="S.gd=null;go(\'goods\')" style="cursor:pointer;background:var(--y);border:0;display:flex;justify-content:space-between;align-items:center"><div><b>' + (k.stage === 'returned' ? (L === 'zh' ? '拒收已处理，请在 POS 确认收货' : 'Penolakan sudah diproses — terima di POS') : (L === 'zh' ? '补货发出了，到了请核对后确认收货' : 'Kiriman barang dikirim — cek & konfirmasi')) + '</b><div style="font-size:13px">DMS ' + esc(k.to_no || '') + (k.courier ? ' · ' + esc(k.courier) + (k.awb ? ' ' + esc(k.awb) : '') : '') + '</div></div><span style="font-size:22px">›</span></div>'; }
+// 首页不再挂补货卡片（待开发第 7 行②）：锁定后在通知里发「本轮补货已确定」，收货走「任务」页
+function gdBanner() { gdPeek(); return ''; }
 
 // ---------- 报修与反馈 + LK School（2026-11-21，决策记录 642）----------
 // 报修：大类 → 小类 → 影响营业吗 → 描述 → 照片 1–4 张，交给维修负责人；本店同类单子还没关时先问「是同一个问题吗」
