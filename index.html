@@ -156,7 +156,7 @@ window.addEventListener('unhandledrejection', function (e) { var r = e && e.reas
 </script>
 <script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261126135359';
+var APP_VER = '20261126210652';
 function chkVer() { fetch('version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
@@ -187,7 +187,7 @@ var TX = {
     sending: 'Mengirim…', upl: 'Mengunggah foto…', needPhoto: 'Ambil foto dulu', got: 'Absen tercatat', ptsGot: 'poin', 
     
     shiftN: { F: 'Full', M: 'Pagi', E: 'Malam' },
-    rules: 'Aturan poin', rule: [['ABSEN MASUK', ''], ['Datang ≥ 20 mnt lebih awal', '+3'], ['10–20 mnt lebih awal', '+2.5'], ['0–10 mnt lebih awal', '+2'], ['Telat 0–10 mnt', '0'], ['Telat 10–20 mnt', '−2'], ['Telat 20–30 mnt', '−3'], ['Telat > 30 mnt', '−5'], ['PULANG', ''], ['Absen pulang tepat waktu (10 mnt sebelum s/d 60 mnt sesudah shift selesai; yang shift-nya sampai toko tutup: s/d 90 mnt)', '+2'], ['Pulang 10–20 mnt lebih awal', '−2'], ['Pulang 20–30 mnt lebih awal', '−3'], ['Pulang > 30 mnt lebih awal', '−5'], ['LAINNYA', ''], ['Izin / cuti yang sudah disetujui', '0'], ['Tidak masuk tanpa izin (HR konfirmasi)', '−10'], ['Kuis aturan LK School (sekali)', '+5'], ['Konfirmasi terima barang tepat waktu (≤ 5 hari setelah dikirim; orang yang menekan konfirmasi)', '+3'], ['PERINGKAT', ''], ['Poin sama: yang lebih sedikit potongan di atas, lalu rata-rata datang lebih awal', ''], ['Yang tampil peringkat 1–10 (poin sama, peringkat sama); poin 0 tidak tampil', ''], ['Tanggal 1–7: tampil peringkat final bulan lalu', ''], ['Salah hitung? Lapor ke atasan dalam 3 hari', '']],
+    rules: 'Aturan poin', rule: [['ABSEN MASUK', ''], ['Datang ≥ 20 mnt lebih awal', '+3'], ['10–20 mnt lebih awal', '+2.5'], ['0–10 mnt lebih awal', '+2'], ['Telat 0–10 mnt', '0'], ['Telat 10–20 mnt', '−2'], ['Telat 20–30 mnt', '−3'], ['Telat > 30 mnt', '−5'], ['PULANG', ''], ['Absen pulang tepat waktu (10 mnt sebelum s/d 2 jam sesudah shift selesai)', '+2'], ['Absen pulang 2–3 jam sesudah shift selesai', '0'], ['Lewat 3 jam sesudah shift selesai: absen pulang ditutup, lapor ke HR', '—'], ['Pulang 10–20 mnt lebih awal', '−2'], ['Pulang 20–30 mnt lebih awal', '−3'], ['Pulang > 30 mnt lebih awal', '−5'], ['LAINNYA', ''], ['Izin / cuti yang sudah disetujui', '0'], ['Tidak masuk tanpa izin (HR konfirmasi)', '−10'], ['Kuis aturan LK School (sekali)', '+5'], ['Konfirmasi terima barang tepat waktu (≤ 5 hari setelah dikirim; orang yang menekan konfirmasi)', '+3'], ['PERINGKAT', ''], ['Poin sama: yang lebih sedikit potongan di atas, lalu rata-rata datang lebih awal', ''], ['Yang tampil peringkat 1–10 (poin sama, peringkat sama); poin 0 tidak tampil', ''], ['Tanggal 1–7: tampil peringkat final bulan lalu', ''], ['Salah hitung? Lapor ke atasan dalam 3 hari', '']],
     logout: 'Keluar', lang: 'Bahasa', test: 'AKUN TES — tidak masuk peringkat',
     
     
@@ -242,7 +242,7 @@ var TX = {
     sending: '提交中…', upl: '正在上传照片…', needPhoto: '请先拍照', got: '打卡成功', ptsGot: '分', 
     
     shiftN: { F: '全天', M: '早班', E: '晚班' },
-    rules: '积分规则', rule: [['上班打卡', ''], ['提前 ≥ 20 分钟', '+3'], ['提前 10–20 分钟', '+2.5'], ['提前 0–10 分钟', '+2'], ['迟到 0–10 分钟', '0'], ['迟到 10–20 分钟', '−2'], ['迟到 20–30 分钟', '−3'], ['迟到 30 分钟以上', '−5'], ['下班', ''], ['下班打卡准时（下班前 10 分钟到下班后 60 分钟；班次做到关门的人到下班后 90 分钟）', '+2'], ['早走 10–20 分钟', '−2'], ['早走 20–30 分钟', '−3'], ['早走 30 分钟以上', '−5'], ['其他', ''], ['事先批准的请假', '0'], ['无故缺勤（HR 确认）', '−10'], ['LK School 规则小测验（一次）', '+5'], ['按时确认收货（货发出后 5 天内，给点确认的人）', '+3'], ['排名', ''], ['同分：扣分次数少的在前，再比平均提前到店', ''], ['排行榜显示第 1–10 名（同分同名次）；0 分不上榜', ''], ['每月 1–7 号显示上个月最终排名', ''], ['觉得算错：3 天内找上级申诉', '']],
+    rules: '积分规则', rule: [['上班打卡', ''], ['提前 ≥ 20 分钟', '+3'], ['提前 10–20 分钟', '+2.5'], ['提前 0–10 分钟', '+2'], ['迟到 0–10 分钟', '0'], ['迟到 10–20 分钟', '−2'], ['迟到 20–30 分钟', '−3'], ['迟到 30 分钟以上', '−5'], ['下班', ''], ['下班打卡准时（下班前 10 分钟到下班后 2 小时）', '+2'], ['下班后 2–3 小时打卡', '0'], ['下班后超过 3 小时：不能再打卡，找 HR', '—'], ['早走 10–20 分钟', '−2'], ['早走 20–30 分钟', '−3'], ['早走 30 分钟以上', '−5'], ['其他', ''], ['事先批准的请假', '0'], ['无故缺勤（HR 确认）', '−10'], ['LK School 规则小测验（一次）', '+5'], ['按时确认收货（货发出后 5 天内，给点确认的人）', '+3'], ['排名', ''], ['同分：扣分次数少的在前，再比平均提前到店', ''], ['排行榜显示第 1–10 名（同分同名次）；0 分不上榜', ''], ['每月 1–7 号显示上个月最终排名', ''], ['觉得算错：3 天内找上级申诉', '']],
     logout: '退出登录', lang: '语言', test: '测试账号 — 不进排名',
     
     
