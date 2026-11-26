@@ -156,7 +156,7 @@ window.addEventListener('unhandledrejection', function (e) { var r = e && e.reas
 </script>
 <script>
 // 自动更新：GitHub 页面会被手机缓存最多 10 分钟；打开或切回 App 时检查 version.txt，有新版就带新参数重新加载
-var APP_VER = '20261122205732';
+var APP_VER = '20261126135359';
 function chkVer() { fetch('version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (v) { v = v.trim(); if (v && v !== APP_VER && sessionStorage.getItem('tk_upd') !== v) { sessionStorage.setItem('tk_upd', v); location.replace(location.pathname + '?v=' + v); } }).catch(function () {}); }
 chkVer(); document.addEventListener('visibilitychange', function () { if (!document.hidden) chkVer(); });
 
@@ -1292,7 +1292,7 @@ var TX2 = {
     rpGo: 'Isi laporan penutupan', rpCardS: 'Isi setelah transaksi terakhir dan tutup kasir',
     rpBy: function (n, x) { return '✓ Laporan penutupan sudah dikirim ' + n + ' ' + x + ' · Lihat'; }, rpCannotBy: function (n, x) { return 'Laporan penutupan: ' + n + ' ' + x + ' tidak bisa isi'; },
     poGo: 'Absen pulang', poCardS: 'Saat kamu benar-benar pulang', notYet: 'Belum selesai! Absen pulang saat kamu benar-benar mau pulang.',
-    stepDone: function (x) { return '✓ Selesai. Langkah berikutnya: ' + x; }, allDone: 'Kerja hari ini selesai ✓', shareWa: 'Bagikan ke grup WhatsApp',
+    stepDone: function (x) { return '✓ Selesai. Langkah berikutnya: ' + x; }, allDone: 'Kerja hari ini selesai ✓', missT: 'Absen pulang sudah ditutup', missS: function (e) { return 'Shift selesai ' + e + '. Absen pulang hanya bisa sampai 3 jam setelah shift selesai. Kalau kamu lupa atau tidak bisa absen, lapor ke HR dengan bukti untuk koreksi absensi.'; }, outClosed: 'Sudah lewat 3 jam setelah shift selesai, absen pulang ditutup. Lapor ke HR.', shareWa: 'Bagikan ke grup WhatsApp',
     notOpen2: 'Shift ini belum bisa dipilih (paling cepat 2 jam sebelum mulai).',
     earlyLink: 'Harus pulang lebih awal?', gsLink: 'Ganti shift', svAdd: 'Tambah', svAddL: '+ Tambah ke Laporan Akhir Shift', rpEdit: 'Ubah laporan penutupan',
     // 上班检查
@@ -1343,7 +1343,7 @@ var TX2 = {
     rpGo: '填营业日报', rpCardS: '最后一单卖完、收银结账后再填',
     rpBy: function (n, x) { return '✓ 营业日报已由 ' + n + ' ' + x + ' 提交 · 查看'; }, rpCannotBy: function (n, x) { return '营业日报：' + n + ' ' + x + ' 选了填不了'; },
     poGo: '下班打卡', poCardS: '真要走的时候再打', notYet: '还没完！真要走的时候再打下班卡。',
-    stepDone: function (x) { return '✓ 完成。下一步：' + x; }, allDone: '今天的工作完成了 ✓', shareWa: '分享到 WhatsApp 群',
+    stepDone: function (x) { return '✓ 完成。下一步：' + x; }, allDone: '今天的工作完成了 ✓', missT: '下班打卡已关闭', missS: function (e) { return '班次 ' + e + ' 结束。下班卡最晚只能在下班后 3 小时内打。忘了打或打不了的，带证据找 HR 做考勤更正。'; }, outClosed: '已经超过下班后 3 小时，不能再打下班卡，请找 HR。', shareWa: '分享到 WhatsApp 群',
     notOpen2: '这个班次现在还不能选（最早开始前 2 小时）。',
     earlyLink: '要提前走？', gsLink: '改班次', svAdd: '补充', svAddL: '+ 补充下班问卷', rpEdit: '修改营业日报',
     stepOf: function (n) { return '第 ' + n + ' 步 / 共 6 步'; }, okL: '正常', badL: '有问题', tapFoto: '点这里拍照', addFoto: function (n) { return '+ 再拍一张（' + n + '/4）'; },
@@ -1491,6 +1491,7 @@ function flowCard(H) {
     var l2 = dayLinks.filter(function (x) { return x[1] !== "go('early')"; }); if (F.survey) l2.unshift([t('svAddL'), "go('survey')"]);
     return nxCard(t('stepN').pulang, t('poCardS'), t('poGo'), "go('pulang')", { extra: ex, links: lnks(l2) });
   }
+  if (F.next === 'missed') return '<div class="next late"><div class="lbl">' + t('today') + '</div><div class="t">' + t('missT') + '</div><div class="s">' + t('missS')(esc(F.end || '')) + '</div></div>';
   // done
   return '<div class="next" style="background:var(--okb);color:#000"><div class="lbl" style="color:var(--ok)">' + t('today') + '</div><div class="t">' + t('allDone') + '</div><div class="s" style="color:#3c4043">' + t('doneS')(F.done ? F.done.time : '') + '</div>' +
     '<button class="btn" onclick="doneShare()">' + t('shareWa') + '</button></div>';
@@ -1981,6 +1982,7 @@ function poSend() {
     if (!r.ok && r.err === 'NO_GEO') { S.geo = null; return geoFail(poSend); }
     if (!r.ok && (r.err === 'NEED_REPORT' || r.err === 'NO_LOCK')) { S.pi = null; poReload(); return toast(r.err === 'NEED_REPORT' ? t('lastMust') : t('lockT')); }
     if (!r.ok && r.err === 'NEED_EARLY_REASON') { S.pi.early = true; S.po2.err = t('earlyNeed'); return render(); }
+    if (!r.ok && r.err === 'OUT_CLOSED') { toast(t('outClosed')); return loadHome().then(function () { go('home'); }, function () { go('home'); }); }
     if (!r.ok) return toast(r.err === 'NO_SURVEY' ? t('svNeed') : t('err'));
     var txt = briefText(r.brief, { early: P.early ? E : null, last: r.last }), ph = shPhSrc(S.po2.ph['po.selfie']).concat(r.last ? shPhSrc(S.po2.ph['po.lock']) : []);
     try { localStorage.setItem(lastShareKey(), txt); localStorage.removeItem(dKey('early')); } catch (e) {}
